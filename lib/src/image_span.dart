@@ -1,5 +1,5 @@
 import 'package:extended_text_library/src/cached_network_image.dart';
-import 'package:extended_text_library/src/special_text_span_base.dart';
+import 'package:extended_text_library/src/special_text_span.dart';
 import 'package:flutter/material.dart';
 
 /// get idea from https://github.com/bytedance/RealRichText about Inline-Image-In-Text
@@ -59,6 +59,7 @@ class ImageSpan extends SpecialTextSpan {
     this.fit: BoxFit.scaleDown,
     String actualText: imageSpanTransparentPlaceholder,
     int start: 0,
+    bool deleteAll: true,
   })  : assert(image != null),
         assert(imageWidth != null),
         assert(imageHeight != null),
@@ -77,7 +78,8 @@ class ImageSpan extends SpecialTextSpan {
                   imageHeight + (margin == null ? 0 : margin.vertical)),
             ),
             actualText: actualText,
-            start: start);
+            start: start,
+            deleteAll: deleteAll);
 
   void createImageConfiguration(BuildContext context) {
     imageSpanResolver.createimageConfiguration(
