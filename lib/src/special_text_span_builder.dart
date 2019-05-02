@@ -23,9 +23,7 @@ abstract class SpecialTextSpanBuilder {
         } else {
           textStack += char;
           specialText = createSpecialText(textStack,
-              textStyle: textStyle,
-              onTap: onTap,
-              start: i - (textStack.length - 1));
+              textStyle: textStyle, onTap: onTap, index: i);
           if (specialText != null) {
             if (textStack.length - specialText.startFlag.length >= 0) {
               textStack = textStack.substring(
@@ -56,7 +54,7 @@ abstract class SpecialTextSpanBuilder {
 
   //build SpecialText base on startflag
   SpecialText createSpecialText(String flag,
-      {TextStyle textStyle, SpecialTextGestureTapCallback onTap, int start});
+      {TextStyle textStyle, SpecialTextGestureTapCallback onTap, int index});
 
   /// start with SpecialText
   bool isStart(String value, String startFlag) {

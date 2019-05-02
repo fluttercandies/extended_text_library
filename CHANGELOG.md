@@ -1,4 +1,4 @@
-## [0.1.4]
+## [0.1.5]
 
 * fix start index is not right in SpecialTextSpanBuilder
 * override == and hashCode for ImageSpan
