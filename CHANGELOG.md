@@ -1,3 +1,8 @@
+## [0.1.3]
+
+* override == and hashCode for SpecialTextSpan
+* update build method in SpecialTextSpanBuilder
+
 ## [0.1.2]
 
 * add deleteAll parameter for SpecialTextSpan
