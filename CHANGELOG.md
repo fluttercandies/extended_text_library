@@ -1,3 +1,8 @@
+## [0.1.4]
+
+* fix start index is not right in SpecialTextSpanBuilder
+* override == and hashCode for ImageSpan
+
 ## [0.1.3]
 
 * override == and hashCode for SpecialTextSpan
