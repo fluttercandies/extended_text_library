@@ -116,6 +116,39 @@ class ImageSpan extends SpecialTextSpan {
     afterPaintImage?.call(canvas, imageRect, this);
     return true;
   }
+
+  @override
+  bool operator ==(dynamic other) {
+    if (identical(this, other)) return true;
+    if (other.runtimeType != runtimeType) return false;
+    final ImageSpan typedOther = other;
+    return typedOther.text == text &&
+        typedOther.style == style &&
+        typedOther.actualText == actualText &&
+        typedOther.start == start &&
+        typedOther.image == image &&
+        typedOther.imageHeight == imageHeight &&
+        typedOther.imageWidth == imageWidth &&
+        typedOther.margin == margin &&
+        typedOther.beforePaintImage == beforePaintImage &&
+        typedOther.afterPaintImage == afterPaintImage &&
+        typedOther.fit == fit;
+  }
+
+  @override
+  int get hashCode => hashValues(
+      style,
+      text,
+      actualText,
+      start,
+      deleteAll,
+      image,
+      imageWidth,
+      imageHeight,
+      margin,
+      beforePaintImage,
+      afterPaintImage,
+      fit);
 }
 
 class ImageSpanResolver {

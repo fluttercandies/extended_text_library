@@ -23,7 +23,9 @@ abstract class SpecialTextSpanBuilder {
         } else {
           textStack += char;
           specialText = createSpecialText(textStack,
-              textStyle: textStyle, onTap: onTap, start: i);
+              textStyle: textStyle,
+              onTap: onTap,
+              start: i - (textStack.length - 1));
           if (specialText != null) {
             if (textStack.length - specialText.startFlag.length >= 0) {
               textStack = textStack.substring(
