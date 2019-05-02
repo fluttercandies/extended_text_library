@@ -1,5 +1,7 @@
 # extended_text_library
 
+[![pub package](https://img.shields.io/pub/v/extended_text_library.svg)](https://pub.dartlang.org/packages/extended_text_library)
+
 library for extended_text and extended_text_field.
 
 # extended_text
