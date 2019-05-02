@@ -23,7 +23,7 @@ class SpecialTextSpan extends TextSpan {
     @required String text,
     @required this.actualText,
     @required this.start,
-    this.deleteAll,
+    this.deleteAll: false,
   })  : assert(text != null),
         assert(actualText != null),
         assert(start != null),
@@ -31,4 +31,19 @@ class SpecialTextSpan extends TextSpan {
           style: style,
           text: text,
         );
+
+  @override
+  bool operator ==(dynamic other) {
+    if (identical(this, other)) return true;
+    if (other.runtimeType != runtimeType) return false;
+    final SpecialTextSpan typedOther = other;
+    return typedOther.text == text &&
+        typedOther.style == style &&
+        typedOther.actualText == actualText &&
+        typedOther.start == start &&
+        typedOther.deleteAll == deleteAll;
+  }
+
+  @override
+  int get hashCode => hashValues(style, text, actualText, start, deleteAll);
 }

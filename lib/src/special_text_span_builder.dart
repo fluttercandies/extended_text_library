@@ -7,7 +7,7 @@ abstract class SpecialTextSpanBuilder {
       {TextStyle textStyle, SpecialTextGestureTapCallback onTap}) {
     if (data == null || data == "") return null;
     List<TextSpan> inlineList = new List<TextSpan>();
-    if (data != null && data.length > 0) {
+    if (data.length > 0) {
       SpecialText specialText;
       String textStack = "";
       //String text
@@ -22,8 +22,8 @@ abstract class SpecialTextSpanBuilder {
           }
         } else {
           textStack += char;
-          specialText =
-              createSpecialText(textStack, textStyle: textStyle, onTap: onTap);
+          specialText = createSpecialText(textStack,
+              textStyle: textStyle, onTap: onTap, start: i);
           if (specialText != null) {
             if (textStack.length - specialText.startFlag.length >= 0) {
               textStack = textStack.substring(
@@ -44,6 +44,8 @@ abstract class SpecialTextSpanBuilder {
       } else if (textStack.length > 0) {
         inlineList.add(TextSpan(text: textStack, style: textStyle));
       }
+    } else {
+      inlineList.add(TextSpan(text: data, style: textStyle));
     }
 
     // TODO: implement build
@@ -52,7 +54,7 @@ abstract class SpecialTextSpanBuilder {
 
   //build SpecialText base on startflag
   SpecialText createSpecialText(String flag,
-      {TextStyle textStyle, SpecialTextGestureTapCallback onTap});
+      {TextStyle textStyle, SpecialTextGestureTapCallback onTap, int start});
 
   /// start with SpecialText
   bool isStart(String value, String startFlag) {
