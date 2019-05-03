@@ -1,7 +1,7 @@
 ## [0.1.6]
 
-* override compareTo method in SpecialTextSpanBuilder to
-  fix issue that image span was error rendering
+* override compareTo method in SpecialTextSpan and ImageSpan to
+  fix issue that image span or special text span was error rendering
 
 ## [0.1.5]
 

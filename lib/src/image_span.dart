@@ -149,6 +149,27 @@ class ImageSpan extends SpecialTextSpan {
       beforePaintImage,
       afterPaintImage,
       fit);
+
+  @override
+  RenderComparison compareTo(TextSpan other) {
+    if (other is ImageSpan) {
+      if (other.imageHeight != imageHeight ||
+          other.imageWidth != imageWidth ||
+          other.margin != margin ||
+          other.fit != fit) {
+        return RenderComparison.layout;
+      }
+
+      if (other.image != image ||
+          other.beforePaintImage != beforePaintImage ||
+          other.afterPaintImage != afterPaintImage) {
+        return RenderComparison.paint;
+      }
+    }
+
+    // TODO: implement compareTo
+    return super.compareTo(other);
+  }
 }
 
 class ImageSpanResolver {
