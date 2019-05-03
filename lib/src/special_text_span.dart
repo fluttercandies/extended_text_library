@@ -22,11 +22,12 @@ class SpecialTextSpan extends TextSpan {
   SpecialTextSpan({
     TextStyle style,
     @required String text,
-    @required this.actualText,
+    @required String actualText,
     @required this.start,
     this.deleteAll: false,
     GestureRecognizer recognizer,
   })  : assert(text != null),
+        actualText = actualText ?? text,
         assert(actualText != null),
         assert(start != null),
         super(
