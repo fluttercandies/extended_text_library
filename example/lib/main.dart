@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:extended_text_library/extended_text_library.dart';
 
 void main() => runApp(MyApp());
 

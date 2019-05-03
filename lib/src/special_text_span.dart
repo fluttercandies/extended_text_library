@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 ///
@@ -24,12 +25,14 @@ class SpecialTextSpan extends TextSpan {
     @required this.actualText,
     @required this.start,
     this.deleteAll: false,
+    GestureRecognizer recognizer,
   })  : assert(text != null),
         assert(actualText != null),
         assert(start != null),
         super(
           style: style,
           text: text,
+          recognizer: recognizer,
         );
 
   @override

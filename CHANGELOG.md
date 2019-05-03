@@ -1,3 +1,7 @@
+## [0.1.7]
+
+* add BackgroundTextSpan to support custom background
+
 ## [0.1.6]
 
 * override compareTo method in SpecialTextSpan and ImageSpan to
