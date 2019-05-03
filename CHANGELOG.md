@@ -1,6 +1,6 @@
-## [0.1.9]
+## [0.2.0]
 
-* add BackgroundTextSpan to support paint custom background
+* add BackgroundTextSpan, support to paint custom background
 
 ## [0.1.6]
 
