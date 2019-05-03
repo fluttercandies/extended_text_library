@@ -1,4 +1,4 @@
-## [0.1.8]
+## [0.1.9]
 
 * add BackgroundTextSpan to support paint custom background
 
