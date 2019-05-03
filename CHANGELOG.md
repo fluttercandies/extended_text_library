@@ -1,3 +1,8 @@
+## [0.1.6]
+
+* override compareTo method in SpecialTextSpanBuilder to
+  fix issue that image span was error rendering
+
 ## [0.1.5]
 
 * fix start index is not right in SpecialTextSpanBuilder

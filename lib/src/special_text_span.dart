@@ -46,4 +46,22 @@ class SpecialTextSpan extends TextSpan {
 
   @override
   int get hashCode => hashValues(style, text, actualText, start, deleteAll);
+
+  @override
+  RenderComparison compareTo(TextSpan other) {
+    if (other is SpecialTextSpan) {
+      if (other.start != start) {
+        return RenderComparison.layout;
+      }
+
+      if (other.actualText != actualText ||
+          other.text != text ||
+          other.style != style) {
+        return RenderComparison.paint;
+      }
+    }
+
+    // TODO: implement compareTo
+    return super.compareTo(other);
+  }
 }
