@@ -28,7 +28,6 @@ class SpecialTextSpan extends TextSpan {
     GestureRecognizer recognizer,
   })  : assert(text != null),
         actualText = actualText ?? text,
-        assert(actualText != null),
         assert(start != null),
         super(
           style: style,
