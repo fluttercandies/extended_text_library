@@ -13,7 +13,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:crypto/crypto.dart';
 
-const String cacheImageFolderName = "extenedtext";
+const String cacheImageFolderName = "cacheimage";
 
 class CachedNetworkImage extends ImageProvider<CachedNetworkImage> {
   /// Creates an object that fetches the image at the given URL.
