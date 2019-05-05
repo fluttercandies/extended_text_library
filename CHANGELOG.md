@@ -1,3 +1,7 @@
+## [0.2.1]
+
+* change cacheImageFolderName from "extenedtext" to "cacheimage"
+
 ## [0.2.0]
 
 * add BackgroundTextSpan, support to paint custom background
