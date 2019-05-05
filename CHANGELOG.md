@@ -1,3 +1,7 @@
+## [0.2.2]
+
+* update deafult build method in SpecialTextSpanBuilder
+
 ## [0.2.1]
 
 * change cacheImageFolderName from "extenedtext" to "cacheimage"
