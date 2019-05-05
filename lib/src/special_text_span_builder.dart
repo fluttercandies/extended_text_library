@@ -13,15 +13,16 @@ abstract class SpecialTextSpanBuilder {
       //String text
       for (int i = 0; i < data.length; i++) {
         String char = data[i];
+        textStack += char;
         if (specialText != null) {
-          if (!specialText.isEnd(char)) {
+          if (!specialText.isEnd(textStack)) {
             specialText.appendContent(char);
           } else {
             inlineList.add(specialText.finishText());
             specialText = null;
+            textStack = "";
           }
         } else {
-          textStack += char;
           specialText = createSpecialText(textStack,
               textStyle: textStyle, onTap: onTap, index: i);
           if (specialText != null) {
