@@ -1,4 +1,3 @@
-import 'package:extended_text_library/src/cached_network_image.dart';
 import 'package:extended_text_library/src/special_text_span.dart';
 import 'package:flutter/material.dart';
 
@@ -49,6 +48,10 @@ class ImageSpan extends SpecialTextSpan {
   ///resolver
   final ImageSpanResolver imageSpanResolver;
 
+  ///when failed to load image, whether clear memory cache
+  ///if ture, image will reload in next time.
+  final bool clearMemoryCacheIfFailed;
+
   ImageSpan(
     this.image, {
     @required this.imageWidth,
@@ -60,11 +63,12 @@ class ImageSpan extends SpecialTextSpan {
     String actualText: imageSpanTransparentPlaceholder,
     int start: 0,
     bool deleteAll: true,
+    this.clearMemoryCacheIfFailed: true,
   })  : assert(image != null),
         assert(imageWidth != null),
         assert(imageHeight != null),
         assert(fit != null),
-        imageSpanResolver = ImageSpanResolver(),
+        imageSpanResolver = ImageSpanResolver(clearMemoryCacheIfFailed),
         width = imageWidth + (margin == null ? 0 : margin.horizontal),
         height = imageHeight + (margin == null ? 0 : margin.vertical),
         super(
@@ -177,10 +181,11 @@ class ImageSpanResolver {
   ImageStream _imageStream;
   ImageInfo _imageInfo;
   ImageInfo get imageInfo => _imageInfo;
-
+  ImageProvider _image;
   bool _isListeningToStream = false;
   ImageConfiguration _imageConfiguration;
-
+  final bool clearMemoryCacheIfFailed;
+  ImageSpanResolver(this.clearMemoryCacheIfFailed);
 //  void didUpdateWidget(Image oldWidget) {
 //    super.didUpdateWidget(oldWidget);
 //    if (widget.image != oldWidget.image)
@@ -197,11 +202,8 @@ class ImageSpanResolver {
 
   void resolveImage({ImageListener listener, ImageProvider image}) {
     assert(_imageConfiguration != null);
+    _image = image;
     if (listener != null) _listener = listener;
-    if (image is CachedNetworkImage && image.clearFailedCache) {
-      clearLoadFailedImageMemoryCache(image: image);
-    }
-
     final ImageStream newStream = image.resolve(_imageConfiguration);
     assert(newStream != null);
     _updateSourceStream(newStream);
@@ -230,7 +232,7 @@ class ImageSpanResolver {
 
   void _listenToStream() {
     if (_isListeningToStream) return;
-    _imageStream?.addListener(_handleImageChanged);
+    _imageStream?.addListener(_handleImageChanged, onError: _loadFailed);
     _isListeningToStream = true;
   }
 
@@ -244,6 +246,12 @@ class ImageSpanResolver {
     //assert(_imageStream != null);
     _stopListeningToStream();
     //super.dispose();
+  }
+
+  void _loadFailed(exception, StackTrace stackTrace) {
+    if (clearMemoryCacheIfFailed) {
+      _image?.evict();
+    }
   }
 }
 
