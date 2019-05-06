@@ -1,4 +1,5 @@
 import 'package:extended_text_library/src/special_text_span.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'dart:ui' as ui show instantiateImageCodec, Codec;
@@ -66,6 +67,7 @@ class ImageSpan extends SpecialTextSpan {
     int start: 0,
     bool deleteAll: true,
     this.clearMemoryCacheIfFailed: true,
+    GestureRecognizer recognizer,
   })  : assert(image != null),
         assert(imageWidth != null),
         assert(imageHeight != null),
@@ -85,7 +87,8 @@ class ImageSpan extends SpecialTextSpan {
             ),
             actualText: actualText,
             start: start,
-            deleteAll: deleteAll);
+            deleteAll: deleteAll,
+            recognizer: recognizer);
 
   void createImageConfiguration(BuildContext context) {
     imageSpanResolver.createimageConfiguration(

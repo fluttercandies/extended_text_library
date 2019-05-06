@@ -1,3 +1,7 @@
+## [0.2.5]
+
+* add GestureRecognizer for image span 
+
 ## [0.2.4]
 
 * handle image loaded failed for image span
