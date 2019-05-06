@@ -1,3 +1,7 @@
+## [0.2.3]
+
+* remove CachedNetworkImage
+
 ## [0.2.2]
 
 * update deafult build method in SpecialTextSpanBuilder
