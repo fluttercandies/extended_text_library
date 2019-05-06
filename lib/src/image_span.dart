@@ -1,5 +1,7 @@
 import 'package:extended_text_library/src/special_text_span.dart';
 import 'package:flutter/material.dart';
+import 'package:transparent_image/transparent_image.dart';
+import 'dart:ui' as ui show instantiateImageCodec, Codec;
 
 /// get idea from https://github.com/bytedance/RealRichText about Inline-Image-In-Text
 /// update by zmtzawqlp@live.com
@@ -136,7 +138,8 @@ class ImageSpan extends SpecialTextSpan {
         typedOther.margin == margin &&
         typedOther.beforePaintImage == beforePaintImage &&
         typedOther.afterPaintImage == afterPaintImage &&
-        typedOther.fit == fit;
+        typedOther.fit == fit &&
+        other.clearMemoryCacheIfFailed == clearMemoryCacheIfFailed;
   }
 
   @override
@@ -152,7 +155,8 @@ class ImageSpan extends SpecialTextSpan {
       margin,
       beforePaintImage,
       afterPaintImage,
-      fit);
+      fit,
+      clearMemoryCacheIfFailed);
 
   @override
   RenderComparison compareTo(TextSpan other) {
@@ -166,7 +170,8 @@ class ImageSpan extends SpecialTextSpan {
 
       if (other.image != image ||
           other.beforePaintImage != beforePaintImage ||
-          other.afterPaintImage != afterPaintImage) {
+          other.afterPaintImage != afterPaintImage ||
+          other.clearMemoryCacheIfFailed != clearMemoryCacheIfFailed) {
         return RenderComparison.paint;
       }
     }
@@ -181,6 +186,8 @@ class ImageSpanResolver {
   ImageStream _imageStream;
   ImageInfo _imageInfo;
   ImageInfo get imageInfo => _imageInfo;
+  bool _loadFailed = false;
+  bool get loadFailed => _loadFailed;
   ImageProvider _image;
   bool _isListeningToStream = false;
   ImageConfiguration _imageConfiguration;
@@ -203,6 +210,7 @@ class ImageSpanResolver {
   void resolveImage({ImageListener listener, ImageProvider image}) {
     assert(_imageConfiguration != null);
     _image = image;
+    _loadFailed = false;
     if (listener != null) _listener = listener;
     final ImageStream newStream = image.resolve(_imageConfiguration);
     assert(newStream != null);
@@ -232,7 +240,7 @@ class ImageSpanResolver {
 
   void _listenToStream() {
     if (_isListeningToStream) return;
-    _imageStream?.addListener(_handleImageChanged, onError: _loadFailed);
+    _imageStream?.addListener(_handleImageChanged, onError: _failed);
     _isListeningToStream = true;
   }
 
@@ -248,9 +256,18 @@ class ImageSpanResolver {
     //super.dispose();
   }
 
-  void _loadFailed(exception, StackTrace stackTrace) {
+  void _failed(exception, StackTrace stackTrace) {
     if (clearMemoryCacheIfFailed) {
       _image?.evict();
+      _loadFailed = true;
+
+      ///show transparentImage
+      ui.instantiateImageCodec(kTransparentImage).then((ui.Codec codec) {
+        codec.getNextFrame().then((vlaue) {
+          _imageInfo = ImageInfo(image: vlaue.image, scale: 1.0);
+        });
+        _listener?.call(_imageInfo, false);
+      });
     }
   }
 }
