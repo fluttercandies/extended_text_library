@@ -262,16 +262,16 @@ class ImageSpanResolver {
   void _failed(exception, StackTrace stackTrace) {
     if (clearMemoryCacheIfFailed) {
       _image?.evict();
-      _loadFailed = true;
-
-      ///show transparentImage
-      ui.instantiateImageCodec(kTransparentImage).then((ui.Codec codec) {
-        codec.getNextFrame().then((vlaue) {
-          _imageInfo = ImageInfo(image: vlaue.image, scale: 1.0);
-        });
-        _listener?.call(_imageInfo, false);
-      });
     }
+    _loadFailed = true;
+
+    ///show transparentImage
+    ui.instantiateImageCodec(kTransparentImage).then((ui.Codec codec) {
+      codec.getNextFrame().then((vlaue) {
+        _imageInfo = ImageInfo(image: vlaue.image, scale: 1.0);
+      });
+      _listener?.call(_imageInfo, false);
+    });
   }
 }
 
