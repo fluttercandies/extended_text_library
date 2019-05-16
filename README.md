@@ -12,7 +12,7 @@ extended official text to quickly build special text like inline image or @someb
 
 ![](https://github.com/fluttercandies/Flutter_Candies/blob/master/gif/extended_text/special_text.jpg)
 
-![](https://github.com/fluttercandies/Flutter_Candies/blob/master/gif/extended_text/background.jpg)
+![](https://github.com/fluttercandies/Flutter_Candies/blob/master/gif/extended_text/background.png)
 
 ![](https://github.com/fluttercandies/Flutter_Candies/blob/master/gif/extended_text/overflow.jpg)
 
