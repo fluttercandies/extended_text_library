@@ -88,7 +88,8 @@ class ImageSpan extends SpecialTextSpan {
             actualText: actualText,
             start: start,
             deleteAll: deleteAll,
-            recognizer: recognizer);
+            recognizer: recognizer,
+            caretIn: false);
 
   void createImageConfiguration(BuildContext context) {
     imageSpanResolver.createimageConfiguration(
