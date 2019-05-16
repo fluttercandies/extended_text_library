@@ -20,7 +20,7 @@ class SpecialTextSpan extends TextSpan {
   final bool deleteAll;
 
   ///extended_text_field
-  ///whether caret can be move into special text for SpecialTextSpan(like a image span or @xxxx)
+  ///whether caret can move into special text for SpecialTextSpan(like a image span or @xxxx)
   final bool caretIn;
 
   SpecialTextSpan({
