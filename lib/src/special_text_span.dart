@@ -19,12 +19,17 @@ class SpecialTextSpan extends TextSpan {
   ///whether delete all actual text when it try to delete SpecialTextSpan(like a image span)
   final bool deleteAll;
 
+  ///extended_text_field
+  ///whether caret can be move into special text for SpecialTextSpan(like a image span or @xxxx)
+  final bool caretIn;
+
   SpecialTextSpan({
     TextStyle style,
     @required String text,
     @required String actualText,
     @required this.start,
     this.deleteAll: false,
+    this.caretIn: false,
     GestureRecognizer recognizer,
   })  : assert(text != null),
         actualText = actualText ?? text,

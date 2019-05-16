@@ -1,3 +1,7 @@
+## [0.2.7]
+
+* add caretIn parameter(whether caret can be move into special text for SpecialTextSpan(like a image span or @xxxx)) for SpecialTextSpan
+
 ## [0.2.6]
 
 * add GestureRecognizer for image span 
