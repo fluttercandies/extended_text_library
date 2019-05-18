@@ -16,12 +16,11 @@ class SpecialTextSpan extends TextSpan {
   int get end => start + actualText.length;
 
   ///extended_text_field
-  ///whether delete all actual text when it try to delete SpecialTextSpan(like a image span)
+  ///
+  ///if it's true
+  ///* delete all actual text when it try to delete a SpecialTextSpan(like a image span)
+  ///* caret can't move into special text of SpecialTextSpan(like a image span or @xxxx)
   final bool deleteAll;
-
-  ///extended_text_field
-  ///whether caret can move into special text for SpecialTextSpan(like a image span or @xxxx)
-  final bool caretIn;
 
   SpecialTextSpan({
     TextStyle style,
@@ -29,7 +28,6 @@ class SpecialTextSpan extends TextSpan {
     @required String actualText,
     @required this.start,
     this.deleteAll: false,
-    this.caretIn: false,
     GestureRecognizer recognizer,
   })  : assert(text != null),
         actualText = actualText ?? text,

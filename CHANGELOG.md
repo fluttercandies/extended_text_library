@@ -1,3 +1,8 @@
+## [0.3.1]
+
+* remove caretIn parameter(SpecialTextSpan)
+* deleteAll parameter has the same effect as caretIn parameter(SpecialTextSpan)
+
 ## [0.3.0]
 
 * add caretIn parameter(whether caret can be move into special text for SpecialTextSpan(like a image span or @xxxx)) for SpecialTextSpan

@@ -36,7 +36,6 @@ class BackgroundTextSpan extends SpecialTextSpan {
     String actualText,
     int start: 0,
     bool deleteAll: false,
-    bool caretIn: false,
   })  : assert(background != null),
         _textPainterHelper = TextPainterHelper(),
         super(
@@ -45,8 +44,7 @@ class BackgroundTextSpan extends SpecialTextSpan {
             recognizer: recognizer,
             actualText: actualText,
             start: start,
-            deleteAll: deleteAll,
-            caretIn: caretIn);
+            deleteAll: deleteAll);
 
   TextPainter layout(TextPainter painter) {
     return _textPainterHelper.layout(painter, this, compareChildren: false);

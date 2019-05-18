@@ -65,7 +65,6 @@ class ImageSpan extends SpecialTextSpan {
     this.fit: BoxFit.scaleDown,
     String actualText: imageSpanTransparentPlaceholder,
     int start: 0,
-    bool deleteAll: true,
     this.clearMemoryCacheIfFailed: true,
     GestureRecognizer recognizer,
   })  : assert(image != null),
@@ -76,20 +75,20 @@ class ImageSpan extends SpecialTextSpan {
         width = imageWidth + (margin == null ? 0 : margin.horizontal),
         height = imageHeight + (margin == null ? 0 : margin.vertical),
         super(
-            text: imageSpanTransparentPlaceholder,
-            style: TextStyle(
-              color: Colors.transparent,
-              height: 1,
-              letterSpacing:
-                  imageWidth + (margin == null ? 0 : margin.horizontal),
-              fontSize: dpToFontSize(
-                  imageHeight + (margin == null ? 0 : margin.vertical)),
-            ),
-            actualText: actualText,
-            start: start,
-            deleteAll: deleteAll,
-            recognizer: recognizer,
-            caretIn: false);
+          text: imageSpanTransparentPlaceholder,
+          style: TextStyle(
+            color: Colors.transparent,
+            height: 1,
+            letterSpacing:
+                imageWidth + (margin == null ? 0 : margin.horizontal),
+            fontSize: dpToFontSize(
+                imageHeight + (margin == null ? 0 : margin.vertical)),
+          ),
+          actualText: actualText,
+          start: start,
+          deleteAll: true,
+          recognizer: recognizer,
+        );
 
   void createImageConfiguration(BuildContext context) {
     imageSpanResolver.createimageConfiguration(
