@@ -1,3 +1,7 @@
+## [0.3.2]
+
+* move extended_text_utils from extended_text_field
+
 ## [0.3.1]
 
 * remove caretIn parameter(SpecialTextSpan)
