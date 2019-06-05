@@ -1,5 +1,4 @@
 import 'package:extended_text_library/src/extended_text_typedef.dart';
-import 'package:extended_text_library/src/extended_text_utils.dart';
 import 'package:flutter/material.dart';
 
 abstract class SpecialTextSpanBuilder {
