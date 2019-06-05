@@ -1,4 +1,4 @@
-## [0.3.4]
+## [0.3.5]
 
 * move extended_text_utils from extended_text_field
 
