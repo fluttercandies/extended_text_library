@@ -306,7 +306,7 @@ void textSpanNestToArray(TextSpan textSpan, List<TextSpan> list) {
   if (textSpan == null) return;
   list.add(textSpan);
   if (textSpan.children != null)
-    textSpan.children.forEach((ts) => textSpanNestToArray(textSpan, list));
+    textSpan.children.forEach((ts) => textSpanNestToArray(ts, list));
 }
 
 String textSpanToActualText(TextSpan textSpan
