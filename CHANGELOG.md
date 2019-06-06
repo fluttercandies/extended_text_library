@@ -1,3 +1,7 @@
+## [0.3.6]
+
+* add textSpanNestToArray and textSpanToActualText
+
 ## [0.3.5]
 
 * move extended_text_utils from extended_text_field

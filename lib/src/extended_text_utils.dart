@@ -7,16 +7,20 @@ import 'package:flutter/services.dart';
 
 TextPosition convertTextInputPostionToTextPainterPostion(
     TextSpan text, TextPosition textPosition) {
-  if (text != null && text.children != null) {
+  List<TextSpan> list = List<TextSpan>();
+  textSpanNestToArray(text, list);
+  if (list.length > 0) {
     int caretOffset = textPosition.offset;
     int textOffset = 0;
-    for (TextSpan ts in text.children) {
+    for (TextSpan ts in list) {
       if (ts is SpecialTextSpan) {
         var length = ts.actualText.length;
         caretOffset -= (length - ts.toPlainText().length);
         textOffset += length;
       } else {
-        textOffset += ts.toPlainText().length;
+        if (ts.text != null) {
+          textOffset += ts.text.length;
+        }
       }
       if (textOffset >= textPosition.offset) {
         break;
@@ -67,12 +71,14 @@ TextSelection convertTextInputSelectionToTextPainterSelection(
 
 TextPosition convertTextPainterPostionToTextInputPostion(
     TextSpan text, TextPosition textPosition) {
-  if (text != null && text.children != null && textPosition != null) {
+  List<TextSpan> list = List<TextSpan>();
+  textSpanNestToArray(text, list);
+  if (list.length > 0 && textPosition != null) {
     int caretOffset = textPosition.offset;
     if (caretOffset <= 0) return textPosition;
 
     int textOffset = 0;
-    for (TextSpan ts in text.children) {
+    for (TextSpan ts in list) {
       if (ts is SpecialTextSpan) {
         var length = ts.actualText.length;
         caretOffset += (length - ts.toPlainText().length);
@@ -88,7 +94,9 @@ TextPosition convertTextPainterPostionToTextInputPostion(
           break;
         }
       }
-      textOffset += ts.toPlainText().length;
+      if (ts.text != null) {
+        textOffset += ts.text.length;
+      }
       if (textOffset >= textPosition.offset) {
         break;
       }
@@ -137,12 +145,14 @@ TextSelection convertTextPainterSelectionToTextInputSelection(
 
 TextPosition makeSureCaretNotInSpecialText(
     TextSpan text, TextPosition textPosition) {
-  if (text != null && text.children != null && textPosition != null) {
+  List<TextSpan> list = List<TextSpan>();
+  textSpanNestToArray(text, list);
+  if (list.length > 0 && textPosition != null) {
     int caretOffset = textPosition.offset;
     if (caretOffset <= 0) return textPosition;
 
     int textOffset = 0;
-    for (TextSpan ts in text.children) {
+    for (TextSpan ts in list) {
       if (ts is SpecialTextSpan) {
         ///make sure caret is not in text when caretIn is false
         if (ts.deleteAll && caretOffset > ts.start && caretOffset < ts.end) {
@@ -155,7 +165,9 @@ TextPosition makeSureCaretNotInSpecialText(
           break;
         }
       }
-      textOffset += ts.toPlainText().length;
+      if (ts.text != null) {
+        textOffset += ts.text.length;
+      }
       if (textOffset >= textPosition.offset) {
         break;
       }
@@ -179,14 +191,16 @@ double getImageSpanCorrectPosition(ImageSpan image, TextDirection direction) {
 TextEditingValue correctCaretOffset(TextEditingValue value, TextSpan textSpan,
     TextInputConnection textInputConnection,
     {TextSelection newSelection}) {
-  if (textSpan == null || textSpan.children == null) return value;
+  List<TextSpan> list = List<TextSpan>();
+  textSpanNestToArray(textSpan, list);
+  if (list.length == 0) return value;
 
   TextSelection selection = newSelection ?? value.selection;
 
   if (selection.isValid && selection.isCollapsed) {
     int caretOffset = selection.extentOffset;
     var specialTextSpans =
-        textSpan.children.where((x) => x is SpecialTextSpan && x.deleteAll);
+        list.where((x) => x is SpecialTextSpan && x.deleteAll);
     //correct caret Offset
     //make sure caret is not in text when caretIn is false
     for (SpecialTextSpan ts in specialTextSpans) {
@@ -219,9 +233,10 @@ TextEditingValue handleSpecialTextSpanDelete(
     TextInputConnection textInputConnection) {
   var oldText = oldValue?.text;
   var newText = value?.text;
-  if (oldTextSpan != null && oldTextSpan.children != null) {
-    var imageSpans = oldTextSpan.children
-        .where((x) => (x is SpecialTextSpan && x.deleteAll));
+  List<TextSpan> list = List<TextSpan>();
+  textSpanNestToArray(oldTextSpan, list);
+  if (list.length > 0) {
+    var imageSpans = list.where((x) => (x is SpecialTextSpan && x.deleteAll));
 
     ///take care of image span
     if (imageSpans.length > 0 &&
@@ -276,11 +291,59 @@ TextEditingValue handleSpecialTextSpanDelete(
 //}
 
 bool hasSpecialText(TextSpan textSpan) {
-  if (textSpan == null || textSpan.children == null) return false;
+  List<TextSpan> list = List<TextSpan>();
+  textSpanNestToArray(textSpan, list);
+  if (list.length == 0) return false;
 
   //for performance, make sure your all SpecialTextSpan are only in textSpan.children
   //extended_text_field will only check textSpan.children
-  return textSpan.children
-          .firstWhere((x) => x is SpecialTextSpan, orElse: () => null) !=
+  return list.firstWhere((x) => x is SpecialTextSpan, orElse: () => null) !=
       null;
+}
+
+void textSpanNestToArray(TextSpan textSpan, List<TextSpan> list) {
+  assert(list != null);
+  if (textSpan == null) return;
+  list.add(textSpan);
+  if (textSpan.children != null)
+    textSpan.children.forEach((ts) => textSpanNestToArray(textSpan, list));
+}
+
+String textSpanToActualText(TextSpan textSpan
+    //,{bool includeSemanticsLabels = true}
+    ) {
+  final StringBuffer buffer = StringBuffer();
+  _visitTextSpan(textSpan, (TextSpan span) {
+//    if (span.semanticsLabel != null && includeSemanticsLabels) {
+//      buffer.write(span.semanticsLabel);
+//    } else
+    {
+      var text = span.text;
+      if (span is SpecialTextSpan) {
+        text = span.actualText;
+      }
+      buffer.write(text);
+    }
+    return true;
+  });
+  return buffer.toString();
+}
+
+/// Walks this text span and its descendants in pre-order and calls [visitor]
+/// for each span that has text.
+bool _visitTextSpan(TextSpan textSpan, bool visitor(TextSpan span)) {
+  var text = textSpan.text;
+  if (textSpan is SpecialTextSpan) {
+    text = textSpan.actualText;
+  }
+  if (text != null) {
+    if (!visitor(textSpan)) return false;
+  }
+  if (textSpan.children != null) {
+    for (TextSpan child in textSpan.children) {
+      if (!_visitTextSpan(child, visitor)) return false;
+      //if (!child.visitTextSpan(visitor)) return false;
+    }
+  }
+  return true;
 }
