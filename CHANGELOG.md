@@ -1,3 +1,7 @@
+## [0.3.8]
+
+* public offset of TextPainterHelper
+
 ## [0.3.7]
 
 * add textSpanNestToArray and textSpanToActualText
