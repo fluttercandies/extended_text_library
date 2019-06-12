@@ -29,6 +29,7 @@ class TextPainterHelper {
   ///method for [OverFlowTextSpan]
   ///offset int coordinate system
   Offset _offset;
+  //public
   Offset get offset => _offset;
   void saveOffset(Offset offset) {
     _offset = offset;
