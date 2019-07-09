@@ -162,7 +162,7 @@ class ImageSpan extends SpecialTextSpan {
       clearMemoryCacheIfFailed);
 
   @override
-  RenderComparison compareTo(TextSpan other) {
+  RenderComparison compareTo(InlineSpan other) {
     if (other is ImageSpan) {
       if (other.imageHeight != imageHeight ||
           other.imageWidth != imageWidth ||
@@ -243,13 +243,13 @@ class ImageSpanResolver {
 
   void _listenToStream() {
     if (_isListeningToStream) return;
-    _imageStream?.addListener(_handleImageChanged, onError: _failed);
+    _imageStream?.addListener(ImageStreamListener(_handleImageChanged, onError: _failed));
     _isListeningToStream = true;
   }
 
   void _stopListeningToStream() {
     if (!_isListeningToStream) return;
-    _imageStream?.removeListener(_handleImageChanged);
+    _imageStream?.removeListener(ImageStreamListener(_handleImageChanged));
     _isListeningToStream = false;
   }
 

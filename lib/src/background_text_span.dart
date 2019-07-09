@@ -162,7 +162,7 @@ class BackgroundTextSpan extends SpecialTextSpan {
       );
 
   @override
-  RenderComparison compareTo(TextSpan other) {
+  RenderComparison compareTo(InlineSpan other) {
     if (other is BackgroundTextSpan) {
       if (other.background != background ||
           other.clipBorderRadius != clipBorderRadius ||
