@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 
 abstract class SpecialTextSpanBuilder {
   //build text span to specialText
-  TextSpan build(String data,
+  InlineSpan build(String data,
       {TextStyle textStyle, SpecialTextGestureTapCallback onTap}) {
     if (data == null || data == "") return null;
-    List<TextSpan> inlineList = new List<TextSpan>();
+    List<InlineSpan> inlineList = new List<InlineSpan>();
     if (data.length > 0) {
       SpecialText specialText;
       String textStack = "";
@@ -49,7 +49,6 @@ abstract class SpecialTextSpanBuilder {
       inlineList.add(TextSpan(text: data, style: textStyle));
     }
 
-    // TODO: implement build
     return TextSpan(children: inlineList, style: textStyle);
   }
 
@@ -82,7 +81,7 @@ abstract class SpecialText {
       : _contetnt = StringBuffer();
 
   ///finish SpecialText
-  TextSpan finishText();
+  InlineSpan finishText();
 
   ///is end of SpecialText
   bool isEnd(String value) {

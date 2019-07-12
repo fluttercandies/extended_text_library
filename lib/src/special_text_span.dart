@@ -1,37 +1,33 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'special_inline_span_base.dart';
 
 ///
 ///  create by zmtzawqlp on 2019/4/30
 ///
 
-class SpecialTextSpan extends TextSpan {
-  /// actual text
+class SpecialTextSpan extends TextSpan with SpecialInlineSpanBase {
+  @override
   final String actualText;
 
-  /// the start index in all text
-  final int start;
-
-  /// the end index in all text
-  int get end => start + actualText.length;
-
-  ///extended_text_field
-  ///
-  ///if it's true
-  ///* delete all actual text when it try to delete a SpecialTextSpan(like a image span)
-  ///* caret can't move into special text of SpecialTextSpan(like a image span or @xxxx)
+  @override
   final bool deleteAll;
+
+  @override
+  final int start;
 
   SpecialTextSpan({
     TextStyle style,
     @required String text,
     @required String actualText,
-    @required this.start,
-    this.deleteAll: false,
+    int start: 0,
+    bool deleteAll: true,
     GestureRecognizer recognizer,
-  })  : assert(text != null),
+  })  : assert(start != null),
+        assert(deleteAll != null),
         actualText = actualText ?? text,
-        assert(start != null),
+        deleteAll = deleteAll,
+        start = start,
         super(
           style: style,
           text: text,
@@ -42,32 +38,19 @@ class SpecialTextSpan extends TextSpan {
   bool operator ==(dynamic other) {
     if (identical(this, other)) return true;
     if (other.runtimeType != runtimeType) return false;
-    final SpecialTextSpan typedOther = other;
-    return typedOther.text == text &&
-        typedOther.style == style &&
-        typedOther.actualText == actualText &&
-        typedOther.start == start &&
-        typedOther.deleteAll == deleteAll;
+    if (super != other) return false;
+    return equal(other);
   }
 
   @override
-  int get hashCode => hashValues(style, text, actualText, start, deleteAll);
+  int get hashCode => hashValues(super.hashCode, baseHashCode);
 
   @override
-  RenderComparison compareTo(TextSpan other) {
-    if (other is SpecialTextSpan) {
-      if (other.start != start) {
-        return RenderComparison.layout;
-      }
-
-      if (other.actualText != actualText ||
-          other.text != text ||
-          other.style != style) {
-        return RenderComparison.paint;
-      }
+  RenderComparison compareTo(InlineSpan other) {
+    var comparison = super.compareTo(other);
+    if (comparison == RenderComparison.identical) {
+      comparison = baseCompareTo(other as SpecialInlineSpanBase);
     }
-
-    // TODO: implement compareTo
-    return super.compareTo(other);
+    return comparison;
   }
 }

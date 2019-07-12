@@ -8,3 +8,5 @@ export 'src/background_text_span.dart';
 export 'src/text_painter_helper.dart';
 export 'src/extended_text_utils.dart';
 export 'src/extended_text_typedef.dart';
+export 'src/extended_widget_span.dart';
+export 'src/special_inline_span_base.dart';

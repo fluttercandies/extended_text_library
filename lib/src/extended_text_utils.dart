@@ -1,26 +1,22 @@
 import 'dart:math';
-
-import 'image_span.dart';
-import 'special_text_span.dart';
+import 'special_inline_span_base.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 TextPosition convertTextInputPostionToTextPainterPostion(
-    TextSpan text, TextPosition textPosition) {
-  List<TextSpan> list = List<TextSpan>();
+    InlineSpan text, TextPosition textPosition) {
+  List<InlineSpan> list = List<InlineSpan>();
   textSpanNestToArray(text, list);
   if (list.length > 0) {
     int caretOffset = textPosition.offset;
     int textOffset = 0;
-    for (TextSpan ts in list) {
-      if (ts is SpecialTextSpan) {
-        var length = ts.actualText.length;
+    for (InlineSpan ts in list) {
+      if (ts is SpecialInlineSpanBase) {
+        var length = (ts as SpecialInlineSpanBase).actualText.length;
         caretOffset -= (length - ts.toPlainText().length);
         textOffset += length;
       } else {
-        if (ts.text != null) {
-          textOffset += ts.text.length;
-        }
+        textOffset += getInlineOffset(ts);
       }
       if (textOffset >= textPosition.offset) {
         break;
@@ -35,7 +31,7 @@ TextPosition convertTextInputPostionToTextPainterPostion(
 }
 
 TextSelection convertTextInputSelectionToTextPainterSelection(
-    TextSpan text, TextSelection selection) {
+    InlineSpan text, TextSelection selection) {
   if (selection.isValid) {
     if (selection.isCollapsed) {
       var extent =
@@ -70,33 +66,35 @@ TextSelection convertTextInputSelectionToTextPainterSelection(
 }
 
 TextPosition convertTextPainterPostionToTextInputPostion(
-    TextSpan text, TextPosition textPosition) {
-  List<TextSpan> list = List<TextSpan>();
+    InlineSpan text, TextPosition textPosition) {
+  List<InlineSpan> list = List<InlineSpan>();
   textSpanNestToArray(text, list);
   if (list.length > 0 && textPosition != null) {
     int caretOffset = textPosition.offset;
     if (caretOffset <= 0) return textPosition;
 
     int textOffset = 0;
-    for (TextSpan ts in list) {
-      if (ts is SpecialTextSpan) {
-        var length = ts.actualText.length;
+    for (InlineSpan ts in list) {
+      if (ts is SpecialInlineSpanBase) {
+        var specialTs = ts as SpecialInlineSpanBase;
+        var length = specialTs.actualText.length;
         caretOffset += (length - ts.toPlainText().length);
 
         ///make sure caret is not in text when caretIn is false
-        if (ts.deleteAll && caretOffset > ts.start && caretOffset < ts.end) {
-          if (caretOffset > (ts.end - ts.start) / 2.0 + ts.start) {
+        if (specialTs.deleteAll &&
+            caretOffset > specialTs.start &&
+            caretOffset < specialTs.end) {
+          if (caretOffset >
+              (specialTs.end - specialTs.start) / 2.0 + specialTs.start) {
             //move caretOffset to end
-            caretOffset = ts.end;
+            caretOffset = specialTs.end;
           } else {
-            caretOffset = ts.start;
+            caretOffset = specialTs.start;
           }
           break;
         }
       }
-      if (ts.text != null) {
-        textOffset += ts.text.length;
-      }
+      textOffset += getInlineOffset(ts);
       if (textOffset >= textPosition.offset) {
         break;
       }
@@ -109,7 +107,7 @@ TextPosition convertTextPainterPostionToTextInputPostion(
 }
 
 TextSelection convertTextPainterSelectionToTextInputSelection(
-    TextSpan text, TextSelection selection) {
+    InlineSpan text, TextSelection selection) {
   if (selection.isValid) {
     if (selection.isCollapsed) {
       var extent =
@@ -144,30 +142,33 @@ TextSelection convertTextPainterSelectionToTextInputSelection(
 }
 
 TextPosition makeSureCaretNotInSpecialText(
-    TextSpan text, TextPosition textPosition) {
-  List<TextSpan> list = List<TextSpan>();
+    InlineSpan text, TextPosition textPosition) {
+  List<InlineSpan> list = List<InlineSpan>();
   textSpanNestToArray(text, list);
   if (list.length > 0 && textPosition != null) {
     int caretOffset = textPosition.offset;
     if (caretOffset <= 0) return textPosition;
 
     int textOffset = 0;
-    for (TextSpan ts in list) {
-      if (ts is SpecialTextSpan) {
+    for (InlineSpan ts in list) {
+      if (ts is SpecialInlineSpanBase) {
+        var specialTs = ts as SpecialInlineSpanBase;
+
         ///make sure caret is not in text when caretIn is false
-        if (ts.deleteAll && caretOffset > ts.start && caretOffset < ts.end) {
-          if (caretOffset > (ts.end - ts.start) / 2.0 + ts.start) {
+        if (specialTs.deleteAll &&
+            caretOffset > specialTs.start &&
+            caretOffset < specialTs.end) {
+          if (caretOffset >
+              (specialTs.end - specialTs.start) / 2.0 + specialTs.start) {
             //move caretOffset to end
-            caretOffset = ts.end;
+            caretOffset = specialTs.end;
           } else {
-            caretOffset = ts.start;
+            caretOffset = specialTs.start;
           }
           break;
         }
       }
-      if (ts.text != null) {
-        textOffset += ts.text.length;
-      }
+      textOffset += getInlineOffset(ts);
       if (textOffset >= textPosition.offset) {
         break;
       }
@@ -179,19 +180,20 @@ TextPosition makeSureCaretNotInSpecialText(
   return textPosition;
 }
 
-double getImageSpanCorrectPosition(ImageSpan image, TextDirection direction) {
-  var correctPosition = image.width / 2.0;
-  //if (direction == TextDirection.rtl) correctPosition = -correctPosition;
-
-  return correctPosition;
-}
+//double getImageSpanCorrectPosition(
+//    ExtendedWidgetSpan widgetSpan, TextDirection direction) {
+//  // var correctPosition = image.width / 2.0;
+//  //if (direction == TextDirection.rtl) correctPosition = -correctPosition;
+//  return 15.0;
+//  //return correctPosition;
+//}
 
 ///correct caret Offset
 ///make sure caret is not in text when caretIn is false
-TextEditingValue correctCaretOffset(TextEditingValue value, TextSpan textSpan,
+TextEditingValue correctCaretOffset(TextEditingValue value, InlineSpan textSpan,
     TextInputConnection textInputConnection,
     {TextSelection newSelection}) {
-  List<TextSpan> list = List<TextSpan>();
+  List<InlineSpan> list = List<InlineSpan>();
   textSpanNestToArray(textSpan, list);
   if (list.length == 0) return value;
 
@@ -199,17 +201,20 @@ TextEditingValue correctCaretOffset(TextEditingValue value, TextSpan textSpan,
 
   if (selection.isValid && selection.isCollapsed) {
     int caretOffset = selection.extentOffset;
-    var specialTextSpans =
-        list.where((x) => x is SpecialTextSpan && x.deleteAll);
+    var specialTextSpans = list.where((x) =>
+        x is SpecialInlineSpanBase && (x as SpecialInlineSpanBase).deleteAll);
     //correct caret Offset
     //make sure caret is not in text when caretIn is false
-    for (SpecialTextSpan ts in specialTextSpans) {
-      if (caretOffset > ts.start && caretOffset < ts.end) {
-        if (caretOffset > (ts.end - ts.start) / 2.0 + ts.start) {
+    for (var ts in specialTextSpans) {
+      var specialTs = ts as SpecialInlineSpanBase;
+
+      if (caretOffset > specialTs.start && caretOffset < specialTs.end) {
+        if (caretOffset >
+            (specialTs.end - specialTs.start) / 2.0 + specialTs.start) {
           //move caretOffset to end
-          caretOffset = ts.end;
+          caretOffset = specialTs.end;
         } else {
-          caretOffset = ts.start;
+          caretOffset = specialTs.start;
         }
         break;
       }
@@ -229,14 +234,15 @@ TextEditingValue correctCaretOffset(TextEditingValue value, TextSpan textSpan,
 TextEditingValue handleSpecialTextSpanDelete(
     TextEditingValue value,
     TextEditingValue oldValue,
-    TextSpan oldTextSpan,
+    InlineSpan oldTextSpan,
     TextInputConnection textInputConnection) {
   var oldText = oldValue?.text;
   var newText = value?.text;
-  List<TextSpan> list = List<TextSpan>();
+  List<InlineSpan> list = List<InlineSpan>();
   textSpanNestToArray(oldTextSpan, list);
   if (list.length > 0) {
-    var imageSpans = list.where((x) => (x is SpecialTextSpan && x.deleteAll));
+    var imageSpans = list.where((x) =>
+        (x is SpecialInlineSpanBase && (x as SpecialInlineSpanBase).deleteAll));
 
     ///take care of image span
     if (imageSpans.length > 0 &&
@@ -253,11 +259,13 @@ TextEditingValue handleSpecialTextSpanDelete(
 
       int caretOffset = value.selection.extentOffset;
       if (difStart > 0) {
-        for (SpecialTextSpan ts in imageSpans) {
-          if (difStart > ts.start && difStart < ts.end) {
+        for (var ts in imageSpans) {
+          var specialTs = ts as SpecialInlineSpanBase;
+
+          if (difStart > specialTs.start && difStart < specialTs.end) {
             //difStart = ts.start;
-            newText = newText.replaceRange(ts.start, difStart, "");
-            caretOffset -= (difStart - ts.start);
+            newText = newText.replaceRange(specialTs.start, difStart, "");
+            caretOffset -= (difStart - specialTs.start);
             break;
           }
         }
@@ -290,37 +298,38 @@ TextEditingValue handleSpecialTextSpanDelete(
 //  return false;
 //}
 
-bool hasSpecialText(TextSpan textSpan) {
-  List<TextSpan> list = List<TextSpan>();
+bool hasSpecialText(InlineSpan textSpan) {
+  List<InlineSpan> list = List<InlineSpan>();
   textSpanNestToArray(textSpan, list);
   if (list.length == 0) return false;
 
   //for performance, make sure your all SpecialTextSpan are only in textSpan.children
   //extended_text_field will only check textSpan.children
-  return list.firstWhere((x) => x is SpecialTextSpan, orElse: () => null) !=
+  return list.firstWhere((x) => x is SpecialInlineSpanBase,
+          orElse: () => null) !=
       null;
 }
 
-void textSpanNestToArray(TextSpan textSpan, List<TextSpan> list) {
+void textSpanNestToArray(InlineSpan textSpan, List<InlineSpan> list) {
   assert(list != null);
   if (textSpan == null) return;
   list.add(textSpan);
-  if (textSpan.children != null)
+  if (textSpan is TextSpan && textSpan.children != null)
     textSpan.children.forEach((ts) => textSpanNestToArray(ts, list));
 }
 
-String textSpanToActualText(TextSpan textSpan
+String textSpanToActualText(InlineSpan textSpan
     //,{bool includeSemanticsLabels = true}
     ) {
   final StringBuffer buffer = StringBuffer();
-  _visitTextSpan(textSpan, (TextSpan span) {
+  _visitTextSpan(textSpan, (InlineSpan span) {
 //    if (span.semanticsLabel != null && includeSemanticsLabels) {
 //      buffer.write(span.semanticsLabel);
 //    } else
     {
-      var text = span.text;
-      if (span is SpecialTextSpan) {
-        text = span.actualText;
+      var text = getInlineText(span);
+      if (span is SpecialInlineSpanBase) {
+        text = (span as SpecialInlineSpanBase).actualText;
       }
       buffer.write(text);
     }
@@ -331,19 +340,39 @@ String textSpanToActualText(TextSpan textSpan
 
 /// Walks this text span and its descendants in pre-order and calls [visitor]
 /// for each span that has text.
-bool _visitTextSpan(TextSpan textSpan, bool visitor(TextSpan span)) {
-  var text = textSpan.text;
-  if (textSpan is SpecialTextSpan) {
-    text = textSpan.actualText;
+bool _visitTextSpan(InlineSpan textSpan, bool visitor(InlineSpan span)) {
+  var text = getInlineText(textSpan);
+  if (textSpan is SpecialInlineSpanBase) {
+    text = (textSpan as SpecialInlineSpanBase).actualText;
   }
   if (text != null) {
     if (!visitor(textSpan)) return false;
   }
-  if (textSpan.children != null) {
-    for (TextSpan child in textSpan.children) {
+  if (textSpan is TextSpan && textSpan.children != null) {
+    for (InlineSpan child in textSpan.children) {
       if (!_visitTextSpan(child, visitor)) return false;
       //if (!child.visitTextSpan(visitor)) return false;
     }
   }
   return true;
+}
+
+int getInlineOffset(InlineSpan inlineSpan) {
+  if (inlineSpan is TextSpan && inlineSpan.text != null) {
+    return inlineSpan.text.length;
+  }
+  if (inlineSpan is PlaceholderSpan) {
+    return 1;
+  }
+  return 0;
+}
+
+String getInlineText(InlineSpan inlineSpan) {
+  if (inlineSpan is TextSpan && inlineSpan.text != null) {
+    return inlineSpan.text;
+  }
+  if (inlineSpan is PlaceholderSpan) {
+    return '\uFFFC';
+  }
+  return "";
 }

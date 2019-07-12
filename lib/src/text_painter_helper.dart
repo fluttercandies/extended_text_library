@@ -10,7 +10,7 @@ class TextPainterHelper {
     if (_painter == null ||
         ((compareChildren
                 ? _painter.text != textSpan
-                : _painter.text.text != textSpan.text) ||
+                : (_painter.text as TextSpan).text != textSpan.text) ||
             _painter.textAlign != painter.textAlign ||
             _painter.textScaleFactor != painter.textScaleFactor ||
             _painter.locale != painter.locale)) {
@@ -41,7 +41,7 @@ class TextPainterHelper {
   }
 
   ///method for [OverFlowTextSpan]
-  TextSpan getSpanForPosition(TextPosition position) {
+  InlineSpan getSpanForPosition(TextPosition position) {
     return painter.text.getSpanForPosition(position);
   }
 }
