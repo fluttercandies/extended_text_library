@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 abstract class SpecialTextSpanBuilder {
   //build text span to specialText
-  InlineSpan build(String data,
+  TextSpan build(String data,
       {TextStyle textStyle, SpecialTextGestureTapCallback onTap}) {
     if (data == null || data == "") return null;
     List<InlineSpan> inlineList = new List<InlineSpan>();

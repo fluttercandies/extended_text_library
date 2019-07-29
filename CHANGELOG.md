@@ -1,3 +1,9 @@
+## [0.4.3]
+
+* set default value('\uFFFC') of actualText for ExtendedWidgetSpan
+* add onTap call back for ImageSpan
+* change return type to TextSpan for SpecialTextSpanBuilder's Build method
+
 ## [0.4.2]
 
 * improve codes base on v1.7.8
