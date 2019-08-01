@@ -14,7 +14,7 @@ class SpecialTextSpan extends TextSpan with SpecialInlineSpanBase {
   final bool deleteAll;
 
   @override
-  final int start;
+  final TextRange textRange;
 
   SpecialTextSpan({
     TextStyle style,
@@ -27,7 +27,8 @@ class SpecialTextSpan extends TextSpan with SpecialInlineSpanBase {
         assert(deleteAll != null),
         actualText = actualText ?? text,
         deleteAll = deleteAll,
-        start = start,
+        textRange =
+            TextRange(start: start, end: start + (actualText ?? text).length),
         super(
           style: style,
           text: text,
