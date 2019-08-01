@@ -6,10 +6,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
+import '../../extended_text_library.dart';
 import '../extended_text_utils.dart';
-import 'package:extended_text_library/src/extended_text_render_object.dart';
-
-import 'extended_text_selection_render_object.dart';
 
 ///
 ///  create by zmtzawqlp on 2019/7/31

@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 ///
-///  create by zhoumaotuo on 2019/8/1
+///  create by zmtzawqlp on 2019/8/1
 ///
 
 abstract class ExtendedTextSelectionRenderObject {
