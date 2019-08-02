@@ -80,12 +80,13 @@ TextPosition convertTextPainterPostionToTextInputPostion(
         var length = specialTs.actualText.length;
         caretOffset += (length - ts.toPlainText().length);
 
-        ///make sure caret is not in text when caretIn is false
+        ///make sure caret is not in text when deleteAll is true
         if (specialTs.deleteAll &&
-            caretOffset > specialTs.start &&
-            caretOffset < specialTs.end) {
-          if (caretOffset >
-              (specialTs.end - specialTs.start) / 2.0 + specialTs.start) {
+            caretOffset >= specialTs.start &&
+            caretOffset <= specialTs.end) {
+          if (ts is PlaceholderSpan ||
+              caretOffset >
+                  (specialTs.end - specialTs.start) / 2.0 + specialTs.start) {
             //move caretOffset to end
             caretOffset = specialTs.end;
           } else {
@@ -154,7 +155,7 @@ TextPosition makeSureCaretNotInSpecialText(
       if (ts is SpecialInlineSpanBase) {
         var specialTs = ts as SpecialInlineSpanBase;
 
-        ///make sure caret is not in text when caretIn is false
+        ///make sure caret is not in text when deleteAll is true
         if (specialTs.deleteAll &&
             caretOffset > specialTs.start &&
             caretOffset < specialTs.end) {
@@ -204,7 +205,7 @@ TextEditingValue correctCaretOffset(TextEditingValue value, InlineSpan textSpan,
     var specialTextSpans = list.where((x) =>
         x is SpecialInlineSpanBase && (x as SpecialInlineSpanBase).deleteAll);
     //correct caret Offset
-    //make sure caret is not in text when caretIn is false
+    ///make sure caret is not in text when deleteAll is true
     for (var ts in specialTextSpans) {
       var specialTs = ts as SpecialInlineSpanBase;
 

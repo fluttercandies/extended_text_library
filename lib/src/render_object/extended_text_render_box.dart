@@ -225,6 +225,42 @@ abstract class ExtendedTextRenderBox extends RenderBox
     }
   }
 
+  Offset getCaretOffset(TextPosition textPosition,
+      {ValueChanged<double> caretHeightCallBack,
+      Offset effectiveOffset,
+      bool handleSpecialText: true,
+      Rect caretPrototype: Rect.zero}) {
+    ///zmt
+    if (handleSpecialText) {
+      ///if first index, check by first span
+      var offset = textPosition.offset;
+      if (offset <= 0) {
+        offset = 1;
+      }
+
+      ///last or has ExtendedWidgetSpan
+
+      var boxs = textPainter.getBoxesForSelection(TextSelection(
+          baseOffset: offset - 1,
+          extentOffset: offset,
+          affinity: textPosition.affinity));
+      if (boxs.length > 0) {
+        var rect = boxs.toList().last.toRect();
+        caretHeightCallBack?.call(rect.height);
+        if (textPosition.offset == 0) {
+          return rect.topLeft + effectiveOffset;
+        } else {
+          return rect.topRight + effectiveOffset;
+        }
+      }
+    }
+
+    final Offset caretOffset =
+        textPainter.getOffsetForCaret(textPosition, caretPrototype) +
+            effectiveOffset;
+    return caretOffset;
+  }
+
   @override
   void setupParentData(RenderBox child) {
     if (child.parentData is! TextParentData)
