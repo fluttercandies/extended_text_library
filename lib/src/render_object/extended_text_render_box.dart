@@ -247,7 +247,7 @@ abstract class ExtendedTextRenderBox extends RenderBox
       if (boxs.length > 0) {
         var rect = boxs.toList().last.toRect();
         caretHeightCallBack?.call(rect.height);
-        if (textPosition.offset == 0) {
+        if (textPosition.offset <= 0) {
           return rect.topLeft + effectiveOffset;
         } else {
           return rect.topRight + effectiveOffset;

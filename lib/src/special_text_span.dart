@@ -24,6 +24,7 @@ class SpecialTextSpan extends TextSpan with SpecialInlineSpanBase {
     bool deleteAll: true,
     GestureRecognizer recognizer,
   })  : assert(start != null),
+        assert(text != null),
         assert(deleteAll != null),
         actualText = actualText ?? text,
         deleteAll = deleteAll,
