@@ -1,3 +1,7 @@
+## [0.4.4]
+
+* add common selection library for extended_text and extended_text_field 
+
 ## [0.4.3]
 
 * set default value('\uFFFC') of actualText for ExtendedWidgetSpan

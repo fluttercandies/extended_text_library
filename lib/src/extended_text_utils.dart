@@ -13,7 +13,7 @@ TextPosition convertTextInputPostionToTextPainterPostion(
     for (InlineSpan ts in list) {
       if (ts is SpecialInlineSpanBase) {
         var length = (ts as SpecialInlineSpanBase).actualText.length;
-        caretOffset -= (length - ts.toPlainText().length);
+        caretOffset -= (length - getInlineOffset(ts));
         textOffset += length;
       } else {
         textOffset += getInlineOffset(ts);
@@ -66,7 +66,8 @@ TextSelection convertTextInputSelectionToTextPainterSelection(
 }
 
 TextPosition convertTextPainterPostionToTextInputPostion(
-    InlineSpan text, TextPosition textPosition) {
+    InlineSpan text, TextPosition textPosition,
+    {bool end}) {
   List<InlineSpan> list = List<InlineSpan>();
   textSpanNestToArray(text, list);
   if (list.length > 0 && textPosition != null) {
@@ -78,19 +79,24 @@ TextPosition convertTextPainterPostionToTextInputPostion(
       if (ts is SpecialInlineSpanBase) {
         var specialTs = ts as SpecialInlineSpanBase;
         var length = specialTs.actualText.length;
-        caretOffset += (length - ts.toPlainText().length);
+        caretOffset += (length - getInlineOffset(ts));
 
-        ///make sure caret is not in text when caretIn is false
+        ///make sure caret is not in text when deleteAll is true
         if (specialTs.deleteAll &&
-            caretOffset > specialTs.start &&
-            caretOffset < specialTs.end) {
-          if (caretOffset >
-              (specialTs.end - specialTs.start) / 2.0 + specialTs.start) {
-            //move caretOffset to end
-            caretOffset = specialTs.end;
+            caretOffset >= specialTs.start &&
+            caretOffset <= specialTs.end) {
+          if (end != null) {
+            caretOffset = end ? specialTs.end : specialTs.start;
           } else {
-            caretOffset = specialTs.start;
+            if (caretOffset >
+                (specialTs.end - specialTs.start) / 2.0 + specialTs.start) {
+              //move caretOffset to end
+              caretOffset = specialTs.end;
+            } else {
+              caretOffset = specialTs.start;
+            }
           }
+
           break;
         }
       }
@@ -107,7 +113,8 @@ TextPosition convertTextPainterPostionToTextInputPostion(
 }
 
 TextSelection convertTextPainterSelectionToTextInputSelection(
-    InlineSpan text, TextSelection selection) {
+    InlineSpan text, TextSelection selection,
+    {bool selectWord: false}) {
   if (selection.isValid) {
     if (selection.isCollapsed) {
       var extent =
@@ -121,11 +128,13 @@ TextSelection convertTextPainterSelectionToTextInputSelection(
         return selection;
       }
     } else {
-      var extent =
-          convertTextPainterPostionToTextInputPostion(text, selection.extent);
+      var extent = convertTextPainterPostionToTextInputPostion(
+          text, selection.extent,
+          end: selectWord ? true : null);
 
-      var base =
-          convertTextPainterPostionToTextInputPostion(text, selection.base);
+      var base = convertTextPainterPostionToTextInputPostion(
+          text, selection.base,
+          end: selectWord ? false : null);
 
       if (selection.extent != extent || selection.base != base) {
         selection = selection.copyWith(
@@ -154,10 +163,10 @@ TextPosition makeSureCaretNotInSpecialText(
       if (ts is SpecialInlineSpanBase) {
         var specialTs = ts as SpecialInlineSpanBase;
 
-        ///make sure caret is not in text when caretIn is false
+        ///make sure caret is not in text when deleteAll is true
         if (specialTs.deleteAll &&
-            caretOffset > specialTs.start &&
-            caretOffset < specialTs.end) {
+            caretOffset >= specialTs.start &&
+            caretOffset <= specialTs.end) {
           if (caretOffset >
               (specialTs.end - specialTs.start) / 2.0 + specialTs.start) {
             //move caretOffset to end
@@ -204,11 +213,11 @@ TextEditingValue correctCaretOffset(TextEditingValue value, InlineSpan textSpan,
     var specialTextSpans = list.where((x) =>
         x is SpecialInlineSpanBase && (x as SpecialInlineSpanBase).deleteAll);
     //correct caret Offset
-    //make sure caret is not in text when caretIn is false
+    ///make sure caret is not in text when deleteAll is true
     for (var ts in specialTextSpans) {
       var specialTs = ts as SpecialInlineSpanBase;
 
-      if (caretOffset > specialTs.start && caretOffset < specialTs.end) {
+      if (caretOffset >= specialTs.start && caretOffset <= specialTs.end) {
         if (caretOffset >
             (specialTs.end - specialTs.start) / 2.0 + specialTs.start) {
           //move caretOffset to end

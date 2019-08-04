@@ -11,10 +11,12 @@ abstract class SpecialInlineSpanBase {
   String get actualText;
 
   /// the start index in all text
-  int get start;
+  int get start => textRange.start;
 
   /// the end index in all text
-  int get end => start + actualText.length;
+  int get end => textRange.end;
+
+  TextRange get textRange;
 
   ///extended_text_field
   ///

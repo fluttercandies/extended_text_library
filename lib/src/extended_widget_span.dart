@@ -17,7 +17,7 @@ class ExtendedWidgetSpan extends WidgetSpan with SpecialInlineSpanBase {
   final bool deleteAll;
 
   @override
-  final int start;
+  final TextRange textRange;
 
   /// store size to calculate selection
   final WidgetSpanSize widgetSpanSize;
@@ -36,7 +36,8 @@ class ExtendedWidgetSpan extends WidgetSpan with SpecialInlineSpanBase {
         assert(deleteAll != null),
         actualText = actualText ?? '\uFFFC',
         deleteAll = deleteAll,
-        start = start,
+        textRange = TextRange(
+            start: start, end: start + (actualText ?? '\uFFFC').length),
         widgetSpanSize = WidgetSpanSize()..size = Size.zero,
         super(child: child, alignment: alignment, baseline: baseline);
 
