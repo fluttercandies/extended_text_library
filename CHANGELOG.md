@@ -1,3 +1,7 @@
+## [0.4.7]
+
+* change kMinInteractiveSize to kExtendedMinInteractiveSize
+
 ## [0.4.6]
 
 * fix null exception of effectiveOffset in getCaretOffset method
