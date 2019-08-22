@@ -1,3 +1,7 @@
+## [0.4.6]
+
+* fix null exception of effectiveOffset in getCaretOffset method
+
 ## [0.4.5]
 
 * fix kMinInteractiveSize is missing in high version of flutter

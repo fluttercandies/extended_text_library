@@ -230,6 +230,8 @@ abstract class ExtendedTextRenderBox extends RenderBox
       Offset effectiveOffset,
       bool handleSpecialText: true,
       Rect caretPrototype: Rect.zero}) {
+    effectiveOffset ??= Offset.zero;
+
     ///zmt
     if (handleSpecialText) {
       ///if first index, check by first span
