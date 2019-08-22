@@ -1,3 +1,8 @@
+## [0.4.8]
+
+* fix issue that ImageSpan's padding can't be null. 
+* add behavior for ImageSpan
+
 ## [0.4.7]
 
 * change kMinInteractiveSize to kExtendedMinInteractiveSize
