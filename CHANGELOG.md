@@ -1,3 +1,7 @@
+## [0.4.5]
+
+* fix kMinInteractiveSize is missing in high version of flutter
+
 ## [0.4.4]
 
 * add common selection library for extended_text and extended_text_field 
