@@ -13,7 +13,7 @@ import '../extended_text_utils.dart';
 ///  create by zmtzawqlp on 2019/7/31
 ///
 
-const double kMinInteractiveSize = 48.0;
+const double kExtendedMinInteractiveSize = 48.0;
 
 /// The text position that a give selection handle manipulates. Dragging the
 /// [start] handle always moves the [start]/[baseOffset] of the selection.
@@ -525,7 +525,7 @@ class _TextSelectionHandleOverlayState
     // Make sure the GestureDetector is big enough to be easily interactive.
     final Rect interactiveRect = handleRect.expandToInclude(
       Rect.fromCircle(
-          center: handleRect.center, radius: kMinInteractiveSize / 2),
+          center: handleRect.center, radius: kExtendedMinInteractiveSize / 2),
     );
     final RelativeRect padding = RelativeRect.fromLTRB(
       max((interactiveRect.width - handleRect.width) / 2, 0),
