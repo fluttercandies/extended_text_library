@@ -13,6 +13,8 @@ import '../extended_text_utils.dart';
 ///  create by zmtzawqlp on 2019/7/31
 ///
 
+const double kMinInteractiveSize = 48.0;
+
 /// The text position that a give selection handle manipulates. Dragging the
 /// [start] handle always moves the [start]/[baseOffset] of the selection.
 enum _TextSelectionHandlePosition { start, end }
