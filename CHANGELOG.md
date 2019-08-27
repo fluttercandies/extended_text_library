@@ -1,3 +1,7 @@
+## [0.4.9]
+
+* workaround about wrong selection position of WidgetSpan
+
 ## [0.4.8]
 
 * fix issue that ImageSpan's padding can't be null. 
