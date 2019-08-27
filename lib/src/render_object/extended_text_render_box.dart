@@ -236,23 +236,30 @@ abstract class ExtendedTextRenderBox extends RenderBox
     if (handleSpecialText) {
       ///if first index, check by first span
       var offset = textPosition.offset;
-      if (offset <= 0) {
-        offset = 1;
-      }
-
-      ///last or has ExtendedWidgetSpan
-
       var boxs = textPainter.getBoxesForSelection(TextSelection(
-          baseOffset: offset - 1,
-          extentOffset: offset,
+          baseOffset: offset,
+          extentOffset: offset + 1,
           affinity: textPosition.affinity));
       if (boxs.length > 0) {
         var rect = boxs.toList().last.toRect();
         caretHeightCallBack?.call(rect.height);
-        if (textPosition.offset <= 0) {
-          return rect.topLeft + effectiveOffset;
-        } else {
-          return rect.topRight + effectiveOffset;
+        return rect.topLeft + effectiveOffset;
+      } else {
+        if (offset <= 0) {
+          offset = 1;
+        }
+        boxs = textPainter.getBoxesForSelection(TextSelection(
+            baseOffset: offset - 1,
+            extentOffset: offset,
+            affinity: textPosition.affinity));
+        if (boxs.length > 0) {
+          var rect = boxs.toList().last.toRect();
+          caretHeightCallBack?.call(rect.height);
+          if (textPosition.offset <= 0) {
+            return rect.topLeft + effectiveOffset;
+          } else {
+            return rect.topRight + effectiveOffset;
+          }
         }
       }
     }
