@@ -1,3 +1,11 @@
+## [0.5.0]
+
+* codes base on 1.12.13+hotfix.5
+* breaking change:
+  CupertinoExtendedTextSelectionControls => ExtendedCupertinoTextSelectionControls
+  MaterialExtendedTextSelectionControls => ExtendedMaterialTextSelectionControls
+* extract method for TextSelection
+
 ## [0.4.9]
 
 * workaround about wrong selection position of WidgetSpan

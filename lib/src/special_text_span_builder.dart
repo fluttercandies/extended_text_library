@@ -100,7 +100,6 @@ abstract class SpecialText {
 
   @override
   String toString() {
-    // TODO: implement toString
     return startFlag + getContent() + endFlag;
   }
 }

@@ -13,5 +13,6 @@ export 'src/special_inline_span_base.dart';
 export 'src/selection/material_text_selection_controls.dart';
 export 'src/selection/cupertino_text_selection_controls.dart';
 export 'src/selection/extended_text_selection_overlay.dart';
+export 'src/selection/extended_text_selection.dart';
 export 'src/render_object/extended_text_selection_render_object.dart';
 export 'src/render_object/extended_text_render_box.dart';

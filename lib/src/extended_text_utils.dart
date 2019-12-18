@@ -258,13 +258,13 @@ TextEditingValue handleSpecialTextSpanDelete(
         oldText != null &&
         newText != null &&
         oldText.length > newText.length) {
-      int difStart = 0;
+      final int difStart = value.selection.extentOffset;
       //int difEnd = oldText.length - 1;
-      for (; difStart < newText.length; difStart++) {
-        if (oldText[difStart] != newText[difStart]) {
-          break;
-        }
-      }
+      // for (; difStart < newText.length; difStart++) {
+      //   if (oldText[difStart] != newText[difStart]) {
+      //     break;
+      //   }
+      // }
 
       int caretOffset = value.selection.extentOffset;
       if (difStart > 0) {
