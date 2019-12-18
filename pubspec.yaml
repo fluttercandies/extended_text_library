@@ -1,12 +1,12 @@
 name: extended_text_library
 description: package library for extended_text and extended_text_field,provide common base class.
-version: 0.5.0
+version: 0.5.1
 author: zmtzawq <zmtzawqlp@live.com>
 homepage: https://github.com/fluttercandies/extended_text_library
 
 environment:
   sdk: ">=2.3.0 <3.0.0"
-  flutter: ">=1.12.13+hotfix.5 <1.12.16"
+  flutter: ">=1.12.13 <1.12.16"
 
 dependencies:
   flutter:

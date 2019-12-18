@@ -1,3 +1,7 @@
+## [0.5.1]
+
+* set limitation of flutter sdk >=1.12.13
+  
 ## [0.5.0]
 
 * codes base on 1.12.13+hotfix.5
