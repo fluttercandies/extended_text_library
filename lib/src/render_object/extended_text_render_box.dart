@@ -1,18 +1,33 @@
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'dart:ui' as ui show PlaceholderAlignment;
+import 'dart:math' as math;
 
 ///
 ///  create by zmtzawqlp on 2019/8/1
 ///
 
+/// [ExtendedRenderEditable](https://github.com/fluttercandies/extended_text_field/blob/master/lib/src/extended_render_editable.dart#L104)
+/// [ExtendedRenderParagraph](https://github.com/fluttercandies/extended_text/blob/master/lib/src/extended_render_paragraph.dart#L13)
+///
+/// Widget Span for them
 abstract class ExtendedTextRenderBox extends RenderBox
     with
         ContainerRenderObjectMixin<RenderBox, TextParentData>,
-        RenderBoxContainerDefaultsMixin<RenderBox, TextParentData> {
+        RenderBoxContainerDefaultsMixin<RenderBox, TextParentData>,
+        RelayoutWhenSystemFontsChangeMixin {
   TextPainter get textPainter;
   bool get softWrap;
   TextOverflow get overflow;
+  double textLayoutLastMaxWidth;
+  double textLayoutLastMinWidth;
+  double get caretMargin;
+  bool get isMultiline;
+  bool get forceLine;
+  String get plainText;
+  Offset get effectiveOffset;
 
   List<PlaceholderSpan> _placeholderSpans;
 
@@ -190,11 +205,26 @@ abstract class ExtendedTextRenderBox extends RenderBox
   void layoutText(
       {double minWidth = 0.0,
       double maxWidth = double.infinity,
-      double constraintWidth = double.infinity}) {
-    final bool widthMatters = softWrap || overflow == TextOverflow.ellipsis;
+      bool forceLayout: false}) {
+    assert(maxWidth != null && minWidth != null);
+
+    if (textLayoutLastMaxWidth == maxWidth &&
+        textLayoutLastMinWidth == minWidth &&
+        !forceLayout) return;
+    final bool widthMatters =
+        softWrap || overflow == TextOverflow.ellipsis || isMultiline;
+    final double availableMaxWidth = math.max(0.0, maxWidth - caretMargin);
+    final double availableMinWidth = math.min(minWidth, availableMaxWidth);
+    final double textMaxWidth =
+        widthMatters ? availableMaxWidth : double.infinity;
+    final double textMinWidth =
+        forceLine ? availableMaxWidth : availableMinWidth;
     textPainter.layout(
-        minWidth: minWidth,
-        maxWidth: widthMatters ? maxWidth : double.infinity);
+      minWidth: textMinWidth,
+      maxWidth: textMaxWidth,
+    );
+    textLayoutLastMinWidth = minWidth;
+    textLayoutLastMaxWidth = maxWidth;
   }
 
   void paintWidgets(PaintingContext context, Offset offset) {
@@ -304,5 +334,62 @@ abstract class ExtendedTextRenderBox extends RenderBox
     _computeChildrenWidthWithMaxIntrinsics(height);
     layoutText(); // layout with infinite width.
     return textPainter.maxIntrinsicWidth;
+  }
+
+  /// Marks the render object as needing to be laid out again and have its text
+  /// metrics recomputed.
+  ///
+  /// Implies [markNeedsLayout].
+  @protected
+  void markNeedsTextLayout() {
+    textLayoutLastMaxWidth = null;
+    textLayoutLastMinWidth = null;
+    markNeedsLayout();
+  }
+
+  @override
+  void systemFontsDidChange() {
+    super.systemFontsDidChange();
+    textPainter.markNeedsLayout();
+    textLayoutLastMaxWidth = null;
+    textLayoutLastMinWidth = null;
+  }
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, {Offset position}) {
+    RenderBox child = firstChild;
+    int childIndex = 0;
+    while (child != null &&
+        childIndex < textPainter.inlinePlaceholderBoxes.length) {
+      final TextParentData textParentData = child.parentData;
+      final Matrix4 transform = Matrix4.translationValues(
+          textParentData.offset.dx + effectiveOffset.dx,
+          textParentData.offset.dy + effectiveOffset.dy,
+          0.0)
+        ..scale(
+            textParentData.scale, textParentData.scale, textParentData.scale);
+      final bool isHit = result.addWithPaintTransform(
+        transform: transform,
+        position: position,
+        hitTest: (BoxHitTestResult result, Offset transformed) {
+          assert(() {
+            final Offset manualPosition =
+                (position - textParentData.offset - effectiveOffset) /
+                    textParentData.scale;
+            return (transformed.dx - manualPosition.dx).abs() <
+                    precisionErrorTolerance &&
+                (transformed.dy - manualPosition.dy).abs() <
+                    precisionErrorTolerance;
+          }());
+          return child.hitTest(result, position: transformed);
+        },
+      );
+      if (isHit) {
+        return true;
+      }
+      child = childAfter(child);
+      childIndex += 1;
+    }
+    return false;
   }
 }
