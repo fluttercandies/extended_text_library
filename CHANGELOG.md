@@ -1,3 +1,7 @@
+## [0.5.2]
+
+* fix issue that TextPainter was not layout(ExtendedText)
+  
 ## [0.5.1]
 
 * set limitation of flutter sdk >=1.12.13
