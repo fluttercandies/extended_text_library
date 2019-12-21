@@ -1,4 +1,3 @@
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -136,6 +135,13 @@ abstract class ExtendedTextRenderBox extends RenderBox
     return textPainter.height;
   }
 
+  // Placeholder dimensions representing the sizes of child inline widgets.
+  //
+  // These need to be cached because the text painter's placeholder dimensions
+  // will be overwritten during intrinsic width/height calculations and must be
+  // restored to the original values before final layout and painting.
+  List<PlaceholderDimensions> _placeholderDimensions;
+
   // Layout the child inline widgets. We then pass the dimensions of the
   // children to _textPainter so that appropriate placeholders can be inserted
   // into the LibTxt layout. This does not do anything if no inline widgets were
@@ -145,8 +151,7 @@ abstract class ExtendedTextRenderBox extends RenderBox
       return;
     }
     RenderBox child = firstChild;
-    final List<PlaceholderDimensions> placeholderDimensions =
-        List<PlaceholderDimensions>(childCount);
+    _placeholderDimensions = List<PlaceholderDimensions>(childCount);
     int childIndex = 0;
     while (child != null) {
       // Only constrain the width to the maximum width of the paragraph.
@@ -170,7 +175,7 @@ abstract class ExtendedTextRenderBox extends RenderBox
             break;
           }
       }
-      placeholderDimensions[childIndex] = PlaceholderDimensions(
+      _placeholderDimensions[childIndex] = PlaceholderDimensions(
         size: child.size,
         alignment: _placeholderSpans[childIndex].alignment,
         baseline: _placeholderSpans[childIndex].baseline,
@@ -179,7 +184,17 @@ abstract class ExtendedTextRenderBox extends RenderBox
       child = childAfter(child);
       childIndex += 1;
     }
-    textPainter.setPlaceholderDimensions(placeholderDimensions);
+    textPainter.setPlaceholderDimensions(_placeholderDimensions);
+  }
+
+  //layoutText for extended_text
+  void layoutTextWithConstraints(BoxConstraints constraints) {
+    textPainter.setPlaceholderDimensions(_placeholderDimensions);
+    layoutText(
+      minWidth: constraints.minWidth,
+      maxWidth: constraints.maxWidth,
+      forceLayout: true,
+    );
   }
 
   // Iterate through the laid-out children and set the parentData offsets based
@@ -334,6 +349,21 @@ abstract class ExtendedTextRenderBox extends RenderBox
     _computeChildrenWidthWithMaxIntrinsics(height);
     layoutText(); // layout with infinite width.
     return textPainter.maxIntrinsicWidth;
+  }
+
+  @override
+  double computeDistanceToActualBaseline(TextBaseline baseline) {
+    assert(!debugNeedsLayout);
+    assert(constraints != null);
+    assert(constraints.debugAssertIsValid());
+    layoutTextWithConstraints(constraints);
+    // TODO(garyq): Since our metric for ideographic baseline is currently
+    // inaccurate and the non-alphabetic baselines are based off of the
+    // alphabetic baseline, we use the alphabetic for now to produce correct
+    // layouts. We should eventually change this back to pass the `baseline`
+    // property when the ideographic baseline is properly implemented
+    // (https://github.com/flutter/flutter/issues/22625).
+    return textPainter.computeDistanceToActualBaseline(TextBaseline.alphabetic);
   }
 
   /// Marks the render object as needing to be laid out again and have its text
