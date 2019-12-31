@@ -316,7 +316,6 @@ class ExtendedTextSelectionGestureDetectorBuilder {
   }
 }
 
-
 class CommonTextSelectionGestureDetectorBuilder
     extends ExtendedTextSelectionGestureDetectorBuilder {
   CommonTextSelectionGestureDetectorBuilder({
@@ -356,22 +355,27 @@ class CommonTextSelectionGestureDetectorBuilder
   @override
   void onSingleLongTapMoveUpdate(LongPressMoveUpdateDetails details) {
     if (delegate.selectionEnabled) {
-      switch (Theme.of(_context).platform) {
-        case TargetPlatform.iOS:
-          renderEditable.selectPositionAt(
-            from: details.globalPosition,
-            cause: SelectionChangedCause.longPress,
-          );
-          break;
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-          renderEditable.selectWordsInRange(
-            from: details.globalPosition - details.offsetFromOrigin,
-            to: details.globalPosition,
-            cause: SelectionChangedCause.longPress,
-          );
-          break;
-      }
+      renderEditable.selectWordsInRange(
+        from: details.globalPosition - details.offsetFromOrigin,
+        to: details.globalPosition,
+        cause: SelectionChangedCause.longPress,
+      );
+      // switch (Theme.of(_context).platform) {
+      //   case TargetPlatform.iOS:
+      //     renderEditable.selectPositionAt(
+      //       from: details.globalPosition,
+      //       cause: SelectionChangedCause.longPress,
+      //     );
+      //     break;
+      //   case TargetPlatform.android:
+      //   case TargetPlatform.fuchsia:
+      //     renderEditable.selectWordsInRange(
+      //       from: details.globalPosition - details.offsetFromOrigin,
+      //       to: details.globalPosition,
+      //       cause: SelectionChangedCause.longPress,
+      //     );
+      //     break;
+      // }
     }
   }
 
@@ -396,19 +400,20 @@ class CommonTextSelectionGestureDetectorBuilder
   @override
   void onSingleLongTapStart(LongPressStartDetails details) {
     if (delegate.selectionEnabled) {
-      switch (Theme.of(_context).platform) {
-        case TargetPlatform.iOS:
-          renderEditable.selectPositionAt(
-            from: details.globalPosition,
-            cause: SelectionChangedCause.longPress,
-          );
-          break;
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-          renderEditable.selectWord(cause: SelectionChangedCause.longPress);
-          Feedback.forLongPress(_context);
-          break;
-      }
+      renderEditable.selectWord(cause: SelectionChangedCause.longPress);
+      // switch (Theme.of(_context).platform) {
+      //   case TargetPlatform.iOS:
+      //     renderEditable.selectPositionAt(
+      //       from: details.globalPosition,
+      //       cause: SelectionChangedCause.longPress,
+      //     );
+      //     break;
+      //   case TargetPlatform.android:
+      //   case TargetPlatform.fuchsia:
+      //     renderEditable.selectWord(cause: SelectionChangedCause.longPress);
+      //     Feedback.forLongPress(_context);
+      //     break;
+      // }
     }
   }
 }
