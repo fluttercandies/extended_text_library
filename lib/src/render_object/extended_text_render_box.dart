@@ -357,7 +357,7 @@ abstract class ExtendedTextRenderBox extends RenderBox
     assert(constraints != null);
     assert(constraints.debugAssertIsValid());
     layoutTextWithConstraints(constraints);
-    // TODO(garyq): Since our metric for ideographic baseline is currently
+    // todo(garyq): Since our metric for ideographic baseline is currently
     // inaccurate and the non-alphabetic baselines are based off of the
     // alphabetic baseline, we use the alphabetic for now to produce correct
     // layouts. We should eventually change this back to pass the `baseline`

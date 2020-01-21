@@ -316,7 +316,6 @@ class ExtendedTextSelectionGestureDetectorBuilder {
   }
 }
 
-
 class CommonTextSelectionGestureDetectorBuilder
     extends ExtendedTextSelectionGestureDetectorBuilder {
   CommonTextSelectionGestureDetectorBuilder({
@@ -357,17 +356,18 @@ class CommonTextSelectionGestureDetectorBuilder
   void onSingleLongTapMoveUpdate(LongPressMoveUpdateDetails details) {
     if (delegate.selectionEnabled) {
       switch (Theme.of(_context).platform) {
-        case TargetPlatform.iOS:
-          renderEditable.selectPositionAt(
-            from: details.globalPosition,
-            cause: SelectionChangedCause.longPress,
-          );
-          break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
           renderEditable.selectWordsInRange(
             from: details.globalPosition - details.offsetFromOrigin,
             to: details.globalPosition,
+            cause: SelectionChangedCause.longPress,
+          );
+          break;
+        case TargetPlatform.iOS:
+        default:
+          renderEditable.selectPositionAt(
+            from: details.globalPosition,
             cause: SelectionChangedCause.longPress,
           );
           break;
@@ -380,12 +380,13 @@ class CommonTextSelectionGestureDetectorBuilder
     _hideToolbar();
     if (delegate.selectionEnabled) {
       switch (Theme.of(_context).platform) {
-        case TargetPlatform.iOS:
-          renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
-          break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
           renderEditable.selectPosition(cause: SelectionChangedCause.tap);
+          break;
+        case TargetPlatform.iOS:
+        default:
+          renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
           break;
       }
     }
@@ -397,16 +398,17 @@ class CommonTextSelectionGestureDetectorBuilder
   void onSingleLongTapStart(LongPressStartDetails details) {
     if (delegate.selectionEnabled) {
       switch (Theme.of(_context).platform) {
-        case TargetPlatform.iOS:
-          renderEditable.selectPositionAt(
-            from: details.globalPosition,
-            cause: SelectionChangedCause.longPress,
-          );
-          break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
           renderEditable.selectWord(cause: SelectionChangedCause.longPress);
           Feedback.forLongPress(_context);
+          break;
+        case TargetPlatform.iOS:
+        default:
+          renderEditable.selectPositionAt(
+            from: details.globalPosition,
+            cause: SelectionChangedCause.longPress,
+          );
           break;
       }
     }
