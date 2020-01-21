@@ -1,3 +1,7 @@
+## [0.5.3]
+
+* fix error about TargetPlatform.macOS
+
 ## [0.5.2]
 
 * fix issue that TextPainter was not layout(ExtendedText)
