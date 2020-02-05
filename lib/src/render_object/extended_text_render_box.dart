@@ -1,3 +1,4 @@
+//import 'package:extended_text_library/src/painting_image_span.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -269,6 +270,41 @@ abstract class ExtendedTextRenderBox extends RenderBox
       childIndex += 1;
     }
   }
+
+  // void paintImages(Canvas canvas, PaintingImageSpan ts, Offset offset) {
+  //   ///imageSpanTransparentPlaceholder \u200B has no width, and we define image width by
+  //   ///use letterSpacing,so the actual top-left offset of image should be subtract letterSpacing(width)/2.0
+  //   Offset imageSpanOffset = offset - Offset(ts.width / 2.0, 0.0);
+
+  //   if (!ts.paint(canvas, imageSpanOffset)) {
+  //     //image not ready
+  //     ts.resolveImage(listener: (ImageInfo imageInfo, bool synchronousCall) {
+  //       if (synchronousCall)
+  //         ts.paint(canvas, imageSpanOffset);
+  //       else {
+  //         if (owner == null || !owner.debugDoingPaint) {
+  //           markNeedsPaint();
+  //         }
+  //       }
+  //     });
+  //   }
+  // }
+
+  // @override
+  // void detach() {
+  //   super.detach();
+  //   _disposePaintingImageSpan(<InlineSpan>[textPainter.text]);
+  // }
+
+  // void _disposePaintingImageSpan(List<InlineSpan> textSpan) {
+  //   textSpan.forEach((ts) {
+  //     if (ts is PaintingImageSpan) {
+  //       ts.dispose();
+  //     } else if (ts is TextSpan && ts.children != null) {
+  //       _disposePaintingImageSpan(ts.children);
+  //     }
+  //   });
+  // }
 
   Offset getCaretOffset(TextPosition textPosition,
       {ValueChanged<double> caretHeightCallBack,
