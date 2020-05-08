@@ -20,7 +20,7 @@ typedef TextSelectionChangedHandler = void Function(
 
 /// [ExtendedRenderEditable](https://github.com/fluttercandies/extended_text_field/blob/master/lib/src/extended_render_editable.dart#L104)
 /// [ExtendedRenderParagraph](https://github.com/fluttercandies/extended_text/blob/master/lib/src/extended_render_paragraph.dart#L13)
-/// 
+///
 /// TextSelection for them
 abstract class ExtendedTextSelectionRenderObject extends ExtendedTextRenderBox {
   ValueListenable<bool> get selectionStartInViewport;
@@ -108,7 +108,7 @@ abstract class ExtendedTextSelectionRenderObject extends ExtendedTextRenderBox {
     assert(cause != null);
     layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
     assert(lastTapDownPosition != null);
-    if (onSelectionChanged != null) {
+    if (onSelectionChanged == null) {
       return;
     }
     final TextPosition position = textPainter

@@ -1,3 +1,7 @@
+## [0.5.4]
+
+* fix selection issue on ios about selectWordEdge
+
 ## [0.5.3]
 
 * fix error about TargetPlatform.macOS
