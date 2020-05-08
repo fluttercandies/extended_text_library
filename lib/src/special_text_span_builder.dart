@@ -63,7 +63,7 @@ abstract class SpecialTextSpanBuilder {
 }
 
 abstract class SpecialText {
-  final StringBuffer _contetnt;
+  final StringBuffer _content;
 
   ///start flag of SpecialText
   final String startFlag;
@@ -78,7 +78,7 @@ abstract class SpecialText {
   final SpecialTextGestureTapCallback onTap;
 
   SpecialText(this.startFlag, this.endFlag, this.textStyle, {this.onTap})
-      : _contetnt = StringBuffer();
+      : _content = StringBuffer();
 
   ///finish SpecialText
   InlineSpan finishText();
@@ -90,12 +90,12 @@ abstract class SpecialText {
 
   ///append text of SpecialText
   void appendContent(String value) {
-    _contetnt.write(value);
+    _content.write(value);
   }
 
   ///get content of SpecialText
   String getContent() {
-    return _contetnt.toString();
+    return _content.toString();
   }
 
   @override
