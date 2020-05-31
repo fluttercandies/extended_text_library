@@ -4,6 +4,26 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 class BackgroundTextSpan extends SpecialTextSpan {
+  BackgroundTextSpan({
+    TextStyle style,
+    String text,
+    GestureRecognizer recognizer,
+    @required this.background,
+    this.clipBorderRadius,
+    this.paintBackground,
+    String actualText,
+    int start = 0,
+    bool deleteAll = false,
+  })  : assert(background != null),
+        _textPainterHelper = TextPainterHelper(),
+        super(
+            style: style,
+            text: text,
+            recognizer: recognizer,
+            actualText: actualText,
+            start: start,
+            deleteAll: deleteAll);
+
   /// The paint drawn as a background for the text.
   ///
   /// The value should ideally be cached and reused each time if multiple text
@@ -26,26 +46,6 @@ class BackgroundTextSpan extends SpecialTextSpan {
   ///helper for textPainter
   final TextPainterHelper _textPainterHelper;
 
-  BackgroundTextSpan({
-    TextStyle style,
-    String text,
-    GestureRecognizer recognizer,
-    this.background,
-    this.clipBorderRadius,
-    this.paintBackground,
-    String actualText,
-    int start: 0,
-    bool deleteAll: false,
-  })  : assert(background != null),
-        _textPainterHelper = TextPainterHelper(),
-        super(
-            style: style,
-            text: text,
-            recognizer: recognizer,
-            actualText: actualText,
-            start: start,
-            deleteAll: deleteAll);
-
   TextPainter layout(TextPainter painter) {
     return _textPainterHelper.layout(painter, this, compareChildren: false);
   }
@@ -56,18 +56,20 @@ class BackgroundTextSpan extends SpecialTextSpan {
     assert(_textPainterHelper.painter != null);
 
     if (paintBackground != null) {
-      bool handle = paintBackground(
+      final bool handle = paintBackground(
               this, canvas, offset, _textPainterHelper.painter, rect,
               endOffset: endOffset, wholeTextPainter: wholeTextPainter) ??
           false;
-      if (handle) return;
+      if (handle) {
+        return;
+      }
     }
 
-    Rect textRect = offset & _textPainterHelper.painter.size;
+    final Rect textRect = offset & _textPainterHelper.painter.size;
 
     ///top-right
     if (endOffset != null) {
-      Rect firstLineRect = offset &
+      final Rect firstLineRect = offset &
           Size(rect.right - offset.dx, _textPainterHelper.painter.height);
 
       if (clipBorderRadius != null) {
@@ -89,7 +91,7 @@ class BackgroundTextSpan extends SpecialTextSpan {
 
       ///endOffset.y has deviation,so we calculate with text height
       ///print(((endOffset.dy - offset.dy) / _painter.height));
-      var fullLinesAndLastLine =
+      final int fullLinesAndLastLine =
           ((endOffset.dy - offset.dy) / _textPainterHelper.painter.height)
               .round();
 
@@ -98,7 +100,7 @@ class BackgroundTextSpan extends SpecialTextSpan {
         y += _textPainterHelper.painter.height;
         //last line
         if (i == fullLinesAndLastLine - 1) {
-          Rect lastLineRect = Offset(0.0, y) &
+          final Rect lastLineRect = Offset(0.0, y) &
               Size(endOffset.dx, _textPainterHelper.painter.height);
           if (clipBorderRadius != null) {
             canvas.save();
@@ -140,15 +142,19 @@ class BackgroundTextSpan extends SpecialTextSpan {
 
   @override
   bool operator ==(dynamic other) {
-    if (identical(this, other)) return true;
-    if (other.runtimeType != runtimeType) return false;
-    final BackgroundTextSpan typedOther = other;
-    return typedOther.text == text &&
-        typedOther.style == style &&
-        typedOther.recognizer == recognizer &&
-        typedOther.background == background &&
-        typedOther.clipBorderRadius == clipBorderRadius &&
-        typedOther.paintBackground == paintBackground;
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is BackgroundTextSpan &&
+        other.text == text &&
+        other.style == style &&
+        other.recognizer == recognizer &&
+        other.background == background &&
+        other.clipBorderRadius == clipBorderRadius &&
+        other.paintBackground == paintBackground;
   }
 
   @override

@@ -1,11 +1,12 @@
+import 'dart:math' as math;
+import 'dart:ui' as ui;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 
 import '../extended_text_utils.dart';
 import 'extended_text_render_box.dart';
-import 'dart:math' as math;
-import 'dart:ui' as ui;
 
 ///
 ///  create by zmtzawqlp on 2019/8/1
@@ -47,9 +48,6 @@ abstract class ExtendedTextSelectionRenderObject extends ExtendedTextRenderBox {
 
   ///selection
   Offset lastTapDownPosition;
-
-  ///
-  ///Offset _lastTapDownPosition;
 
   /// If [ignorePointer] is false (the default) then this method is called by
   /// the internal gesture recognizer's [TapGestureRecognizer.onTapDown]
@@ -249,16 +247,20 @@ abstract class ExtendedTextSelectionRenderObject extends ExtendedTextRenderBox {
 
   void paintHandleLayers(PaintingContext context,
       Function(PaintingContext context, Offset offset) paint) {
-    if (startHandleLayerLink == null || endHandleLayerLink == null) return;
+    if (startHandleLayerLink == null || endHandleLayerLink == null) {
+      return;
+    }
 
-    final endpoints = getEndpointsForSelection(selection);
+    final List<TextSelectionPoint> endpoints = getEndpointsForSelection(selection);
 
-    if (endpoints == null || endpoints.isEmpty) return;
+    if (endpoints == null || endpoints.isEmpty) {
+      return;
+    }
 
     Offset startPoint = endpoints[0].point;
     startPoint = Offset(
-      startPoint.dx.clamp(0.0, size.width),
-      startPoint.dy.clamp(0.0, size.height),
+      startPoint.dx.clamp(0.0, size.width) as double,
+      startPoint.dy.clamp(0.0, size.height) as double,
     );
     context.pushLayer(
       LeaderLayer(link: startHandleLayerLink, offset: startPoint),
@@ -268,8 +270,8 @@ abstract class ExtendedTextSelectionRenderObject extends ExtendedTextRenderBox {
     if (endpoints.length == 2) {
       Offset endPoint = endpoints[1].point;
       endPoint = Offset(
-        endPoint.dx.clamp(0.0, size.width),
-        endPoint.dy.clamp(0.0, size.height),
+        endPoint.dx.clamp(0.0, size.width) as double,
+        endPoint.dy.clamp(0.0, size.height)as double,
       );
       context.pushLayer(
         LeaderLayer(link: endHandleLayerLink, offset: endPoint),
@@ -284,7 +286,7 @@ abstract class ExtendedTextSelectionRenderObject extends ExtendedTextRenderBox {
         'Last width ($textLayoutLastMaxWidth) not the same as max width constraint (${constraints.maxWidth}).');
     assert(selectionRects != null);
     final Paint paint = Paint()..color = selectionColor;
-    for (ui.TextBox box in selectionRects)
+    for (final ui.TextBox box in selectionRects)
       canvas.drawRect(box.toRect().shift(effectiveOffset), paint);
   }
 }

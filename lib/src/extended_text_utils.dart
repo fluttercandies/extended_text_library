@@ -1,19 +1,19 @@
 import 'dart:math';
-import 'special_inline_span_base.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'special_inline_span_base.dart';
 
 TextPosition convertTextInputPostionToTextPainterPostion(
     InlineSpan text, TextPosition textPosition) {
-  List<InlineSpan> list = List<InlineSpan>();
+  final List<InlineSpan> list = <InlineSpan>[];
   textSpanNestToArray(text, list);
-  if (list.length > 0) {
+  if (list.isNotEmpty) {
     int caretOffset = textPosition.offset;
     int textOffset = 0;
-    for (InlineSpan ts in list) {
+    for (final InlineSpan ts in list) {
       if (ts is SpecialInlineSpanBase) {
-        var length = (ts as SpecialInlineSpanBase).actualText.length;
-        caretOffset -= (length - getInlineOffset(ts));
+        final int length = (ts as SpecialInlineSpanBase).actualText.length;
+        caretOffset -= length - getInlineOffset(ts);
         textOffset += length;
       } else {
         textOffset += getInlineOffset(ts);
@@ -34,7 +34,7 @@ TextSelection convertTextInputSelectionToTextPainterSelection(
     InlineSpan text, TextSelection selection) {
   if (selection.isValid) {
     if (selection.isCollapsed) {
-      var extent =
+      final TextPosition extent =
           convertTextInputPostionToTextPainterPostion(text, selection.extent);
       if (selection.extent != extent) {
         selection = selection.copyWith(
@@ -45,10 +45,10 @@ TextSelection convertTextInputSelectionToTextPainterSelection(
         return selection;
       }
     } else {
-      var extent =
+      final TextPosition extent =
           convertTextInputPostionToTextPainterPostion(text, selection.extent);
 
-      var base =
+      final TextPosition base =
           convertTextInputPostionToTextPainterPostion(text, selection.base);
 
       if (selection.extent != extent || selection.base != base) {
@@ -68,18 +68,20 @@ TextSelection convertTextInputSelectionToTextPainterSelection(
 TextPosition convertTextPainterPostionToTextInputPostion(
     InlineSpan text, TextPosition textPosition,
     {bool end}) {
-  List<InlineSpan> list = List<InlineSpan>();
+  final List<InlineSpan> list = <InlineSpan>[];
   textSpanNestToArray(text, list);
-  if (list.length > 0 && textPosition != null) {
+  if (list.isNotEmpty && textPosition != null) {
     int caretOffset = textPosition.offset;
-    if (caretOffset <= 0) return textPosition;
+    if (caretOffset <= 0) {
+      return textPosition;
+    }
 
     int textOffset = 0;
-    for (InlineSpan ts in list) {
+    for (final InlineSpan ts in list) {
       if (ts is SpecialInlineSpanBase) {
-        var specialTs = ts as SpecialInlineSpanBase;
-        var length = specialTs.actualText.length;
-        caretOffset += (length - getInlineOffset(ts));
+        final SpecialInlineSpanBase specialTs = ts as SpecialInlineSpanBase;
+        final int length = specialTs.actualText.length;
+        caretOffset += length - getInlineOffset(ts);
 
         ///make sure caret is not in text when deleteAll is true
         if (specialTs.deleteAll &&
@@ -114,10 +116,10 @@ TextPosition convertTextPainterPostionToTextInputPostion(
 
 TextSelection convertTextPainterSelectionToTextInputSelection(
     InlineSpan text, TextSelection selection,
-    {bool selectWord: false}) {
+    {bool selectWord = false}) {
   if (selection.isValid) {
     if (selection.isCollapsed) {
-      var extent =
+      final TextPosition extent =
           convertTextPainterPostionToTextInputPostion(text, selection.extent);
       if (selection.extent != extent) {
         selection = selection.copyWith(
@@ -128,11 +130,11 @@ TextSelection convertTextPainterSelectionToTextInputSelection(
         return selection;
       }
     } else {
-      var extent = convertTextPainterPostionToTextInputPostion(
+      final TextPosition extent = convertTextPainterPostionToTextInputPostion(
           text, selection.extent,
           end: selectWord ? true : null);
 
-      var base = convertTextPainterPostionToTextInputPostion(
+      final TextPosition base = convertTextPainterPostionToTextInputPostion(
           text, selection.base,
           end: selectWord ? false : null);
 
@@ -152,16 +154,18 @@ TextSelection convertTextPainterSelectionToTextInputSelection(
 
 TextPosition makeSureCaretNotInSpecialText(
     InlineSpan text, TextPosition textPosition) {
-  List<InlineSpan> list = List<InlineSpan>();
+  final List<InlineSpan> list = <InlineSpan>[];
   textSpanNestToArray(text, list);
-  if (list.length > 0 && textPosition != null) {
+  if (list.isNotEmpty && textPosition != null) {
     int caretOffset = textPosition.offset;
-    if (caretOffset <= 0) return textPosition;
+    if (caretOffset <= 0) {
+      return textPosition;
+    }
 
     int textOffset = 0;
-    for (InlineSpan ts in list) {
+    for (final InlineSpan ts in list) {
       if (ts is SpecialInlineSpanBase) {
-        var specialTs = ts as SpecialInlineSpanBase;
+        final SpecialInlineSpanBase specialTs = ts as SpecialInlineSpanBase;
 
         ///make sure caret is not in text when deleteAll is true
         if (specialTs.deleteAll &&
@@ -202,20 +206,22 @@ TextPosition makeSureCaretNotInSpecialText(
 TextEditingValue correctCaretOffset(TextEditingValue value, InlineSpan textSpan,
     TextInputConnection textInputConnection,
     {TextSelection newSelection}) {
-  List<InlineSpan> list = List<InlineSpan>();
+  final List<InlineSpan> list = <InlineSpan>[];
   textSpanNestToArray(textSpan, list);
-  if (list.length == 0) return value;
+  if (list.isEmpty) {
+    return value;
+  }
 
-  TextSelection selection = newSelection ?? value.selection;
+  final TextSelection selection = newSelection ?? value.selection;
 
   if (selection.isValid && selection.isCollapsed) {
     int caretOffset = selection.extentOffset;
-    var specialTextSpans = list.where((x) =>
+    final Iterable<InlineSpan> specialTextSpans = list.where((InlineSpan x) =>
         x is SpecialInlineSpanBase && (x as SpecialInlineSpanBase).deleteAll);
     //correct caret Offset
     ///make sure caret is not in text when deleteAll is true
-    for (var ts in specialTextSpans) {
-      var specialTs = ts as SpecialInlineSpanBase;
+    for (final InlineSpan ts in specialTextSpans) {
+      final SpecialInlineSpanBase specialTs = ts as SpecialInlineSpanBase;
 
       if (caretOffset >= specialTs.start && caretOffset <= specialTs.end) {
         if (caretOffset >
@@ -245,16 +251,16 @@ TextEditingValue handleSpecialTextSpanDelete(
     TextEditingValue oldValue,
     InlineSpan oldTextSpan,
     TextInputConnection textInputConnection) {
-  var oldText = oldValue?.text;
-  var newText = value?.text;
-  List<InlineSpan> list = List<InlineSpan>();
+  final String oldText = oldValue?.text;
+  String newText = value?.text;
+  final List<InlineSpan> list = <InlineSpan>[];
   textSpanNestToArray(oldTextSpan, list);
-  if (list.length > 0) {
-    var imageSpans = list.where((x) =>
-        (x is SpecialInlineSpanBase && (x as SpecialInlineSpanBase).deleteAll));
+  if (list.isNotEmpty) {
+    final Iterable<InlineSpan> imageSpans = list.where((InlineSpan x) =>
+        x is SpecialInlineSpanBase && (x as SpecialInlineSpanBase).deleteAll);
 
     ///take care of image span
-    if (imageSpans.length > 0 &&
+    if (imageSpans.isNotEmpty &&
         oldText != null &&
         newText != null &&
         oldText.length > newText.length) {
@@ -268,13 +274,13 @@ TextEditingValue handleSpecialTextSpanDelete(
 
       int caretOffset = value.selection.extentOffset;
       if (difStart > 0) {
-        for (var ts in imageSpans) {
-          var specialTs = ts as SpecialInlineSpanBase;
+        for (final InlineSpan ts in imageSpans) {
+          final SpecialInlineSpanBase specialTs = ts as SpecialInlineSpanBase;
 
           if (difStart > specialTs.start && difStart < specialTs.end) {
             //difStart = ts.start;
-            newText = newText.replaceRange(specialTs.start, difStart, "");
-            caretOffset -= (difStart - specialTs.start);
+            newText = newText.replaceRange(specialTs.start, difStart, '');
+            caretOffset -= difStart - specialTs.start;
             break;
           }
         }
@@ -308,23 +314,30 @@ TextEditingValue handleSpecialTextSpanDelete(
 //}
 
 bool hasSpecialText(InlineSpan textSpan) {
-  List<InlineSpan> list = List<InlineSpan>();
+  final List<InlineSpan> list = <InlineSpan>[];
   textSpanNestToArray(textSpan, list);
-  if (list.length == 0) return false;
+  if (list.isEmpty) {
+    return false;
+  }
 
   //for performance, make sure your all SpecialTextSpan are only in textSpan.children
   //extended_text_field will only check textSpan.children
-  return list.firstWhere((x) => x is SpecialInlineSpanBase,
+  return list.firstWhere((InlineSpan x) => x is SpecialInlineSpanBase,
           orElse: () => null) !=
       null;
 }
 
 void textSpanNestToArray(InlineSpan textSpan, List<InlineSpan> list) {
   assert(list != null);
-  if (textSpan == null) return;
+  if (textSpan == null) {
+    return;
+  }
   list.add(textSpan);
-  if (textSpan is TextSpan && textSpan.children != null)
-    textSpan.children.forEach((ts) => textSpanNestToArray(ts, list));
+  if (textSpan is TextSpan && textSpan.children != null) {
+    for (final InlineSpan ts in textSpan.children) {
+      textSpanNestToArray(ts, list);
+    }
+  }
 }
 
 String textSpanToActualText(InlineSpan textSpan
@@ -336,7 +349,7 @@ String textSpanToActualText(InlineSpan textSpan
 //      buffer.write(span.semanticsLabel);
 //    } else
     {
-      var text = getInlineText(span);
+      String text = getInlineText(span);
       if (span is SpecialInlineSpanBase) {
         text = (span as SpecialInlineSpanBase).actualText;
       }
@@ -350,16 +363,20 @@ String textSpanToActualText(InlineSpan textSpan
 /// Walks this text span and its descendants in pre-order and calls [visitor]
 /// for each span that has text.
 bool _visitTextSpan(InlineSpan textSpan, bool visitor(InlineSpan span)) {
-  var text = getInlineText(textSpan);
+  String text = getInlineText(textSpan);
   if (textSpan is SpecialInlineSpanBase) {
     text = (textSpan as SpecialInlineSpanBase).actualText;
   }
   if (text != null) {
-    if (!visitor(textSpan)) return false;
+    if (!visitor(textSpan)) {
+      return false;
+    }
   }
   if (textSpan is TextSpan && textSpan.children != null) {
-    for (InlineSpan child in textSpan.children) {
-      if (!_visitTextSpan(child, visitor)) return false;
+    for (final InlineSpan child in textSpan.children) {
+      if (!_visitTextSpan(child, visitor)) {
+        return false;
+      }
       //if (!child.visitTextSpan(visitor)) return false;
     }
   }
@@ -383,5 +400,5 @@ String getInlineText(InlineSpan inlineSpan) {
   if (inlineSpan is PlaceholderSpan) {
     return '\uFFFC';
   }
-  return "";
+  return '';
 }

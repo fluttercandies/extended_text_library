@@ -1,9 +1,10 @@
 //import 'package:extended_text_library/src/painting_image_span.dart';
+import 'dart:math' as math;
+import 'dart:ui' as ui show PlaceholderAlignment;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'dart:ui' as ui show PlaceholderAlignment;
-import 'dart:math' as math;
 
 ///
 ///  create by zmtzawqlp on 2019/8/1
@@ -46,7 +47,7 @@ abstract class ExtendedTextRenderBox extends RenderBox
   // alignments that require the baseline (baseline, aboveBaseline,
   // belowBaseline).
   bool _canComputeIntrinsics() {
-    for (PlaceholderSpan span in _placeholderSpans) {
+    for (final PlaceholderSpan span in _placeholderSpans) {
       switch (span.alignment) {
         case ui.PlaceholderAlignment.baseline:
         case ui.PlaceholderAlignment.aboveBaseline:
@@ -207,7 +208,7 @@ abstract class ExtendedTextRenderBox extends RenderBox
     ///maybe overflow
     while (child != null &&
         childIndex < textPainter.inlinePlaceholderBoxes.length) {
-      final TextParentData textParentData = child.parentData;
+      final TextParentData textParentData = child.parentData as TextParentData;
 
       textParentData.offset = Offset(
           textPainter.inlinePlaceholderBoxes[childIndex].left,
@@ -221,12 +222,14 @@ abstract class ExtendedTextRenderBox extends RenderBox
   void layoutText(
       {double minWidth = 0.0,
       double maxWidth = double.infinity,
-      bool forceLayout: false}) {
+      bool forceLayout = false}) {
     assert(maxWidth != null && minWidth != null);
 
     if (textLayoutLastMaxWidth == maxWidth &&
         textLayoutLastMinWidth == minWidth &&
-        !forceLayout) return;
+        !forceLayout) {
+      return;
+    }
     final bool widthMatters =
         softWrap || overflow == TextOverflow.ellipsis || isMultiline;
     final double availableMaxWidth = math.max(0.0, maxWidth - caretMargin);
@@ -252,7 +255,7 @@ abstract class ExtendedTextRenderBox extends RenderBox
         childIndex < textPainter.inlinePlaceholderBoxes.length) {
       //assert(childIndex < _textPainter.inlinePlaceholderBoxes.length);
 
-      final TextParentData textParentData = child.parentData;
+      final TextParentData textParentData = child.parentData as TextParentData;
 
       final double scale = textParentData.scale;
       context.pushTransform(
@@ -306,23 +309,25 @@ abstract class ExtendedTextRenderBox extends RenderBox
   //   });
   // }
 
+  // it seems TextPainter works for WidgetSpan on 1.17.0
+  // code under 1.17.0
   Offset getCaretOffset(TextPosition textPosition,
       {ValueChanged<double> caretHeightCallBack,
       Offset effectiveOffset,
-      bool handleSpecialText: true,
-      Rect caretPrototype: Rect.zero}) {
+      bool handleSpecialText = true,
+      Rect caretPrototype = Rect.zero}) {
     effectiveOffset ??= Offset.zero;
 
     ///zmt
     if (handleSpecialText) {
       ///if first index, check by first span
-      var offset = textPosition.offset;
-      var boxs = textPainter.getBoxesForSelection(TextSelection(
+      int offset = textPosition.offset;
+      List<TextBox> boxs = textPainter.getBoxesForSelection(TextSelection(
           baseOffset: offset,
           extentOffset: offset + 1,
           affinity: textPosition.affinity));
-      if (boxs.length > 0) {
-        var rect = boxs.toList().last.toRect();
+      if (boxs.isNotEmpty) {
+        final Rect rect = boxs.toList().last.toRect();
         caretHeightCallBack?.call(rect.height);
         return rect.topLeft + effectiveOffset;
       } else {
@@ -333,8 +338,8 @@ abstract class ExtendedTextRenderBox extends RenderBox
             baseOffset: offset - 1,
             extentOffset: offset,
             affinity: textPosition.affinity));
-        if (boxs.length > 0) {
-          var rect = boxs.toList().last.toRect();
+        if (boxs.isNotEmpty) {
+          final Rect rect = boxs.toList().last.toRect();
           caretHeightCallBack?.call(rect.height);
           if (textPosition.offset <= 0) {
             return rect.topLeft + effectiveOffset;
@@ -427,7 +432,7 @@ abstract class ExtendedTextRenderBox extends RenderBox
     int childIndex = 0;
     while (child != null &&
         childIndex < textPainter.inlinePlaceholderBoxes.length) {
-      final TextParentData textParentData = child.parentData;
+      final TextParentData textParentData = child.parentData as TextParentData;
       final Matrix4 transform = Matrix4.translationValues(
           textParentData.offset.dx + effectiveOffset.dx,
           textParentData.offset.dy + effectiveOffset.dy,
