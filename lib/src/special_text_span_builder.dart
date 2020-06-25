@@ -5,14 +5,16 @@ abstract class SpecialTextSpanBuilder {
   //build text span to specialText
   TextSpan build(String data,
       {TextStyle textStyle, SpecialTextGestureTapCallback onTap}) {
-    if (data == null || data == "") return null;
-    List<InlineSpan> inlineList = new List<InlineSpan>();
-    if (data.length > 0) {
+    if (data == null || data == '') {
+      return null;
+    }
+    final List<InlineSpan> inlineList = <InlineSpan>[];
+    if (data.isNotEmpty) {
       SpecialText specialText;
-      String textStack = "";
+      String textStack = '';
       //String text
       for (int i = 0; i < data.length; i++) {
-        String char = data[i];
+        final String char = data[i];
         textStack += char;
         if (specialText != null) {
           if (!specialText.isEnd(textStack)) {
@@ -20,7 +22,7 @@ abstract class SpecialTextSpanBuilder {
           } else {
             inlineList.add(specialText.finishText());
             specialText = null;
-            textStack = "";
+            textStack = '';
           }
         } else {
           specialText = createSpecialText(textStack,
@@ -29,11 +31,11 @@ abstract class SpecialTextSpanBuilder {
             if (textStack.length - specialText.startFlag.length >= 0) {
               textStack = textStack.substring(
                   0, textStack.length - specialText.startFlag.length);
-              if (textStack.length > 0) {
+              if (textStack.isNotEmpty) {
                 inlineList.add(TextSpan(text: textStack, style: textStyle));
               }
             }
-            textStack = "";
+            textStack = '';
           }
         }
       }
@@ -42,7 +44,7 @@ abstract class SpecialTextSpanBuilder {
         inlineList.add(TextSpan(
             text: specialText.startFlag + specialText.getContent(),
             style: textStyle));
-      } else if (textStack.length > 0) {
+      } else if (textStack.isNotEmpty) {
         inlineList.add(TextSpan(text: textStack, style: textStyle));
       }
     } else {
@@ -63,6 +65,8 @@ abstract class SpecialTextSpanBuilder {
 }
 
 abstract class SpecialText {
+  SpecialText(this.startFlag, this.endFlag, this.textStyle, {this.onTap})
+      : _content = StringBuffer();
   final StringBuffer _content;
 
   ///start flag of SpecialText
@@ -76,9 +80,6 @@ abstract class SpecialText {
 
   ///tap call back of SpecialText
   final SpecialTextGestureTapCallback onTap;
-
-  SpecialText(this.startFlag, this.endFlag, this.textStyle, {this.onTap})
-      : _content = StringBuffer();
 
   ///finish SpecialText
   InlineSpan finishText();

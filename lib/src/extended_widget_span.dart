@@ -1,6 +1,6 @@
-import 'package:flutter/widgets.dart';
-
 import 'dart:ui' as ui show PlaceholderAlignment, ParagraphBuilder;
+
+import 'package:flutter/widgets.dart';
 
 import 'special_inline_span_base.dart';
 
@@ -10,6 +10,20 @@ import 'special_inline_span_base.dart';
 
 ///support selection for widget Span
 class ExtendedWidgetSpan extends WidgetSpan with SpecialInlineSpanBase {
+  ExtendedWidgetSpan({
+    @required Widget child,
+    String actualText= '\uFFFC',
+    int start= 0,
+    this.deleteAll= true,
+    ui.PlaceholderAlignment alignment = ui.PlaceholderAlignment.bottom,
+    TextBaseline baseline,
+  })  : assert(start != null),
+        assert(deleteAll != null),
+        actualText = actualText ?? '\uFFFC',
+        textRange = TextRange(
+            start: start, end: start + (actualText ?? '\uFFFC').length),
+        widgetSpanSize = WidgetSpanSize()..size = Size.zero,
+        super(child: child, alignment: alignment, baseline: baseline);
   @override
   final String actualText;
 
@@ -24,33 +38,22 @@ class ExtendedWidgetSpan extends WidgetSpan with SpecialInlineSpanBase {
 
   Size get size => widgetSpanSize.size;
 
-  ExtendedWidgetSpan({
-    @required Widget child,
-    String actualText: '\uFFFC',
-    int start: 0,
-    bool deleteAll: true,
-    ui.PlaceholderAlignment alignment = ui.PlaceholderAlignment.bottom,
-    TextBaseline baseline,
-    TextStyle style,
-  })  : assert(start != null),
-        assert(deleteAll != null),
-        actualText = actualText ?? '\uFFFC',
-        deleteAll = deleteAll,
-        textRange = TextRange(
-            start: start, end: start + (actualText ?? '\uFFFC').length),
-        widgetSpanSize = WidgetSpanSize()..size = Size.zero,
-        super(child: child, alignment: alignment, baseline: baseline);
-
   @override
   bool operator ==(dynamic other) {
-    if (identical(this, other)) return true;
-    if (other.runtimeType != runtimeType) return false;
-    if (super != other) return false;
-
-    if (widgetSpanSize.size != (other).widgetSpanSize.size) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
     }
-    return equal(other);
+    if (super != other) {
+      return false;
+    }
+
+    if (widgetSpanSize.size != other.widgetSpanSize.size) {
+      return false;
+    }
+    return other is SpecialInlineSpanBase && equal(other);
   }
 
   @override
@@ -59,7 +62,7 @@ class ExtendedWidgetSpan extends WidgetSpan with SpecialInlineSpanBase {
 
   @override
   RenderComparison compareTo(InlineSpan other) {
-    var comparison = super.compareTo(other);
+    RenderComparison comparison = super.compareTo(other);
     if (comparison == RenderComparison.identical) {
       if (widgetSpanSize.size !=
           (other as ExtendedWidgetSpan).widgetSpanSize.size) {

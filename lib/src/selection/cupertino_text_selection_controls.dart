@@ -34,9 +34,10 @@ const double _kToolbarHeight = 43.0;
 const Size _kToolbarArrowSize = Size(14.0, 7.0);
 const Radius _kToolbarBorderRadius = Radius.circular(8);
 // Colors extracted from https://developer.apple.com/design/resources/.
-// (LongCatIsLooong): https://github.com/flutter/flutter/issues/41507.
+// TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/41507.
 const Color _kToolbarBackgroundColor = Color(0xEB202020);
 const Color _kToolbarDividerColor = Color(0xFF808080);
+
 
 const TextStyle _kToolbarButtonFontStyle = TextStyle(
   inherit: false,
@@ -47,8 +48,7 @@ const TextStyle _kToolbarButtonFontStyle = TextStyle(
 );
 
 // Eyeballed value.
-const EdgeInsets _kToolbarButtonPadding =
-    EdgeInsets.symmetric(vertical: 10.0, horizontal: 18.0);
+const EdgeInsets _kToolbarButtonPadding = EdgeInsets.symmetric(vertical: 10.0, horizontal: 18.0);
 
 /// An iOS-style toolbar that appears in response to text selection.
 ///
@@ -56,8 +56,8 @@ const EdgeInsets _kToolbarButtonPadding =
 ///
 /// See also:
 ///
-/// * [TextSelectionControls.buildToolbar], where [ExtendedCupertinoTextSelectionToolbar]
-///   will be used to build an iOS-style toolbar.
+///  * [TextSelectionControls.buildToolbar], where [ExtendedCupertinoTextSelectionToolbar]
+///    will be used to build an iOS-style toolbar.
 class ExtendedCupertinoTextSelectionToolbar extends SingleChildRenderObjectWidget {
   const ExtendedCupertinoTextSelectionToolbar({
     Key key,
@@ -65,10 +65,10 @@ class ExtendedCupertinoTextSelectionToolbar extends SingleChildRenderObjectWidge
     double arrowTipX,
     bool isArrowPointingDown,
     Widget child,
-  })  : _barTopY = barTopY,
-        _arrowTipX = arrowTipX,
-        _isArrowPointingDown = isArrowPointingDown,
-        super(key: key, child: child);
+  }) : _barTopY = barTopY,
+       _arrowTipX = arrowTipX,
+       _isArrowPointingDown = isArrowPointingDown,
+       super(key: key, child: child);
 
   // The y-coordinate of toolbar's top edge, in global coordinate system.
   final double _barTopY;
@@ -81,12 +81,10 @@ class ExtendedCupertinoTextSelectionToolbar extends SingleChildRenderObjectWidge
   final bool _isArrowPointingDown;
 
   @override
-  ExtendedCupertinoToolbarRenderBox createRenderObject(BuildContext context) =>
-      ExtendedCupertinoToolbarRenderBox(_barTopY, _arrowTipX, _isArrowPointingDown, null);
+  _ToolbarRenderBox createRenderObject(BuildContext context) => _ToolbarRenderBox(_barTopY, _arrowTipX, _isArrowPointingDown, null);
 
   @override
-  void updateRenderObject(
-      BuildContext context, ExtendedCupertinoToolbarRenderBox renderObject) {
+  void updateRenderObject(BuildContext context, _ToolbarRenderBox renderObject) {
     renderObject
       ..barTopY = _barTopY
       ..arrowTipX = _arrowTipX
@@ -94,23 +92,23 @@ class ExtendedCupertinoTextSelectionToolbar extends SingleChildRenderObjectWidge
   }
 }
 
-class ExtendedCupertinoToolbarParentData extends BoxParentData {
+class _ToolbarParentData extends BoxParentData {
   // The x offset from the tip of the arrow to the center of the toolbar.
   // Positive if the tip of the arrow has a larger x-coordinate than the
   // center of the toolbar.
   double arrowXOffsetFromCenter;
   @override
-  String toString() =>
-      'offset=$offset, arrowXOffsetFromCenter=$arrowXOffsetFromCenter';
+  String toString() => 'offset=$offset, arrowXOffsetFromCenter=$arrowXOffsetFromCenter';
 }
 
-class ExtendedCupertinoToolbarRenderBox extends RenderShiftedBox {
-  ExtendedCupertinoToolbarRenderBox(
+class _ToolbarRenderBox extends RenderShiftedBox {
+  _ToolbarRenderBox(
     this._barTopY,
     this._arrowTipX,
     this._isArrowPointingDown,
     RenderBox child,
   ) : super(child);
+
 
   @override
   bool get isRepaintBoundary => true;
@@ -145,66 +143,56 @@ class ExtendedCupertinoToolbarRenderBox extends RenderShiftedBox {
     markNeedsSemanticsUpdate();
   }
 
-  final BoxConstraints heightConstraint =
-      const BoxConstraints.tightFor(height: _kToolbarHeight);
+  final BoxConstraints heightConstraint = const BoxConstraints.tightFor(height: _kToolbarHeight);
 
   @override
   void setupParentData(RenderObject child) {
-    if (child.parentData is! ExtendedCupertinoToolbarParentData) {
-      child.parentData = ExtendedCupertinoToolbarParentData();
+    if (child.parentData is! _ToolbarParentData) {
+      child.parentData = _ToolbarParentData();
     }
   }
 
   @override
   void performLayout() {
+    final BoxConstraints constraints = this.constraints;
     size = constraints.biggest;
 
     if (child == null) {
       return;
     }
     final BoxConstraints enforcedConstraint = constraints
-        .deflate(const EdgeInsets.symmetric(horizontal: _kToolbarScreenPadding))
-        .loosen();
+      .deflate(const EdgeInsets.symmetric(horizontal: _kToolbarScreenPadding))
+      .loosen();
 
-    child.layout(
-      heightConstraint.enforce(enforcedConstraint),
-      parentUsesSize: true,
-    );
-    final ExtendedCupertinoToolbarParentData childParentData = child.parentData;
+    child.layout(heightConstraint.enforce(enforcedConstraint), parentUsesSize: true,);
+    final _ToolbarParentData childParentData = child.parentData as _ToolbarParentData;
 
     // The local x-coordinate of the center of the toolbar.
-    final double lowerBound = child.size.width / 2 + _kToolbarScreenPadding;
-    final double upperBound =
-        size.width - child.size.width / 2 - _kToolbarScreenPadding;
-    final double adjustedCenterX = _arrowTipX.clamp(lowerBound, upperBound);
+    final double lowerBound = child.size.width/2 + _kToolbarScreenPadding;
+    final double upperBound = size.width - child.size.width/2 - _kToolbarScreenPadding;
+    final double adjustedCenterX = _arrowTipX.clamp(lowerBound, upperBound) as double;
 
-    childParentData.offset =
-        Offset(adjustedCenterX - child.size.width / 2, _barTopY);
+    childParentData.offset = Offset(adjustedCenterX - child.size.width / 2, _barTopY);
     childParentData.arrowXOffsetFromCenter = _arrowTipX - adjustedCenterX;
   }
 
   // The path is described in the toolbar's coordinate system.
   Path _clipPath() {
-    final ExtendedCupertinoToolbarParentData childParentData = child.parentData;
+    final _ToolbarParentData childParentData = child.parentData as _ToolbarParentData;
     final Path rrect = Path()
       ..addRRect(
         RRect.fromRectAndRadius(
-          Offset(
-                0,
-                _isArrowPointingDown ? 0 : _kToolbarArrowSize.height,
-              ) &
-              Size(child.size.width,
-                  child.size.height - _kToolbarArrowSize.height),
+          Offset(0, _isArrowPointingDown ? 0 : _kToolbarArrowSize.height,)
+          & Size(child.size.width, child.size.height - _kToolbarArrowSize.height),
           _kToolbarBorderRadius,
         ),
       );
 
-    final double arrowTipX =
-        child.size.width / 2 + childParentData.arrowXOffsetFromCenter;
+    final double arrowTipX = child.size.width / 2 + childParentData.arrowXOffsetFromCenter;
 
     final double arrowBottomY = _isArrowPointingDown
-        ? child.size.height - _kToolbarArrowSize.height
-        : _kToolbarArrowSize.height;
+      ? child.size.height - _kToolbarArrowSize.height
+      : _kToolbarArrowSize.height;
 
     final double arrowTipY = _isArrowPointingDown ? child.size.height : 0;
 
@@ -223,14 +211,13 @@ class ExtendedCupertinoToolbarRenderBox extends RenderShiftedBox {
       return;
     }
 
-    final ExtendedCupertinoToolbarParentData childParentData = child.parentData;
+    final _ToolbarParentData childParentData = child.parentData as _ToolbarParentData;
     context.pushClipPath(
       needsCompositing,
       offset + childParentData.offset,
       Offset.zero & child.size,
       _clipPath(),
-      (PaintingContext innerContext, Offset innerOffset) =>
-          innerContext.paintChild(child, innerOffset),
+      (PaintingContext innerContext, Offset innerOffset) => innerContext.paintChild(child, innerOffset),
     );
   }
 
@@ -244,24 +231,18 @@ class ExtendedCupertinoToolbarRenderBox extends RenderShiftedBox {
       }
 
       _debugPaint ??= Paint()
-        ..shader = ui.Gradient.linear(
-          const Offset(0.0, 0.0),
-          const Offset(10.0, 10.0),
-          <Color>[
-            const Color(0x00000000),
-            const Color(0xFFFF00FF),
-            const Color(0xFFFF00FF),
-            const Color(0x00000000)
-          ],
-          <double>[0.25, 0.25, 0.75, 0.75],
-          TileMode.repeated,
-        )
-        ..strokeWidth = 2.0
-        ..style = PaintingStyle.stroke;
+      ..shader = ui.Gradient.linear(
+        const Offset(0.0, 0.0),
+        const Offset(10.0, 10.0),
+        <Color>[const Color(0x00000000), const Color(0xFFFF00FF), const Color(0xFFFF00FF), const Color(0x00000000)],
+        <double>[0.25, 0.25, 0.75, 0.75],
+        TileMode.repeated,
+      )
+      ..strokeWidth = 2.0
+      ..style = PaintingStyle.stroke;
 
-      final ExtendedCupertinoToolbarParentData childParentData = child.parentData;
-      context.canvas.drawPath(
-          _clipPath().shift(offset + childParentData.offset), _debugPaint);
+      final _ToolbarParentData childParentData = child.parentData as _ToolbarParentData;
+      context.canvas.drawPath(_clipPath().shift(offset + childParentData.offset), _debugPaint);
       return true;
     }());
   }
@@ -275,31 +256,28 @@ class ExtendedCupertinoTextSelectionHandlePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint paint = Paint()
-      ..color = color
-      ..strokeWidth = 2.0;
-    canvas.drawCircle(
-      const Offset(_kSelectionHandleRadius, _kSelectionHandleRadius),
-      _kSelectionHandleRadius,
-      paint,
+    const double halfStrokeWidth = 1.0;
+    final Paint paint = Paint()..color = color;
+    final Rect circle = Rect.fromCircle(
+      center: const Offset(_kSelectionHandleRadius, _kSelectionHandleRadius),
+      radius: _kSelectionHandleRadius,
     );
-    // Draw line so it slightly overlaps the circle.
-    canvas.drawLine(
+    final Rect line = Rect.fromPoints(
       const Offset(
-        _kSelectionHandleRadius,
+        _kSelectionHandleRadius - halfStrokeWidth,
         2 * _kSelectionHandleRadius - _kSelectionHandleOverlap,
       ),
-      Offset(
-        _kSelectionHandleRadius,
-        size.height,
-      ),
-      paint,
+      Offset(_kSelectionHandleRadius + halfStrokeWidth, size.height),
     );
+    final Path path = Path()
+      ..addOval(circle)
+    // Draw line so it slightly overlaps the circle.
+      ..addRect(line);
+    canvas.drawPath(path, paint);
   }
 
   @override
-  bool shouldRepaint(ExtendedCupertinoTextSelectionHandlePainter oldPainter) =>
-      color != oldPainter.color;
+  bool shouldRepaint(ExtendedCupertinoTextSelectionHandlePainter oldDelegate) => color != oldDelegate.color;
 }
 
 class ExtendedCupertinoTextSelectionControls extends TextSelectionControls {
@@ -328,37 +306,32 @@ class ExtendedCupertinoTextSelectionControls extends TextSelectionControls {
     // The toolbar should appear below the TextField when there is not enough
     // space above the TextField to show it, assuming there's always enough space
     // at the bottom in this case.
-    final double toolbarHeightNeeded = mediaQuery.padding.top +
-        _kToolbarScreenPadding +
-        _kToolbarHeight +
-        _kToolbarContentDistance;
-    final double availableHeight =
-        globalEditableRegion.top + endpoints.first.point.dy - textLineHeight;
+    final double toolbarHeightNeeded = mediaQuery.padding.top
+      + _kToolbarScreenPadding
+      + _kToolbarHeight
+      + _kToolbarContentDistance;
+    final double availableHeight = globalEditableRegion.top + endpoints.first.point.dy - textLineHeight;
     final bool isArrowPointingDown = toolbarHeightNeeded <= availableHeight;
 
     final double arrowTipX = (position.dx + globalEditableRegion.left).clamp(
       _kArrowScreenPadding + mediaQuery.padding.left,
       mediaQuery.size.width - mediaQuery.padding.right - _kArrowScreenPadding,
-    );
+    ) as double;
 
     // The y-coordinate has to be calculated instead of directly quoting postion.dy,
     // since the caller (TextSelectionOverlay._buildToolbar) does not know whether
     // the toolbar is going to be facing up or down.
     final double localBarTopY = isArrowPointingDown
-        ? endpoints.first.point.dy -
-            textLineHeight -
-            _kToolbarContentDistance -
-            _kToolbarHeight
-        : endpoints.last.point.dy + _kToolbarContentDistance;
+      ? endpoints.first.point.dy - textLineHeight - _kToolbarContentDistance - _kToolbarHeight
+      : endpoints.last.point.dy + _kToolbarContentDistance;
 
     final List<Widget> items = <Widget>[];
     final Widget onePhysicalPixelVerticalDivider =
-        SizedBox(width: 1.0 / MediaQuery.of(context).devicePixelRatio);
-    final CupertinoLocalizations localizations =
-        CupertinoLocalizations.of(context);
+    SizedBox(width: 1.0 / MediaQuery.of(context).devicePixelRatio);
+    final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
     final EdgeInsets arrowPadding = isArrowPointingDown
-        ? EdgeInsets.only(bottom: _kToolbarArrowSize.height)
-        : EdgeInsets.only(top: _kToolbarArrowSize.height);
+      ? EdgeInsets.only(bottom: _kToolbarArrowSize.height)
+      : EdgeInsets.only(top: _kToolbarArrowSize.height);
 
     void addToolbarButtonIfNeeded(
       String text,
@@ -385,30 +358,24 @@ class ExtendedCupertinoTextSelectionControls extends TextSelectionControls {
     }
 
     addToolbarButtonIfNeeded(localizations.cutButtonLabel, canCut, handleCut);
-    addToolbarButtonIfNeeded(
-        localizations.copyButtonLabel, canCopy, handleCopy);
-    addToolbarButtonIfNeeded(
-        localizations.pasteButtonLabel, canPaste, handlePaste);
-    addToolbarButtonIfNeeded(
-        localizations.selectAllButtonLabel, canSelectAll, handleSelectAll);
+    addToolbarButtonIfNeeded(localizations.copyButtonLabel, canCopy, handleCopy);
+    addToolbarButtonIfNeeded(localizations.pasteButtonLabel, canPaste, handlePaste);
+    addToolbarButtonIfNeeded(localizations.selectAllButtonLabel, canSelectAll, handleSelectAll);
 
     return ExtendedCupertinoTextSelectionToolbar(
       barTopY: localBarTopY + globalEditableRegion.top,
       arrowTipX: arrowTipX,
       isArrowPointingDown: isArrowPointingDown,
-      child: items.isEmpty
-          ? null
-          : DecoratedBox(
-              decoration: const BoxDecoration(color: _kToolbarDividerColor),
-              child: Row(mainAxisSize: MainAxisSize.min, children: items),
-            ),
+      child: items.isEmpty ? null : DecoratedBox(
+        decoration: const BoxDecoration(color: _kToolbarDividerColor),
+        child: Row(mainAxisSize: MainAxisSize.min, children: items),
+      ),
     );
   }
 
   /// Builder for iOS text selection edges.
   @override
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type,
-      double textLineHeight) {
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight) {
     // We want a size that's a vertical line the height of the text plus a 18.0
     // padding in every direction that will constitute the selection drag area.
     final Size desiredSize = getHandleSize(textLineHeight);
@@ -416,8 +383,7 @@ class ExtendedCupertinoTextSelectionControls extends TextSelectionControls {
     final Widget handle = SizedBox.fromSize(
       size: desiredSize,
       child: CustomPaint(
-        painter: ExtendedCupertinoTextSelectionHandlePainter(
-            CupertinoTheme.of(context).primaryColor),
+        painter: ExtendedCupertinoTextSelectionHandlePainter(CupertinoTheme.of(context).primaryColor),
       ),
     );
 
@@ -463,9 +429,7 @@ class ExtendedCupertinoTextSelectionControls extends TextSelectionControls {
       case TextSelectionHandleType.right:
         return Offset(
           handleSize.width / 2,
-          handleSize.height -
-              2 * _kSelectionHandleRadius +
-              _kSelectionHandleOverlap,
+          handleSize.height - 2 * _kSelectionHandleRadius + _kSelectionHandleOverlap,
         );
       // A collapsed handle anchors itself so that it's centered.
       default:

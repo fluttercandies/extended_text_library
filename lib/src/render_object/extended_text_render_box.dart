@@ -1,9 +1,10 @@
 //import 'package:extended_text_library/src/painting_image_span.dart';
+import 'dart:math' as math;
+import 'dart:ui' as ui show PlaceholderAlignment;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'dart:ui' as ui show PlaceholderAlignment;
-import 'dart:math' as math;
 
 ///
 ///  create by zmtzawqlp on 2019/8/1
@@ -28,6 +29,10 @@ abstract class ExtendedTextRenderBox extends RenderBox
   bool get forceLine;
   String get plainText;
   Offset get effectiveOffset;
+  //only for [ExtendedText]
+  Widget get overFlowWidget;
+  int get textChildCount =>
+      overFlowWidget != null ? childCount - 1 : childCount;
 
   List<PlaceholderSpan> _placeholderSpans;
 
@@ -46,7 +51,7 @@ abstract class ExtendedTextRenderBox extends RenderBox
   // alignments that require the baseline (baseline, aboveBaseline,
   // belowBaseline).
   bool _canComputeIntrinsics() {
-    for (PlaceholderSpan span in _placeholderSpans) {
+    for (final PlaceholderSpan span in _placeholderSpans) {
       switch (span.alignment) {
         case ui.PlaceholderAlignment.baseline:
         case ui.PlaceholderAlignment.aboveBaseline:
@@ -72,7 +77,7 @@ abstract class ExtendedTextRenderBox extends RenderBox
   void _computeChildrenWidthWithMaxIntrinsics(double height) {
     RenderBox child = firstChild;
     final List<PlaceholderDimensions> placeholderDimensions =
-        List<PlaceholderDimensions>(childCount);
+        List<PlaceholderDimensions>(textChildCount);
     int childIndex = 0;
     while (child != null) {
       // Height and baseline is irrelevant as all text will be laid
@@ -91,7 +96,7 @@ abstract class ExtendedTextRenderBox extends RenderBox
   void _computeChildrenWidthWithMinIntrinsics(double height) {
     RenderBox child = firstChild;
     final List<PlaceholderDimensions> placeholderDimensions =
-        List<PlaceholderDimensions>(childCount);
+        List<PlaceholderDimensions>(textChildCount);
     int childIndex = 0;
     while (child != null) {
       final double intrinsicWidth = child.getMinIntrinsicWidth(height);
@@ -111,7 +116,7 @@ abstract class ExtendedTextRenderBox extends RenderBox
   void _computeChildrenHeightWithMinIntrinsics(double width) {
     RenderBox child = firstChild;
     final List<PlaceholderDimensions> placeholderDimensions =
-        List<PlaceholderDimensions>(childCount);
+        List<PlaceholderDimensions>(textChildCount);
     int childIndex = 0;
     while (child != null) {
       final double intrinsicHeight = child.getMinIntrinsicHeight(width);
@@ -152,9 +157,9 @@ abstract class ExtendedTextRenderBox extends RenderBox
       return;
     }
     RenderBox child = firstChild;
-    _placeholderDimensions = List<PlaceholderDimensions>(childCount);
+    _placeholderDimensions = List<PlaceholderDimensions>(textChildCount);
     int childIndex = 0;
-    while (child != null) {
+    while (child != null && childIndex < _placeholderDimensions.length) {
       // Only constrain the width to the maximum width of the paragraph.
       // Leave height unconstrained, which will overflow if expanded past.
       child.layout(
@@ -207,7 +212,7 @@ abstract class ExtendedTextRenderBox extends RenderBox
     ///maybe overflow
     while (child != null &&
         childIndex < textPainter.inlinePlaceholderBoxes.length) {
-      final TextParentData textParentData = child.parentData;
+      final TextParentData textParentData = child.parentData as TextParentData;
 
       textParentData.offset = Offset(
           textPainter.inlinePlaceholderBoxes[childIndex].left,
@@ -221,12 +226,14 @@ abstract class ExtendedTextRenderBox extends RenderBox
   void layoutText(
       {double minWidth = 0.0,
       double maxWidth = double.infinity,
-      bool forceLayout: false}) {
+      bool forceLayout = false}) {
     assert(maxWidth != null && minWidth != null);
 
     if (textLayoutLastMaxWidth == maxWidth &&
         textLayoutLastMinWidth == minWidth &&
-        !forceLayout) return;
+        !forceLayout) {
+      return;
+    }
     final bool widthMatters =
         softWrap || overflow == TextOverflow.ellipsis || isMultiline;
     final double availableMaxWidth = math.max(0.0, maxWidth - caretMargin);
@@ -243,7 +250,7 @@ abstract class ExtendedTextRenderBox extends RenderBox
     textLayoutLastMaxWidth = maxWidth;
   }
 
-  void paintWidgets(PaintingContext context, Offset offset) {
+  void paintWidgets(PaintingContext context, Offset offset, {Path clip}) {
     RenderBox child = firstChild;
     int childIndex = 0;
 
@@ -252,9 +259,14 @@ abstract class ExtendedTextRenderBox extends RenderBox
         childIndex < textPainter.inlinePlaceholderBoxes.length) {
       //assert(childIndex < _textPainter.inlinePlaceholderBoxes.length);
 
-      final TextParentData textParentData = child.parentData;
+      final TextParentData textParentData = child.parentData as TextParentData;
 
       final double scale = textParentData.scale;
+
+      final Rect rect = (offset + textParentData.offset) & child.size;
+      if (clip != null && !clip.contains(rect.centerLeft)) {
+        break;
+      }
       context.pushTransform(
         needsCompositing,
         offset + textParentData.offset,
@@ -306,23 +318,25 @@ abstract class ExtendedTextRenderBox extends RenderBox
   //   });
   // }
 
+  // it seems TextPainter works for WidgetSpan on 1.17.0
+  // code under 1.17.0
   Offset getCaretOffset(TextPosition textPosition,
       {ValueChanged<double> caretHeightCallBack,
       Offset effectiveOffset,
-      bool handleSpecialText: true,
-      Rect caretPrototype: Rect.zero}) {
+      bool handleSpecialText = true,
+      Rect caretPrototype = Rect.zero}) {
     effectiveOffset ??= Offset.zero;
 
     ///zmt
     if (handleSpecialText) {
       ///if first index, check by first span
-      var offset = textPosition.offset;
-      var boxs = textPainter.getBoxesForSelection(TextSelection(
+      int offset = textPosition.offset;
+      List<TextBox> boxs = textPainter.getBoxesForSelection(TextSelection(
           baseOffset: offset,
           extentOffset: offset + 1,
           affinity: textPosition.affinity));
-      if (boxs.length > 0) {
-        var rect = boxs.toList().last.toRect();
+      if (boxs.isNotEmpty) {
+        final Rect rect = boxs.toList().last.toRect();
         caretHeightCallBack?.call(rect.height);
         return rect.topLeft + effectiveOffset;
       } else {
@@ -333,8 +347,8 @@ abstract class ExtendedTextRenderBox extends RenderBox
             baseOffset: offset - 1,
             extentOffset: offset,
             affinity: textPosition.affinity));
-        if (boxs.length > 0) {
-          var rect = boxs.toList().last.toRect();
+        if (boxs.isNotEmpty) {
+          final Rect rect = boxs.toList().last.toRect();
           caretHeightCallBack?.call(rect.height);
           if (textPosition.offset <= 0) {
             return rect.topLeft + effectiveOffset;
@@ -427,29 +441,7 @@ abstract class ExtendedTextRenderBox extends RenderBox
     int childIndex = 0;
     while (child != null &&
         childIndex < textPainter.inlinePlaceholderBoxes.length) {
-      final TextParentData textParentData = child.parentData;
-      final Matrix4 transform = Matrix4.translationValues(
-          textParentData.offset.dx + effectiveOffset.dx,
-          textParentData.offset.dy + effectiveOffset.dy,
-          0.0)
-        ..scale(
-            textParentData.scale, textParentData.scale, textParentData.scale);
-      final bool isHit = result.addWithPaintTransform(
-        transform: transform,
-        position: position,
-        hitTest: (BoxHitTestResult result, Offset transformed) {
-          assert(() {
-            final Offset manualPosition =
-                (position - textParentData.offset - effectiveOffset) /
-                    textParentData.scale;
-            return (transformed.dx - manualPosition.dx).abs() <
-                    precisionErrorTolerance &&
-                (transformed.dy - manualPosition.dy).abs() <
-                    precisionErrorTolerance;
-          }());
-          return child.hitTest(result, position: transformed);
-        },
-      );
+      final bool isHit = hitTestChild(result, child, position: position);
       if (isHit) {
         return true;
       }
@@ -457,5 +449,35 @@ abstract class ExtendedTextRenderBox extends RenderBox
       childIndex += 1;
     }
     return false;
+  }
+
+  bool hitTestChild(
+    BoxHitTestResult result,
+    RenderBox child, {
+    Offset position,
+  }) {
+    final TextParentData textParentData = child.parentData as TextParentData;
+    final Matrix4 transform = Matrix4.translationValues(
+        textParentData.offset.dx + effectiveOffset.dx,
+        textParentData.offset.dy + effectiveOffset.dy,
+        0.0)
+      ..scale(textParentData.scale, textParentData.scale, textParentData.scale);
+    final bool isHit = result.addWithPaintTransform(
+      transform: transform,
+      position: position,
+      hitTest: (BoxHitTestResult result, Offset transformed) {
+        assert(() {
+          final Offset manualPosition =
+              (position - textParentData.offset - effectiveOffset) /
+                  textParentData.scale;
+          return (transformed.dx - manualPosition.dx).abs() <
+                  precisionErrorTolerance &&
+              (transformed.dy - manualPosition.dy).abs() <
+                  precisionErrorTolerance;
+        }());
+        return child.hitTest(result, position: transformed);
+      },
+    );
+    return isHit;
   }
 }

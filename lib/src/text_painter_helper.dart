@@ -6,7 +6,7 @@ class TextPainterHelper {
 
   ///method for [OverFlowTextSpan] and [BackgroundTextSpan]
   TextPainter layout(TextPainter painter, TextSpan textSpan,
-      {bool compareChildren: true}) {
+      {bool compareChildren = true}) {
     if (_painter == null ||
         ((compareChildren
                 ? _painter.text != textSpan

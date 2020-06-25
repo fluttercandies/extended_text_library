@@ -45,7 +45,7 @@ class ExtendedTextSelectionOverlay {
         assert(handlesVisible != null),
         _handlesVisible = handlesVisible,
         _value = value {
-    final OverlayState overlay = Overlay.of(context);
+    final OverlayState overlay = Overlay.of(context, rootOverlay: true);
     assert(
         overlay != null,
         'No Overlay widget exists above $context.\n'
@@ -151,7 +151,9 @@ class ExtendedTextSelectionOverlay {
   bool _handlesVisible = false;
   set handlesVisible(bool visible) {
     assert(visible != null);
-    if (_handlesVisible == visible) return;
+    if (_handlesVisible == visible) {
+      return;
+    }
     _handlesVisible = visible;
     // If we are in build state, it will be too late to update visibility.
     // We will need to schedule the build in next frame.
@@ -190,7 +192,7 @@ class ExtendedTextSelectionOverlay {
   void showToolbar() {
     assert(_toolbar == null);
     _toolbar = OverlayEntry(builder: _buildToolbar);
-    Overlay.of(context, debugRequiredFor: debugRequiredFor).insert(_toolbar);
+    Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor).insert(_toolbar);
     _toolbarController.forward(from: 0.0);
   }
 
@@ -204,7 +206,9 @@ class ExtendedTextSelectionOverlay {
   /// that if you do call this during a build, the UI will not update until the
   /// next frame (i.e. many milliseconds later).
   void update(TextEditingValue newValue) {
-    if (_value == newValue) return;
+    if (_value == newValue) {
+      return;
+    }
     _value = newValue;
     if (SchedulerBinding.instance.schedulerPhase ==
         SchedulerPhase.persistentCallbacks) {
@@ -288,15 +292,21 @@ class ExtendedTextSelectionOverlay {
   }
 
   Widget _buildToolbar(BuildContext context) {
-    if (selectionControls == null) return Container();
+    if (selectionControls == null) {
+      return Container();
+    }
 
-    if (renderObject == null || !renderObject.isAttached) return Container();
+    if (renderObject == null || !renderObject.isAttached) {
+      return Container();
+    }
 
     // Find the horizontal midpoint, just above the selected text.
     final List<TextSelectionPoint> endpoints =
         renderObject.getEndpointsForSelection(_selection);
 
-    if (endpoints == null) return Container();
+    if (endpoints == null) {
+      return Container();
+    }
 
     final Rect editingRegion = Rect.fromPoints(
       renderObject.localToGlobal(Offset.zero),
@@ -582,7 +592,9 @@ class _TextSelectionHandleOverlayState
     TextSelectionHandleType ltrType,
     TextSelectionHandleType rtlType,
   ) {
-    if (widget.selection.isCollapsed) return TextSelectionHandleType.collapsed;
+    if (widget.selection.isCollapsed) {
+      return TextSelectionHandleType.collapsed;
+    }
 
     assert(textDirection != null);
     switch (textDirection) {
