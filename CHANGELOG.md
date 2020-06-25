@@ -1,8 +1,13 @@
+## [2.0.0]
+
+* Support OverFlowWidget [ExtendedText].
+* Breaking change: remove overFlowTextSpan.
+
 ## [1.0.0]
 
 * Merge code from 1.17.0
 * Fix analysis_options
-  
+
 ## [0.5.4]
 
 * fix selection issue on ios about selectWordEdge
@@ -14,11 +19,11 @@
 ## [0.5.2]
 
 * fix issue that TextPainter was not layout(ExtendedText)
-  
+
 ## [0.5.1]
 
 * set limitation of flutter sdk >=1.12.13
-  
+
 ## [0.5.0]
 
 * codes base on 1.12.13+hotfix.5
@@ -33,7 +38,7 @@
 
 ## [0.4.8]
 
-* fix issue that ImageSpan's padding can't be null. 
+* fix issue that ImageSpan's padding can't be null.
 * add behavior for ImageSpan
 
 ## [0.4.7]
@@ -50,7 +55,7 @@
 
 ## [0.4.4]
 
-* add common selection library for extended_text and extended_text_field 
+* add common selection library for extended_text and extended_text_field
 
 ## [0.4.3]
 
@@ -82,7 +87,7 @@
 
 ## [0.2.6]
 
-* add GestureRecognizer for image span 
+* add GestureRecognizer for image span
 
 ## [0.2.4]
 
