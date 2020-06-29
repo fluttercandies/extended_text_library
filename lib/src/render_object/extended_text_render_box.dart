@@ -29,9 +29,9 @@ abstract class ExtendedTextRenderBox extends RenderBox
   String get plainText;
   Offset get effectiveOffset;
   //only for [ExtendedText]
-  Widget get overFlowWidget;
+  Widget get overflowWidget;
   int get textChildCount =>
-      overFlowWidget != null ? childCount - 1 : childCount;
+      overflowWidget != null ? childCount - 1 : childCount;
 
   List<PlaceholderSpan> _placeholderSpans;
 
