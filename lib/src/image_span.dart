@@ -15,7 +15,7 @@ class ImageSpan extends ExtendedWidgetSpan {
     ui.PlaceholderAlignment alignment = ui.PlaceholderAlignment.bottom,
     String actualText,
     TextBaseline baseline,
-    BoxFit fit= BoxFit.scaleDown,
+    BoxFit fit = BoxFit.scaleDown,
     ImageLoadingBuilder loadingBuilder,
     ImageFrameBuilder frameBuilder,
     String semanticLabel,

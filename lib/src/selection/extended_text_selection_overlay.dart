@@ -40,6 +40,7 @@ class ExtendedTextSelectionOverlay {
     this.selectionDelegate,
     this.dragStartBehavior = DragStartBehavior.start,
     this.onSelectionHandleTapped,
+    this.clipboardStatus,
   })  : assert(value != null),
         assert(context != null),
         assert(handlesVisible != null),
@@ -112,6 +113,13 @@ class ExtendedTextSelectionOverlay {
   /// {@endtemplate}
   final VoidCallback onSelectionHandleTapped;
 
+  /// Maintains the status of the clipboard for determining if its contents can
+  /// be pasted or not.
+  ///
+  /// Useful because the actual value of the clipboard can only be checked
+  /// asynchronously (see [Clipboard.getData]).
+  final ClipboardStatusNotifier clipboardStatus;
+
   /// Controls the fade-in and fade-out animations for the toolbar and handles.
   static const Duration fadeDuration = Duration(milliseconds: 150);
 
@@ -176,7 +184,8 @@ class ExtendedTextSelectionOverlay {
           builder: (BuildContext context) =>
               _buildHandle(context, _TextSelectionHandlePosition.end)),
     ];
-    Overlay.of(context, debugRequiredFor: debugRequiredFor).insertAll(_handles);
+    Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor)
+        .insertAll(_handles);
   }
 
   /// Destroys the handles by removing them from overlay.
@@ -192,7 +201,8 @@ class ExtendedTextSelectionOverlay {
   void showToolbar() {
     assert(_toolbar == null);
     _toolbar = OverlayEntry(builder: _buildToolbar);
-    Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor).insert(_toolbar);
+    Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor)
+        .insert(_toolbar);
     _toolbarController.forward(from: 0.0);
   }
 
@@ -310,8 +320,7 @@ class ExtendedTextSelectionOverlay {
 
     final Rect editingRegion = Rect.fromPoints(
       renderObject.localToGlobal(Offset.zero),
-      renderObject
-          .localToGlobal(renderObject.size.bottomRight(Offset.zero)),
+      renderObject.localToGlobal(renderObject.size.bottomRight(Offset.zero)),
     );
 
     final bool isMultiline =
@@ -343,6 +352,7 @@ class ExtendedTextSelectionOverlay {
           midpoint,
           endpoints,
           selectionDelegate,
+          clipboardStatus,
         ),
       ),
     );

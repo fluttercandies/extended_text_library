@@ -360,7 +360,7 @@ class CommonTextSelectionGestureDetectorBuilder
 
   @override
   void onSingleLongTapMoveUpdate(LongPressMoveUpdateDetails details) {
-   if (delegate.selectionEnabled) {
+    if (delegate.selectionEnabled) {
       switch (Theme.of(_context).platform) {
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
@@ -386,7 +386,7 @@ class CommonTextSelectionGestureDetectorBuilder
   @override
   void onSingleTapUp(TapUpDetails details) {
     _hideToolbar();
-   if (delegate.selectionEnabled) {
+    if (delegate.selectionEnabled) {
       switch (Theme.of(_context).platform) {
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
@@ -407,20 +407,20 @@ class CommonTextSelectionGestureDetectorBuilder
   @override
   void onSingleLongTapStart(LongPressStartDetails details) {
     switch (Theme.of(_context).platform) {
-        case TargetPlatform.iOS:
-        case TargetPlatform.macOS:
-          renderEditable.selectPositionAt(
-            from: details.globalPosition,
-            cause: SelectionChangedCause.longPress,
-          );
-          break;
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
-          renderEditable.selectWord(cause: SelectionChangedCause.longPress);
-          Feedback.forLongPress(_context);
-          break;
-      }
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        renderEditable.selectPositionAt(
+          from: details.globalPosition,
+          cause: SelectionChangedCause.longPress,
+        );
+        break;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        renderEditable.selectWord(cause: SelectionChangedCause.longPress);
+        Feedback.forLongPress(_context);
+        break;
+    }
   }
 }

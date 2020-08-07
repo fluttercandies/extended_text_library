@@ -12,9 +12,9 @@ import 'special_inline_span_base.dart';
 class ExtendedWidgetSpan extends WidgetSpan with SpecialInlineSpanBase {
   ExtendedWidgetSpan({
     @required Widget child,
-    String actualText= '\uFFFC',
-    int start= 0,
-    this.deleteAll= true,
+    String actualText = '\uFFFC',
+    int start = 0,
+    this.deleteAll = true,
     ui.PlaceholderAlignment alignment = ui.PlaceholderAlignment.bottom,
     TextBaseline baseline,
   })  : assert(start != null),
