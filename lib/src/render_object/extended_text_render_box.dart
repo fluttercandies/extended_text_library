@@ -79,7 +79,7 @@ abstract class ExtendedTextRenderBox extends RenderBox
     final List<PlaceholderDimensions> placeholderDimensions =
         List<PlaceholderDimensions>(textChildCount);
     int childIndex = 0;
-    while (child != null) {
+    while (child != null && childIndex < _placeholderDimensions.length) {
       // Height and baseline is irrelevant as all text will be laid
       // out in a single line.
       placeholderDimensions[childIndex] = PlaceholderDimensions(
@@ -98,7 +98,7 @@ abstract class ExtendedTextRenderBox extends RenderBox
     final List<PlaceholderDimensions> placeholderDimensions =
         List<PlaceholderDimensions>(textChildCount);
     int childIndex = 0;
-    while (child != null) {
+    while (child != null && childIndex < _placeholderDimensions.length) {
       final double intrinsicWidth = child.getMinIntrinsicWidth(height);
       final double intrinsicHeight =
           child.getMinIntrinsicHeight(intrinsicWidth);
@@ -118,7 +118,7 @@ abstract class ExtendedTextRenderBox extends RenderBox
     final List<PlaceholderDimensions> placeholderDimensions =
         List<PlaceholderDimensions>(textChildCount);
     int childIndex = 0;
-    while (child != null) {
+    while (child != null && childIndex < _placeholderDimensions.length) {
       final double intrinsicHeight = child.getMinIntrinsicHeight(width);
       final double intrinsicWidth = child.getMinIntrinsicWidth(intrinsicHeight);
       placeholderDimensions[childIndex] = PlaceholderDimensions(

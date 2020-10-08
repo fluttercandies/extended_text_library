@@ -1,144 +1,148 @@
-## [4.0.0]
+## 4.0.1
+
+* Fix valid value range #23
+
+## 4.0.0
 
 * Merge from Flutter v1.20
 
-## [3.0.0]
+## 3.0.0
 
-* Breaking change: fix typos [OverflowWidget].
+* Breaking change: fix typos OverflowWidget.
 
-## [2.0.0]
+## 2.0.0
 
-* Support OverFlowWidget [ExtendedText].
+* Support OverFlowWidget ExtendedText.
 * Breaking change: remove overFlowTextSpan.
 
-## [1.0.0]
+## 1.0.0
 
 * Merge code from 1.17.0
 * Fix analysis_options
 
-## [0.5.4]
+## 0.5.4
 
-* fix selection issue on ios about selectWordEdge
+* Fix selection issue on ios about selectWordEdge
 
-## [0.5.3]
+## 0.5.3
 
-* fix error about TargetPlatform.macOS
+* Fix error about TargetPlatform.macOS
 
-## [0.5.2]
+## 0.5.2
 
-* fix issue that TextPainter was not layout(ExtendedText)
+* Fix issue that TextPainter was not layout(ExtendedText)
 
-## [0.5.1]
+## 0.5.1
 
-* set limitation of flutter sdk >=1.12.13
+* Set limitation of flutter sdk >=1.12.13
 
-## [0.5.0]
+## 0.5.0
 
-* codes base on 1.12.13+hotfix.5
-* breaking change:
+* Codes base on 1.12.13+hotfix.5
+* Breaking change:
   CupertinoExtendedTextSelectionControls => ExtendedCupertinoTextSelectionControls
   MaterialExtendedTextSelectionControls => ExtendedMaterialTextSelectionControls
-* extract method for TextSelection
+* Extract method for TextSelection
 
-## [0.4.9]
+## 0.4.9
 
-* workaround about wrong selection position of WidgetSpan
+* Workaround about wrong selection position of WidgetSpan
 
-## [0.4.8]
+## 0.4.8
 
-* fix issue that ImageSpan's padding can't be null.
-* add behavior for ImageSpan
+* Fix issue that ImageSpan's padding can't be null.
+* Add behavior for ImageSpan
 
-## [0.4.7]
+## 0.4.7
 
-* change kMinInteractiveSize to kExtendedMinInteractiveSize
+* Change kMinInteractiveSize to kExtendedMinInteractiveSize
 
-## [0.4.6]
+## 0.4.6
 
-* fix null exception of effectiveOffset in getCaretOffset method
+* Fix null exception of effectiveOffset in getCaretOffset method
 
-## [0.4.5]
+## 0.4.5
 
-* fix kMinInteractiveSize is missing in high version of flutter
+* Fix kMinInteractiveSize is missing in high version of flutter
 
-## [0.4.4]
+## 0.4.4
 
-* add common selection library for extended_text and extended_text_field
+* Add common selection library for extended_text and extended_text_field
 
-## [0.4.3]
+## 0.4.3
 
-* set default value('\uFFFC') of actualText for ExtendedWidgetSpan
-* add onTap call back for ImageSpan
-* change return type to TextSpan for SpecialTextSpanBuilder's Build method
+* Set default value('\uFFFC') of actualText for ExtendedWidgetSpan
+* Add onTap call back for ImageSpan
+* Change return type to TextSpan for SpecialTextSpanBuilder's Build method
 
-## [0.4.2]
+## 0.4.2
 
-* improve codes base on v1.7.8
-* support WidgetSpan (ExtendedWidgetSpan)
+* Improve codes base on v1.7.8
+* Support WidgetSpan (ExtendedWidgetSpan)
 
-## [0.4.1]
+## 0.4.1
 
-* add textSpanNestToArray and textSpanToActualText
+* Add textSpanNestToArray and textSpanToActualText
 
-## [0.3.5]
+## 0.3.5
 
-* move extended_text_utils from extended_text_field
+* Move extended_text_utils from extended_text_field
 
-## [0.3.1]
+## 0.3.1
 
-* remove caretIn parameter(SpecialTextSpan)
-* deleteAll parameter has the same effect as caretIn parameter(SpecialTextSpan)
+* Remove caretIn parameter(SpecialTextSpan)
+* DeleteAll parameter has the same effect as caretIn parameter(SpecialTextSpan)
 
-## [0.3.0]
+## 0.3.0
 
-* add caretIn parameter(whether caret can be move into special text for SpecialTextSpan(like a image span or @xxxx)) for SpecialTextSpan
+* Add caretIn parameter(whether caret can be move into special text for SpecialTextSpan(like a image span or @xxxx)) for SpecialTextSpan
 
-## [0.2.6]
+## 0.2.6
 
-* add GestureRecognizer for image span
+* Add GestureRecognizer for image span
 
-## [0.2.4]
+## 0.2.4
 
-* handle image loaded failed for image span
+* Handle image loaded failed for image span
 
-## [0.2.3]
+## 0.2.3
 
-* remove CachedNetworkImage
+* Remove CachedNetworkImage
 
-## [0.2.2]
+## 0.2.2
 
-* update deafult build method in SpecialTextSpanBuilder
+* Update deafult build method in SpecialTextSpanBuilder
 
-## [0.2.1]
+## 0.2.1
 
-* change cacheImageFolderName from "extenedtext" to "cacheimage"
+* Change cacheImageFolderName from "extenedtext" to "cacheimage"
 
-## [0.2.0]
+## 0.2.0
 
-* add BackgroundTextSpan, support to paint custom background
+* Add BackgroundTextSpan, support to paint custom background
 
-## [0.1.6]
+## 0.1.6
 
-* override compareTo method in SpecialTextSpan and ImageSpan to
+* Override compareTo method in SpecialTextSpan and ImageSpan to
   fix issue that image span or special text span was error rendering
 
-## [0.1.5]
+## 0.1.5
 
-* fix start index is not right in SpecialTextSpanBuilder
-* override == and hashCode for ImageSpan
+* Fix start index is not right in SpecialTextSpanBuilder
+* Override == and hashCode for ImageSpan
 
-## [0.1.3]
+## 0.1.3
 
-* override == and hashCode for SpecialTextSpan
-* update build method in SpecialTextSpanBuilder
+* Override == and hashCode for SpecialTextSpan
+* Update build method in SpecialTextSpanBuilder
 
-## [0.1.2]
+## 0.1.2
 
-* add deleteAll parameter for SpecialTextSpan
+* Add deleteAll parameter for SpecialTextSpan
 
-## [0.1.0]
+## 0.1.0
 
-* add following to support extended_text and extended_text_field
+* Add following to support extended_text and extended_text_field
   cached_network_image.dart
   extended_text_utils.dart
   image_span.dart
