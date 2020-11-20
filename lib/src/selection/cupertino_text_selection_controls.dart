@@ -10,6 +10,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
 
+import '../../extended_text_library.dart';
+
 // Read off from the output on iOS 12. This color does not vary with the
 // application's theme color.
 const double _kSelectionHandleOverlap = 1.5;
@@ -59,6 +61,18 @@ const TextStyle _kToolbarButtonDisabledFontStyle = TextStyle(
 const EdgeInsets _kToolbarButtonPadding =
     EdgeInsets.symmetric(vertical: 10.0, horizontal: 18.0);
 
+// Intermediate data used for building menu items.
+class _ItemData {
+  const _ItemData(
+      this.label,
+      this.onPressed,
+  ) : assert(onPressed != null),
+      assert(label != null);
+
+  final VoidCallback onPressed;
+  final String label;
+}
+
 // Generates the child that's passed into CupertinoTextSelectionToolbar.
 class ExtendedCupertinoTextSelectionToolbarWrapper extends StatefulWidget {
   const ExtendedCupertinoTextSelectionToolbarWrapper({
@@ -71,6 +85,8 @@ class ExtendedCupertinoTextSelectionToolbarWrapper extends StatefulWidget {
     this.handlePaste,
     this.handleSelectAll,
     this.isArrowPointingDown,
+    this.preActions,
+    this.postActions,
   }) : super(key: key);
 
   final double arrowTipX;
@@ -81,6 +97,9 @@ class ExtendedCupertinoTextSelectionToolbarWrapper extends StatefulWidget {
   final VoidCallback handlePaste;
   final VoidCallback handleSelectAll;
   final bool isArrowPointingDown;
+  final List<_ItemData> preActions;
+  final List<_ItemData> postActions;
+
 
   @override
   _ExtendedCupertinoTextSelectionToolbarWrapperState createState() =>
@@ -180,7 +199,11 @@ class _ExtendedCupertinoTextSelectionToolbarWrapperState
         pressedOpacity: 0.7,
       ));
     }
-
+    if (widget.preActions?.isNotEmpty == true) {
+      for (final _ItemData item in widget.preActions) {
+        addToolbarButton(item.label, item.onPressed);
+      }
+    }
     if (widget.handleCut != null) {
       addToolbarButton(localizations.cutButtonLabel, widget.handleCut);
     }
@@ -194,6 +217,11 @@ class _ExtendedCupertinoTextSelectionToolbarWrapperState
     if (widget.handleSelectAll != null) {
       addToolbarButton(
           localizations.selectAllButtonLabel, widget.handleSelectAll);
+    }
+    if (widget.postActions?.isNotEmpty == true) {
+      for (final _ItemData item in widget.postActions) {
+        addToolbarButton(item.label, item.onPressed);
+      }
     }
 
     return ExtendedCupertinoTextSelectionToolbar._(
@@ -468,7 +496,17 @@ class ExtendedCupertinoTextSelectionHandlePainter extends CustomPainter {
       color != oldDelegate.color;
 }
 
-class ExtendedCupertinoTextSelectionControls extends TextSelectionControls {
+class ExtendedCupertinoTextSelectionControls extends TextSelectionControls implements ExtendedTextSelectionControls {
+  ExtendedCupertinoTextSelectionControls()
+      : preActions = null,
+        postActions = null,
+        super();
+
+  ExtendedCupertinoTextSelectionControls.withActions({this.preActions, this.postActions});
+
+  List<ActionData> postActions;
+  List<ActionData> preActions;
+
   /// Returns the size of the Cupertino handle.
   @override
   Size getHandleSize(double textLineHeight) {
@@ -530,6 +568,14 @@ class ExtendedCupertinoTextSelectionControls extends TextSelectionControls {
       handleSelectAll:
           canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
       isArrowPointingDown: isArrowPointingDown,
+      preActions: preActions
+          ?.where((ActionData element) => element.shouldShow(delegate))
+          ?.map((ActionData action) => _ItemData(action.label, () => action.onPressed(delegate)))
+          ?.toList(),
+      postActions: postActions
+          ?.where((ActionData element) => element.shouldShow(delegate))
+          ?.map((ActionData action) => _ItemData(action.label, () => action.onPressed(delegate)))
+          ?.toList(),
     );
   }
 

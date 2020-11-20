@@ -5,8 +5,10 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
+
+import '../../extended_text_library.dart';
 
 const double _kHandleSize = 22.0;
 
@@ -20,18 +22,6 @@ const double _kToolbarContentDistance = 8.0;
 
 typedef CallbackWithDelegate = void Function(TextSelectionDelegate delegate);
 typedef ActionValidator = bool Function(TextSelectionDelegate delegate);
-
-class ActionData {
-  ActionData({
-    @required this.onPressed,
-    @required this.label,
-    this.shouldShow,
-  });
-
-  final ActionValidator shouldShow;
-  final CallbackWithDelegate onPressed;
-  final String label;
-}
 
 /// Manages a copy/paste text selection toolbar.
 class ExtendedMaterialTextSelectionToolbar extends StatefulWidget {
@@ -736,7 +726,7 @@ class ExtendedMaterialTextSelectionHandlePainter extends CustomPainter {
   }
 }
 
-class ExtendedMaterialTextSelectionControls extends TextSelectionControls {
+class ExtendedMaterialTextSelectionControls extends TextSelectionControls implements ExtendedTextSelectionControls {
   ExtendedMaterialTextSelectionControls()
       : preActions = null,
         postActions = null,
@@ -796,18 +786,24 @@ class ExtendedMaterialTextSelectionControls extends TextSelectionControls {
             handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
             handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
             isAbove: fitsAbove,
-            preActions: preActions?.where((element) => element.shouldShow(delegate))?.map(
-              (ActionData data) => _ItemData(
-                () => data.onPressed(delegate),
-                data.label,
-              ),
-            )?.toList(),
-            postActions: postActions?.where((element) => element.shouldShow(delegate))?.map(
+            preActions: preActions
+                ?.where((ActionData element) => element.shouldShow(delegate))
+                ?.map(
                   (ActionData data) => _ItemData(
                     () => data.onPressed(delegate),
-                data.label,
-              ),
-            )?.toList(),
+                    data.label,
+                  ),
+                )
+                ?.toList(),
+            postActions: postActions
+                ?.where((ActionData element) => element.shouldShow(delegate))
+                ?.map(
+                  (ActionData data) => _ItemData(
+                    () => data.onPressed(delegate),
+                    data.label,
+                  ),
+                )
+                ?.toList(),
           ),
         ),
       ],
