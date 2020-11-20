@@ -18,6 +18,21 @@ const double _kToolbarHeight = 44.0;
 const double _kToolbarContentDistanceBelow = _kHandleSize - 2.0;
 const double _kToolbarContentDistance = 8.0;
 
+typedef CallbackWithDelegate = void Function(TextSelectionDelegate delegate);
+typedef ActionValidator = bool Function(TextSelectionDelegate delegate);
+
+class ActionData {
+  ActionData({
+    @required this.onPressed,
+    @required this.label,
+    this.shouldShow,
+  });
+
+  final ActionValidator shouldShow;
+  final CallbackWithDelegate onPressed;
+  final String label;
+}
+
 /// Manages a copy/paste text selection toolbar.
 class ExtendedMaterialTextSelectionToolbar extends StatefulWidget {
   const ExtendedMaterialTextSelectionToolbar({
@@ -28,6 +43,8 @@ class ExtendedMaterialTextSelectionToolbar extends StatefulWidget {
     this.handlePaste,
     this.handleSelectAll,
     this.isAbove,
+    this.preActions,
+    this.postActions,
   }) : super(key: key);
 
   final ClipboardStatusNotifier clipboardStatus;
@@ -35,13 +52,14 @@ class ExtendedMaterialTextSelectionToolbar extends StatefulWidget {
   final VoidCallback handleCopy;
   final VoidCallback handlePaste;
   final VoidCallback handleSelectAll;
+  final List<_ItemData> preActions;
+  final List<_ItemData> postActions;
 
   // When true, the toolbar fits above its anchor and will be positioned there.
   final bool isAbove;
 
   @override
-  ExtendedMaterialTextSelectionToolbarState createState() =>
-      ExtendedMaterialTextSelectionToolbarState();
+  ExtendedMaterialTextSelectionToolbarState createState() => ExtendedMaterialTextSelectionToolbarState();
 }
 
 // Intermediate data used for building menu items with the _getItems method.
@@ -56,8 +74,7 @@ class _ItemData {
   final String label;
 }
 
-class ExtendedMaterialTextSelectionToolbarState
-    extends State<ExtendedMaterialTextSelectionToolbar>
+class ExtendedMaterialTextSelectionToolbarState extends State<ExtendedMaterialTextSelectionToolbar>
     with TickerProviderStateMixin {
   ClipboardStatusNotifier _clipboardStatus;
 
@@ -126,8 +143,7 @@ class ExtendedMaterialTextSelectionToolbarState
     if (((widget.handleCut == null) != (oldWidget.handleCut == null)) ||
         ((widget.handleCopy == null) != (oldWidget.handleCopy == null)) ||
         ((widget.handlePaste == null) != (oldWidget.handlePaste == null)) ||
-        ((widget.handleSelectAll == null) !=
-            (oldWidget.handleSelectAll == null))) {
+        ((widget.handleSelectAll == null) != (oldWidget.handleSelectAll == null))) {
       _reset();
     }
     if (oldWidget.clipboardStatus == null && widget.clipboardStatus != null) {
@@ -166,23 +182,19 @@ class ExtendedMaterialTextSelectionToolbarState
   @override
   Widget build(BuildContext context) {
     // Don't render the menu until the state of the clipboard is known.
-    if (widget.handlePaste != null &&
-        _clipboardStatus.value == ClipboardStatus.unknown) {
+    if (widget.handlePaste != null && _clipboardStatus.value == ClipboardStatus.unknown) {
       return const SizedBox(width: 0.0, height: 0.0);
     }
 
-    final MaterialLocalizations localizations =
-        MaterialLocalizations.of(context);
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final List<_ItemData> itemDatas = <_ItemData>[
-      if (widget.handleCut != null)
-        _ItemData(widget.handleCut, localizations.cutButtonLabel),
-      if (widget.handleCopy != null)
-        _ItemData(widget.handleCopy, localizations.copyButtonLabel),
-      if (widget.handlePaste != null &&
-          _clipboardStatus.value == ClipboardStatus.pasteable)
+      if (widget.preActions != null) ...widget.preActions,
+      if (widget.handleCut != null) _ItemData(widget.handleCut, localizations.cutButtonLabel),
+      if (widget.handleCopy != null) _ItemData(widget.handleCopy, localizations.copyButtonLabel),
+      if (widget.handlePaste != null && _clipboardStatus.value == ClipboardStatus.pasteable)
         _ItemData(widget.handlePaste, localizations.pasteButtonLabel),
-      if (widget.handleSelectAll != null)
-        _ItemData(widget.handleSelectAll, localizations.selectAllButtonLabel),
+      if (widget.handleSelectAll != null) _ItemData(widget.handleSelectAll, localizations.selectAllButtonLabel),
+      if (widget.postActions != null) ...widget.postActions,
     ];
 
     // If there is no option available, build an empty widget.
@@ -217,20 +229,16 @@ class ExtendedMaterialTextSelectionToolbarState
                   // TODO(justinmc): This should be an AnimatedIcon, but
                   // AnimatedIcons doesn't yet support arrow_back to more_vert.
                   // https://github.com/flutter/flutter/issues/51209
-                  icon:
-                      Icon(_overflowOpen ? Icons.arrow_back : Icons.more_vert),
+                  icon: Icon(_overflowOpen ? Icons.arrow_back : Icons.more_vert),
                   onPressed: () {
                     setState(() {
                       _overflowOpen = !_overflowOpen;
                     });
                   },
-                  tooltip: _overflowOpen
-                      ? localizations.backButtonTooltip
-                      : localizations.moreButtonTooltip,
+                  tooltip: _overflowOpen ? localizations.backButtonTooltip : localizations.moreButtonTooltip,
                 ),
               ),
-              for (int i = 0; i < itemDatas.length; i++)
-                _getItem(itemDatas[i], i == 0, i == itemDatas.length - 1)
+              for (int i = 0; i < itemDatas.length; i++) _getItem(itemDatas[i], i == 0, i == itemDatas.length - 1)
             ],
           ),
         ),
@@ -242,8 +250,7 @@ class ExtendedMaterialTextSelectionToolbarState
 // When the overflow menu is open, it tries to align its right edge to the right
 // edge of the closed menu. This widget handles this effect by measuring and
 // maintaining the width of the closed menu and aligning the child to the right.
-class ExtendedMaterialTextSelectionToolbarContainer
-    extends SingleChildRenderObjectWidget {
+class ExtendedMaterialTextSelectionToolbarContainer extends SingleChildRenderObjectWidget {
   const ExtendedMaterialTextSelectionToolbarContainer({
     Key key,
     @required Widget child,
@@ -255,21 +262,17 @@ class ExtendedMaterialTextSelectionToolbarContainer
   final bool overflowOpen;
 
   @override
-  ExtendedMaterialTextSelectionToolbarContainerRenderBox createRenderObject(
-      BuildContext context) {
-    return ExtendedMaterialTextSelectionToolbarContainerRenderBox(
-        overflowOpen: overflowOpen);
+  ExtendedMaterialTextSelectionToolbarContainerRenderBox createRenderObject(BuildContext context) {
+    return ExtendedMaterialTextSelectionToolbarContainerRenderBox(overflowOpen: overflowOpen);
   }
 
   @override
-  void updateRenderObject(BuildContext context,
-      ExtendedMaterialTextSelectionToolbarContainerRenderBox renderObject) {
+  void updateRenderObject(BuildContext context, ExtendedMaterialTextSelectionToolbarContainerRenderBox renderObject) {
     renderObject.overflowOpen = overflowOpen;
   }
 }
 
-class ExtendedMaterialTextSelectionToolbarContainerRenderBox
-    extends RenderProxyBox {
+class ExtendedMaterialTextSelectionToolbarContainerRenderBox extends RenderProxyBox {
   ExtendedMaterialTextSelectionToolbarContainerRenderBox({
     @required bool overflowOpen,
   })  : assert(overflowOpen != null),
@@ -282,7 +285,9 @@ class ExtendedMaterialTextSelectionToolbarContainerRenderBox
   double _closedWidth;
 
   bool _overflowOpen;
+
   bool get overflowOpen => _overflowOpen;
+
   set overflowOpen(bool value) {
     if (value == overflowOpen) {
       return;
@@ -308,14 +313,11 @@ class ExtendedMaterialTextSelectionToolbarContainerRenderBox
       // and don't worry about aligning the right edges.
       // _closedWidth is used even when the menu is closed to allow it to
       // animate its size while keeping the same right alignment.
-      _closedWidth == null || child.size.width > _closedWidth
-          ? child.size.width
-          : _closedWidth,
+      _closedWidth == null || child.size.width > _closedWidth ? child.size.width : _closedWidth,
       child.size.height,
     ));
 
-    final ToolbarItemsParentData childParentData =
-        child.parentData as ToolbarItemsParentData;
+    final ToolbarItemsParentData childParentData = child.parentData as ToolbarItemsParentData;
     childParentData.offset = Offset(
       size.width - child.size.width,
       0.0,
@@ -325,8 +327,7 @@ class ExtendedMaterialTextSelectionToolbarContainerRenderBox
   // Paint at the offset set in the parent data.
   @override
   void paint(PaintingContext context, Offset offset) {
-    final ToolbarItemsParentData childParentData =
-        child.parentData as ToolbarItemsParentData;
+    final ToolbarItemsParentData childParentData = child.parentData as ToolbarItemsParentData;
     context.paintChild(child, childParentData.offset + offset);
   }
 
@@ -334,8 +335,7 @@ class ExtendedMaterialTextSelectionToolbarContainerRenderBox
   @override
   bool hitTestChildren(BoxHitTestResult result, {Offset position}) {
     // The x, y parameters have the top left of the node's box as the origin.
-    final ToolbarItemsParentData childParentData =
-        child.parentData as ToolbarItemsParentData;
+    final ToolbarItemsParentData childParentData = child.parentData as ToolbarItemsParentData;
     return result.addWithPaintOffset(
       offset: childParentData.offset,
       position: position,
@@ -355,8 +355,7 @@ class ExtendedMaterialTextSelectionToolbarContainerRenderBox
 
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
-    final ToolbarItemsParentData childParentData =
-        child.parentData as ToolbarItemsParentData;
+    final ToolbarItemsParentData childParentData = child.parentData as ToolbarItemsParentData;
     transform.translate(childParentData.offset.dx, childParentData.offset.dy);
     super.applyPaintTransform(child, transform);
   }
@@ -364,8 +363,7 @@ class ExtendedMaterialTextSelectionToolbarContainerRenderBox
 
 // Renders the menu items in the correct positions in the menu and its overflow
 // submenu based on calculating which item would first overflow.
-class ExtendedMaterialTextSelectionToolbarItems
-    extends MultiChildRenderObjectWidget {
+class ExtendedMaterialTextSelectionToolbarItems extends MultiChildRenderObjectWidget {
   ExtendedMaterialTextSelectionToolbarItems({
     Key key,
     @required this.isAbove,
@@ -380,8 +378,7 @@ class ExtendedMaterialTextSelectionToolbarItems
   final bool overflowOpen;
 
   @override
-  ExtendedMaterialTextSelectionToolbarItemsRenderBox createRenderObject(
-      BuildContext context) {
+  ExtendedMaterialTextSelectionToolbarItemsRenderBox createRenderObject(BuildContext context) {
     return ExtendedMaterialTextSelectionToolbarItemsRenderBox(
       isAbove: isAbove,
       overflowOpen: overflowOpen,
@@ -389,16 +386,14 @@ class ExtendedMaterialTextSelectionToolbarItems
   }
 
   @override
-  void updateRenderObject(BuildContext context,
-      ExtendedMaterialTextSelectionToolbarItemsRenderBox renderObject) {
+  void updateRenderObject(BuildContext context, ExtendedMaterialTextSelectionToolbarItemsRenderBox renderObject) {
     renderObject
       ..isAbove = isAbove
       ..overflowOpen = overflowOpen;
   }
 
   @override
-  _TextSelectionToolbarItemsElement createElement() =>
-      _TextSelectionToolbarItemsElement(this);
+  _TextSelectionToolbarItemsElement createElement() => _TextSelectionToolbarItemsElement(this);
 }
 
 class _TextSelectionToolbarItemsElement extends MultiChildRenderObjectElement {
@@ -407,8 +402,7 @@ class _TextSelectionToolbarItemsElement extends MultiChildRenderObjectElement {
   ) : super(widget);
 
   static bool _shouldPaint(Element child) {
-    return (child.renderObject.parentData as ToolbarItemsParentData)
-        .shouldPaint;
+    return (child.renderObject.parentData as ToolbarItemsParentData).shouldPaint;
   }
 
   @override
@@ -432,7 +426,9 @@ class ExtendedMaterialTextSelectionToolbarItemsRenderBox extends RenderBox
   int _lastIndexThatFits = -1;
 
   bool _isAbove;
+
   bool get isAbove => _isAbove;
+
   set isAbove(bool value) {
     if (value == isAbove) {
       return;
@@ -442,7 +438,9 @@ class ExtendedMaterialTextSelectionToolbarItemsRenderBox extends RenderBox
   }
 
   bool _overflowOpen;
+
   bool get overflowOpen => _overflowOpen;
+
   set overflowOpen(bool value) {
     if (value == overflowOpen) {
       return;
@@ -520,14 +518,12 @@ class ExtendedMaterialTextSelectionToolbarItemsRenderBox extends RenderBox
     Size nextSize = const Size(0.0, 0.0);
     double fitWidth = 0.0;
     final RenderBox navButton = firstChild;
-    double overflowHeight =
-        overflowOpen && !isAbove ? navButton.size.height : 0.0;
+    double overflowHeight = overflowOpen && !isAbove ? navButton.size.height : 0.0;
     visitChildren((RenderObject renderObjectChild) {
       i++;
 
       final RenderBox child = renderObjectChild as RenderBox;
-      final ToolbarItemsParentData childParentData =
-          child.parentData as ToolbarItemsParentData;
+      final ToolbarItemsParentData childParentData = child.parentData as ToolbarItemsParentData;
 
       // Handle placing the navigation button after iterating all children.
       if (renderObjectChild == navButton) {
@@ -559,13 +555,11 @@ class ExtendedMaterialTextSelectionToolbarItemsRenderBox extends RenderBox
     });
 
     // Place the navigation button if needed.
-    final ToolbarItemsParentData navButtonParentData =
-        navButton.parentData as ToolbarItemsParentData;
+    final ToolbarItemsParentData navButtonParentData = navButton.parentData as ToolbarItemsParentData;
     if (_shouldPaintChild(firstChild, 0)) {
       navButtonParentData.shouldPaint = true;
       if (overflowOpen) {
-        navButtonParentData.offset =
-            isAbove ? Offset(0.0, overflowHeight) : Offset.zero;
+        navButtonParentData.offset = isAbove ? Offset(0.0, overflowHeight) : Offset.zero;
         nextSize = Size(
           nextSize.width,
           isAbove ? nextSize.height + navButton.size.height : nextSize.height,
@@ -597,8 +591,7 @@ class ExtendedMaterialTextSelectionToolbarItemsRenderBox extends RenderBox
   void paint(PaintingContext context, Offset offset) {
     visitChildren((RenderObject renderObjectChild) {
       final RenderBox child = renderObjectChild as RenderBox;
-      final ToolbarItemsParentData childParentData =
-          child.parentData as ToolbarItemsParentData;
+      final ToolbarItemsParentData childParentData = child.parentData as ToolbarItemsParentData;
       if (!childParentData.shouldPaint) {
         return;
       }
@@ -619,8 +612,7 @@ class ExtendedMaterialTextSelectionToolbarItemsRenderBox extends RenderBox
     // The x, y parameters have the top left of the node's box as the origin.
     RenderBox child = lastChild;
     while (child != null) {
-      final ToolbarItemsParentData childParentData =
-          child.parentData as ToolbarItemsParentData;
+      final ToolbarItemsParentData childParentData = child.parentData as ToolbarItemsParentData;
 
       // Don't hit test children aren't shown.
       if (!childParentData.shouldPaint) {
@@ -649,8 +641,7 @@ class ExtendedMaterialTextSelectionToolbarItemsRenderBox extends RenderBox
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
     visitChildren((RenderObject renderObjectChild) {
       final RenderBox child = renderObjectChild as RenderBox;
-      final ToolbarItemsParentData childParentData =
-          child.parentData as ToolbarItemsParentData;
+      final ToolbarItemsParentData childParentData = child.parentData as ToolbarItemsParentData;
       if (childParentData.shouldPaint) {
         visitor(renderObjectChild);
       }
@@ -660,10 +651,8 @@ class ExtendedMaterialTextSelectionToolbarItemsRenderBox extends RenderBox
 
 /// Centers the toolbar around the given anchor, ensuring that it remains on
 /// screen.
-class ExtendedMaterialTextSelectionToolbarLayout
-    extends SingleChildLayoutDelegate {
-  ExtendedMaterialTextSelectionToolbarLayout(
-      this.anchor, this.upperBounds, this.fitsAbove);
+class ExtendedMaterialTextSelectionToolbarLayout extends SingleChildLayoutDelegate {
+  ExtendedMaterialTextSelectionToolbarLayout(this.anchor, this.upperBounds, this.fitsAbove);
 
   /// Anchor position of the toolbar in global coordinates.
   final Offset anchor;
@@ -684,8 +673,7 @@ class ExtendedMaterialTextSelectionToolbarLayout
 
   // Return the value that centers width as closely as possible to position
   // while fitting inside of min and max.
-  static double _centerOn(
-      double position, double width, double min, double max) {
+  static double _centerOn(double position, double width, double min, double max) {
     // If it overflows on the left, put it as far left as possible.
     if (position - width / 2.0 < min) {
       return min;
@@ -714,9 +702,7 @@ class ExtendedMaterialTextSelectionToolbarLayout
         _kToolbarScreenPadding,
         size.width - _kToolbarScreenPadding,
       ),
-      fitsAbove
-          ? math.max(upperBounds, anchor.dy - childSize.height)
-          : anchor.dy,
+      fitsAbove ? math.max(upperBounds, anchor.dy - childSize.height) : anchor.dy,
     );
   }
 
@@ -736,8 +722,7 @@ class ExtendedMaterialTextSelectionHandlePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final Paint paint = Paint()..color = color;
     final double radius = size.width / 2.0;
-    final Rect circle =
-        Rect.fromCircle(center: Offset(radius, radius), radius: radius);
+    final Rect circle = Rect.fromCircle(center: Offset(radius, radius), radius: radius);
     final Rect point = Rect.fromLTWH(0.0, 0.0, radius, radius);
     final Path path = Path()
       ..addOval(circle)
@@ -752,10 +737,19 @@ class ExtendedMaterialTextSelectionHandlePainter extends CustomPainter {
 }
 
 class ExtendedMaterialTextSelectionControls extends TextSelectionControls {
+  ExtendedMaterialTextSelectionControls()
+      : preActions = null,
+        postActions = null,
+        super();
+
+  ExtendedMaterialTextSelectionControls.withActions({this.preActions, this.postActions});
+
+  final List<ActionData> preActions;
+  final List<ActionData> postActions;
+
   /// Returns the size of the Material handle.
   @override
-  Size getHandleSize(double textLineHeight) =>
-      const Size(_kHandleSize, _kHandleSize);
+  Size getHandleSize(double textLineHeight) => const Size(_kHandleSize, _kHandleSize);
 
   /// Builder for material-style copy/paste text selection toolbar.
   @override
@@ -774,26 +768,17 @@ class ExtendedMaterialTextSelectionControls extends TextSelectionControls {
     // The toolbar should appear below the TextField when there is not enough
     // space above the TextField to show it.
     final TextSelectionPoint startTextSelectionPoint = endpoints[0];
-    final TextSelectionPoint endTextSelectionPoint =
-        endpoints.length > 1 ? endpoints[1] : endpoints[0];
-    const double closedToolbarHeightNeeded =
-        _kToolbarScreenPadding + _kToolbarHeight + _kToolbarContentDistance;
+    final TextSelectionPoint endTextSelectionPoint = endpoints.length > 1 ? endpoints[1] : endpoints[0];
+    const double closedToolbarHeightNeeded = _kToolbarScreenPadding + _kToolbarHeight + _kToolbarContentDistance;
     final double paddingTop = MediaQuery.of(context).padding.top;
-    final double availableHeight = globalEditableRegion.top +
-        startTextSelectionPoint.point.dy -
-        textLineHeight -
-        paddingTop;
+    final double availableHeight =
+        globalEditableRegion.top + startTextSelectionPoint.point.dy - textLineHeight - paddingTop;
     final bool fitsAbove = closedToolbarHeightNeeded <= availableHeight;
     final Offset anchor = Offset(
       globalEditableRegion.left + selectionMidpoint.dx,
       fitsAbove
-          ? globalEditableRegion.top +
-              startTextSelectionPoint.point.dy -
-              textLineHeight -
-              _kToolbarContentDistance
-          : globalEditableRegion.top +
-              endTextSelectionPoint.point.dy +
-              _kToolbarContentDistanceBelow,
+          ? globalEditableRegion.top + startTextSelectionPoint.point.dy - textLineHeight - _kToolbarContentDistance
+          : globalEditableRegion.top + endTextSelectionPoint.point.dy + _kToolbarContentDistanceBelow,
     );
 
     return Stack(
@@ -807,14 +792,22 @@ class ExtendedMaterialTextSelectionControls extends TextSelectionControls {
           child: ExtendedMaterialTextSelectionToolbar(
             clipboardStatus: clipboardStatus,
             handleCut: canCut(delegate) ? () => handleCut(delegate) : null,
-            handleCopy: canCopy(delegate)
-                ? () => handleCopy(delegate, clipboardStatus)
-                : null,
-            handlePaste:
-                canPaste(delegate) ? () => handlePaste(delegate) : null,
-            handleSelectAll:
-                canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
+            handleCopy: canCopy(delegate) ? () => handleCopy(delegate, clipboardStatus) : null,
+            handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
+            handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
             isAbove: fitsAbove,
+            preActions: preActions?.where((element) => element.shouldShow(delegate))?.map(
+              (ActionData data) => _ItemData(
+                () => data.onPressed(delegate),
+                data.label,
+              ),
+            )?.toList(),
+            postActions: postActions?.where((element) => element.shouldShow(delegate))?.map(
+                  (ActionData data) => _ItemData(
+                    () => data.onPressed(delegate),
+                data.label,
+              ),
+            )?.toList(),
           ),
         ),
       ],
@@ -823,8 +816,7 @@ class ExtendedMaterialTextSelectionControls extends TextSelectionControls {
 
   /// Builder for material-style text selection handles.
   @override
-  Widget buildHandle(
-      BuildContext context, TextSelectionHandleType type, double textHeight) {
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textHeight) {
     final Widget handle = SizedBox(
       width: _kHandleSize,
       height: _kHandleSize,
@@ -878,11 +870,9 @@ class ExtendedMaterialTextSelectionControls extends TextSelectionControls {
     final TextEditingValue value = delegate.textEditingValue;
     return delegate.selectAllEnabled &&
         value.text.isNotEmpty &&
-        !(value.selection.start == 0 &&
-            value.selection.end == value.text.length);
+        !(value.selection.start == 0 && value.selection.end == value.text.length);
   }
 }
 
 /// Text selection controls that follow the Material Design specification.
-final TextSelectionControls extendedMaterialTextSelectionControls =
-    ExtendedMaterialTextSelectionControls();
+final TextSelectionControls extendedMaterialTextSelectionControls = ExtendedMaterialTextSelectionControls();
