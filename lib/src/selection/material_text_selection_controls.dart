@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
 
+import '../../extended_text_library.dart';
+
 const double _kHandleSize = 22.0;
 
 // Minimal padding from all edges of the selection toolbar to all edges of the
@@ -28,6 +30,8 @@ class ExtendedMaterialTextSelectionToolbar extends StatefulWidget {
     this.handlePaste,
     this.handleSelectAll,
     this.isAbove,
+    this.preActions,
+    this.postActions,
   }) : super(key: key);
 
   final ClipboardStatusNotifier clipboardStatus;
@@ -35,6 +39,8 @@ class ExtendedMaterialTextSelectionToolbar extends StatefulWidget {
   final VoidCallback handleCopy;
   final VoidCallback handlePaste;
   final VoidCallback handleSelectAll;
+  final List<_ItemData> preActions;
+  final List<_ItemData> postActions;
 
   // When true, the toolbar fits above its anchor and will be positioned there.
   final bool isAbove;
@@ -174,6 +180,7 @@ class ExtendedMaterialTextSelectionToolbarState
     final MaterialLocalizations localizations =
         MaterialLocalizations.of(context);
     final List<_ItemData> itemDatas = <_ItemData>[
+      if (widget.preActions != null) ...widget.preActions,
       if (widget.handleCut != null)
         _ItemData(widget.handleCut, localizations.cutButtonLabel),
       if (widget.handleCopy != null)
@@ -183,6 +190,7 @@ class ExtendedMaterialTextSelectionToolbarState
         _ItemData(widget.handlePaste, localizations.pasteButtonLabel),
       if (widget.handleSelectAll != null)
         _ItemData(widget.handleSelectAll, localizations.selectAllButtonLabel),
+      if (widget.postActions != null) ...widget.postActions,
     ];
 
     // If there is no option available, build an empty widget.
@@ -751,7 +759,17 @@ class ExtendedMaterialTextSelectionHandlePainter extends CustomPainter {
   }
 }
 
-class ExtendedMaterialTextSelectionControls extends TextSelectionControls {
+class ExtendedMaterialTextSelectionControls extends TextSelectionControls implements ExtendedTextSelectionControls {
+  ExtendedMaterialTextSelectionControls()
+      : preActions = null,
+        postActions = null,
+        super();
+
+  ExtendedMaterialTextSelectionControls.withActions({this.preActions, this.postActions});
+
+  final List<ToolbarAction> preActions;
+  final List<ToolbarAction> postActions;
+
   /// Returns the size of the Material handle.
   @override
   Size getHandleSize(double textLineHeight) =>
@@ -815,6 +833,24 @@ class ExtendedMaterialTextSelectionControls extends TextSelectionControls {
             handleSelectAll:
                 canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
             isAbove: fitsAbove,
+            preActions: preActions
+                ?.where((ToolbarAction element) => element.shouldShow(delegate))
+                ?.map(
+                  (ToolbarAction action) => _ItemData(
+                    () => action.onPressed(delegate),
+                    action.label,
+                  ),
+                )
+                ?.toList(),
+            postActions: postActions
+                ?.where((ToolbarAction element) => element.shouldShow(delegate))
+                ?.map(
+                  (ToolbarAction action) => _ItemData(
+                    () => action.onPressed(delegate),
+                    action.label,
+                  ),
+                )
+                ?.toList(),
           ),
         ),
       ],
