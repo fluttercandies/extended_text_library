@@ -734,8 +734,8 @@ class ExtendedMaterialTextSelectionControls extends TextSelectionControls implem
 
   ExtendedMaterialTextSelectionControls.withActions({this.preActions, this.postActions});
 
-  final List<ActionData> preActions;
-  final List<ActionData> postActions;
+  final List<ToolbarAction> preActions;
+  final List<ToolbarAction> postActions;
 
   /// Returns the size of the Material handle.
   @override
@@ -787,20 +787,20 @@ class ExtendedMaterialTextSelectionControls extends TextSelectionControls implem
             handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
             isAbove: fitsAbove,
             preActions: preActions
-                ?.where((ActionData element) => element.shouldShow(delegate))
+                ?.where((ToolbarAction element) => element.shouldShow(delegate))
                 ?.map(
-                  (ActionData data) => _ItemData(
-                    () => data.onPressed(delegate),
-                    data.label,
+                  (ToolbarAction action) => _ItemData(
+                    () => action.onPressed(delegate),
+                    action.label,
                   ),
                 )
                 ?.toList(),
             postActions: postActions
-                ?.where((ActionData element) => element.shouldShow(delegate))
+                ?.where((ToolbarAction element) => element.shouldShow(delegate))
                 ?.map(
-                  (ActionData data) => _ItemData(
-                    () => data.onPressed(delegate),
-                    data.label,
+                  (ToolbarAction action) => _ItemData(
+                    () => action.onPressed(delegate),
+                    action.label,
                   ),
                 )
                 ?.toList(),

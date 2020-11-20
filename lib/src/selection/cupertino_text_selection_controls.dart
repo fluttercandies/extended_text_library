@@ -504,8 +504,8 @@ class ExtendedCupertinoTextSelectionControls extends TextSelectionControls imple
 
   ExtendedCupertinoTextSelectionControls.withActions({this.preActions, this.postActions});
 
-  List<ActionData> postActions;
-  List<ActionData> preActions;
+  List<ToolbarAction> postActions;
+  List<ToolbarAction> preActions;
 
   /// Returns the size of the Cupertino handle.
   @override
@@ -569,12 +569,12 @@ class ExtendedCupertinoTextSelectionControls extends TextSelectionControls imple
           canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
       isArrowPointingDown: isArrowPointingDown,
       preActions: preActions
-          ?.where((ActionData element) => element.shouldShow(delegate))
-          ?.map((ActionData action) => _ItemData(action.label, () => action.onPressed(delegate)))
+          ?.where((ToolbarAction element) => element.shouldShow(delegate))
+          ?.map((ToolbarAction action) => _ItemData(action.label, () => action.onPressed(delegate)))
           ?.toList(),
       postActions: postActions
-          ?.where((ActionData element) => element.shouldShow(delegate))
-          ?.map((ActionData action) => _ItemData(action.label, () => action.onPressed(delegate)))
+          ?.where((ToolbarAction element) => element.shouldShow(delegate))
+          ?.map((ToolbarAction action) => _ItemData(action.label, () => action.onPressed(delegate)))
           ?.toList(),
     );
   }

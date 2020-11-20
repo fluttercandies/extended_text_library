@@ -2,8 +2,8 @@ import 'package:flutter/foundation.dart';
 
 import '../../extended_text_library.dart';
 
-class ActionData {
-  ActionData({
+class ToolbarAction {
+  ToolbarAction({
     @required this.onPressed,
     @required this.label,
     this.shouldShow,
