@@ -569,12 +569,12 @@ class ExtendedCupertinoTextSelectionControls extends TextSelectionControls imple
           canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
       isArrowPointingDown: isArrowPointingDown,
       preActions: preActions
-          ?.where((ToolbarAction element) => element.shouldShow(delegate))
-          ?.map((ToolbarAction action) => _ItemData(action.label, () => action.onPressed(delegate)))
+          ?.where((ToolbarAction element) => element.shouldShow?.call(delegate) ?? true)
+          ?.map((ToolbarAction action) => _ItemData(action.label, () => action.onPressed?.call(delegate)))
           ?.toList(),
       postActions: postActions
-          ?.where((ToolbarAction element) => element.shouldShow(delegate))
-          ?.map((ToolbarAction action) => _ItemData(action.label, () => action.onPressed(delegate)))
+          ?.where((ToolbarAction element) => element.shouldShow?.call(delegate) ?? true)
+          ?.map((ToolbarAction action) => _ItemData(action.label, () => action.onPressed?.call(delegate)))
           ?.toList(),
     );
   }

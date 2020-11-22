@@ -834,19 +834,19 @@ class ExtendedMaterialTextSelectionControls extends TextSelectionControls implem
                 canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
             isAbove: fitsAbove,
             preActions: preActions
-                ?.where((ToolbarAction element) => element.shouldShow(delegate))
+                ?.where((ToolbarAction element) => element.shouldShow?.call(delegate) ?? true)
                 ?.map(
                   (ToolbarAction action) => _ItemData(
-                    () => action.onPressed(delegate),
+                    () => action.onPressed?.call(delegate),
                     action.label,
                   ),
                 )
                 ?.toList(),
             postActions: postActions
-                ?.where((ToolbarAction element) => element.shouldShow(delegate))
+                ?.where((ToolbarAction element) => element.shouldShow?.call(delegate) ?? true)
                 ?.map(
                   (ToolbarAction action) => _ItemData(
-                    () => action.onPressed(delegate),
+                    () => action.onPressed?.call(delegate),
                     action.label,
                   ),
                 )
