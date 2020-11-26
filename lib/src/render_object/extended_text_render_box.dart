@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import '../special_inline_span_base.dart';
+
 ///
 ///  create by zmtzawqlp on 2019/8/1
 ///
@@ -33,7 +35,9 @@ abstract class ExtendedTextRenderBox extends RenderBox
   Widget get overflowWidget;
   int get textChildCount =>
       overflowWidget != null ? childCount - 1 : childCount;
-
+  bool get hasPlaceholderSpan => _placeholderSpans?.isNotEmpty ?? false;
+  bool _hasSpecialInlineSpanBase = false;
+  bool get hasSpecialInlineSpanBase => _hasSpecialInlineSpanBase;
   List<PlaceholderSpan> _placeholderSpans;
 
   void extractPlaceholderSpans(InlineSpan span) {
@@ -42,6 +46,8 @@ abstract class ExtendedTextRenderBox extends RenderBox
       if (span is PlaceholderSpan) {
         final PlaceholderSpan placeholderSpan = span;
         _placeholderSpans.add(placeholderSpan);
+      } else if (span is SpecialInlineSpanBase) {
+        _hasSpecialInlineSpanBase = true;
       }
       return true;
     });
@@ -323,12 +329,12 @@ abstract class ExtendedTextRenderBox extends RenderBox
   Offset getCaretOffset(TextPosition textPosition,
       {ValueChanged<double> caretHeightCallBack,
       Offset effectiveOffset,
-      bool handleSpecialText = true,
       Rect caretPrototype = Rect.zero}) {
     effectiveOffset ??= Offset.zero;
 
     ///zmt
-    if (handleSpecialText) {
+    /// fix widget span
+    if (hasPlaceholderSpan) {
       ///if first index, check by first span
       int offset = textPosition.offset;
       List<TextBox> boxs = textPainter.getBoxesForSelection(TextSelection(

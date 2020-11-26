@@ -31,7 +31,6 @@ abstract class ExtendedTextSelectionRenderObject extends ExtendedTextRenderBox {
 
   double get preferredLineHeight;
   TextPosition getPositionForPoint(Offset globalPosition);
-  bool get handleSpecialText;
   InlineSpan get text;
   bool get isAttached;
   TextDirection get textDirection;
@@ -129,7 +128,7 @@ abstract class ExtendedTextSelectionRenderObject extends ExtendedTextRenderBox {
           affinity: endOfLine ? position.affinity : TextAffinity.upstream);
     }
 
-    selection = handleSpecialText
+    selection = hasSpecialInlineSpanBase
         ? convertTextPainterSelectionToTextInputSelection(text, selection)
         : selection;
 
@@ -166,7 +165,7 @@ abstract class ExtendedTextSelectionRenderObject extends ExtendedTextRenderBox {
           : textPainter.getPositionForOffset(globalToLocal(to - paintOffset));
 
       //zmt
-      if (handleSpecialText) {
+      if (hasSpecialInlineSpanBase) {
         fromPosition =
             convertTextPainterPostionToTextInputPostion(text, fromPosition);
         toPosition =
@@ -228,7 +227,7 @@ abstract class ExtendedTextSelectionRenderObject extends ExtendedTextRenderBox {
       selection = TextSelection(baseOffset: word.start, extentOffset: word.end);
     }
 
-    return handleSpecialText
+    return hasSpecialInlineSpanBase
         ? convertTextPainterSelectionToTextInputSelection(text, selection,
             selectWord: true)
         : selection;

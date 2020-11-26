@@ -825,7 +825,7 @@ class ExtendedCupertinoTextSelectionToolbarItemsElement
   }
 
   @override
-  void insertChildRenderObject(RenderObject child, dynamic slot) {
+  void insertRenderObjectChild(RenderObject child, dynamic slot) {
     if (slot is _CupertinoTextSelectionToolbarItemsSlot) {
       assert(child is RenderBox);
       assert(slot is _CupertinoTextSelectionToolbarItemsSlot);
@@ -846,10 +846,12 @@ class ExtendedCupertinoTextSelectionToolbarItemsElement
 
   // This is not reachable for children that don't have an IndexedSlot.
   @override
-  void moveChildRenderObject(RenderObject child, IndexedSlot<Element> slot) {
+  @override
+  void moveRenderObjectChild(RenderObject child, IndexedSlot<Element> oldSlot,
+      IndexedSlot<Element> newSlot) {
     assert(child.parent == renderObject);
     renderObject.move(child as RenderBox,
-        after: slot?.value?.renderObject as RenderBox);
+        after: newSlot?.value?.renderObject as RenderBox);
   }
 
   static bool _shouldPaint(Element child) {
@@ -858,7 +860,7 @@ class ExtendedCupertinoTextSelectionToolbarItemsElement
   }
 
   @override
-  void removeChildRenderObject(RenderObject child) {
+  void removeRenderObjectChild(RenderObject child, dynamic slot) {
     // Check if the child is in a slot.
     if (renderObject.childToSlot.containsKey(child)) {
       assert(child is RenderBox);

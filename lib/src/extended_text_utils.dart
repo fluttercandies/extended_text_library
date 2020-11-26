@@ -314,17 +314,25 @@ TextEditingValue handleSpecialTextSpanDelete(
 //}
 
 bool hasSpecialText(InlineSpan textSpan) {
-  final List<InlineSpan> list = <InlineSpan>[];
-  textSpanNestToArray(textSpan, list);
-  if (list.isEmpty) {
+  return hasT<SpecialInlineSpanBase>(textSpan);
+}
+
+bool hasT<T>(InlineSpan textSpan) {
+  if (textSpan == null) {
     return false;
   }
-
-  //for performance, make sure your all SpecialTextSpan are only in textSpan.children
-  //extended_text_field will only check textSpan.children
-  return list.firstWhere((InlineSpan x) => x is SpecialInlineSpanBase,
-          orElse: () => null) !=
-      null;
+  if (textSpan is T) {
+    return true;
+  }
+  if (textSpan is TextSpan && textSpan.children != null) {
+    for (final InlineSpan ts in textSpan.children) {
+      final bool has = hasT<T>(ts);
+      if (has) {
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 void textSpanNestToArray(InlineSpan textSpan, List<InlineSpan> list) {

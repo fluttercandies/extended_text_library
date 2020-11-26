@@ -472,7 +472,7 @@ class _TextSelectionHandleOverlayState
         widget.renderObject.getPositionForPoint(_dragPosition);
 
     ///zmt
-    if (widget.renderObject.handleSpecialText) {
+    if (widget.renderObject.hasSpecialInlineSpanBase) {
       position = convertTextPainterPostionToTextInputPostion(
           widget.renderObject.text, position);
     }

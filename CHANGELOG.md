@@ -1,3 +1,7 @@
+## 4.0.2
+
+* change handleSpecialText to hasSpecialInlineSpanBase
+* add hasPlaceholderSpan
 ## 4.0.1
 
 * Fix valid value range #23
