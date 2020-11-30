@@ -46,7 +46,8 @@ abstract class ExtendedTextRenderBox extends RenderBox
       if (span is PlaceholderSpan) {
         final PlaceholderSpan placeholderSpan = span;
         _placeholderSpans.add(placeholderSpan);
-      } else if (span is SpecialInlineSpanBase) {
+      }
+      if (span is SpecialInlineSpanBase) {
         _hasSpecialInlineSpanBase = true;
       }
       return true;

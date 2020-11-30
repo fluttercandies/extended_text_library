@@ -1,7 +1,13 @@
+# 4.0.3
+
+* Support keyboard copy on web/desktop for both text and text field
+* Fix wrong position of caret
+
 ## 4.0.2
 
-* change handleSpecialText to hasSpecialInlineSpanBase
-* add hasPlaceholderSpan
+* Change handleSpecialText to hasSpecialInlineSpanBase
+* Add hasPlaceholderSpan
+  
 ## 4.0.1
 
 * Fix valid value range #23
