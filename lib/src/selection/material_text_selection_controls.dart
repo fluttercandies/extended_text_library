@@ -77,15 +77,17 @@ class ExtendedMaterialTextSelectionToolbarState
         height: kMinInteractiveDimension,
         minWidth: kMinInteractiveDimension,
       ),
-      child: FlatButton(
+      child: TextButton(
         onPressed: itemData.onPressed,
-        padding: EdgeInsets.only(
-          // These values were eyeballed to match the native text selection menu
-          // on a Pixel 2 running Android 10.
-          left: 9.5 + (isFirst ? 5.0 : 0.0),
-          right: 9.5 + (isLast ? 5.0 : 0.0),
+        style: TextButton.styleFrom(
+          padding: EdgeInsets.only(
+            // These values were eyeballed to match the native text selection menu
+            // on a Pixel 2 running Android 10.
+            left: 9.5 + (isFirst ? 5.0 : 0.0),
+            right: 9.5 + (isLast ? 5.0 : 0.0),
+          ),
+          shape: const ContinuousRectangleBorder(side: BorderSide.none),
         ),
-        shape: Border.all(width: 0.0, color: Colors.transparent),
         child: Text(itemData.label),
       ),
     );
@@ -760,14 +762,14 @@ class ExtendedMaterialTextSelectionControls extends TextSelectionControls {
   /// Builder for material-style copy/paste text selection toolbar.
   @override
   Widget buildToolbar(
-    BuildContext context,
-    Rect globalEditableRegion,
-    double textLineHeight,
-    Offset selectionMidpoint,
-    List<TextSelectionPoint> endpoints,
-    TextSelectionDelegate delegate,
-    ClipboardStatusNotifier clipboardStatus,
-  ) {
+      BuildContext context,
+      Rect globalEditableRegion,
+      double textLineHeight,
+      Offset selectionMidpoint,
+      List<TextSelectionPoint> endpoints,
+      TextSelectionDelegate delegate,
+      ClipboardStatusNotifier clipboardStatus,
+      Offset _) {
     assert(debugCheckHasMediaQuery(context));
     assert(debugCheckHasMaterialLocalizations(context));
 
@@ -830,7 +832,7 @@ class ExtendedMaterialTextSelectionControls extends TextSelectionControls {
       height: _kHandleSize,
       child: CustomPaint(
         painter: ExtendedMaterialTextSelectionHandlePainter(
-          color: Theme.of(context).textSelectionHandleColor,
+          color: Theme.of(context).textSelectionTheme.selectionHandleColor,
         ),
       ),
     );

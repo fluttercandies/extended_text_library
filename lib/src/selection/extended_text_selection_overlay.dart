@@ -346,14 +346,14 @@ class ExtendedTextSelectionOverlay {
         showWhenUnlinked: false,
         offset: -editingRegion.topLeft,
         child: selectionControls.buildToolbar(
-          context,
-          editingRegion,
-          renderObject.preferredLineHeight,
-          midpoint,
-          endpoints,
-          selectionDelegate,
-          clipboardStatus,
-        ),
+            context,
+            editingRegion,
+            renderObject.preferredLineHeight,
+            midpoint,
+            endpoints,
+            selectionDelegate,
+            clipboardStatus,
+            null),
       ),
     );
   }
