@@ -526,6 +526,7 @@ class ExtendedCupertinoTextSelectionControls extends TextSelectionControls imple
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
     ClipboardStatusNotifier clipboardStatus,
+      Offset lastSecondaryTapDownPosition,
   ) {
     assert(debugCheckHasMediaQuery(context));
     final MediaQueryData mediaQuery = MediaQuery.of(context);

@@ -353,6 +353,7 @@ class ExtendedTextSelectionOverlay {
           endpoints,
           selectionDelegate,
           clipboardStatus,
+          null,
         ),
       ),
     );
