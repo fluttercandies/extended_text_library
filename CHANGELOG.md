@@ -1,4 +1,10 @@
-# 4.0.3
+## 5.0.0
+
+* Refactored `SpecialText`'s `startFlag` and `endFlag`'s type from `String` to `Pattern`.
+* Support `prefixSpans` and `suffixSpans` in the default spans builder by default.
+* Fill documentations for special text span builder.
+
+## 4.0.3
 
 * Support keyboard copy on web/desktop for both text and text field
 * Fix wrong position of caret
@@ -7,7 +13,7 @@
 
 * Change handleSpecialText to hasSpecialInlineSpanBase
 * Add hasPlaceholderSpan
-  
+
 ## 4.0.1
 
 * Fix valid value range #23

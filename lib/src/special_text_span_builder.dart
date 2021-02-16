@@ -1,10 +1,29 @@
-import 'package:extended_text_library/src/extended_text_typedef.dart';
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+import 'package:extended_text_library/src/extended_text_typedef.dart';
 
 abstract class SpecialTextSpanBuilder {
-  //build text span to specialText
-  TextSpan build(String data,
-      {TextStyle textStyle, SpecialTextGestureTapCallback onTap}) {
+  const SpecialTextSpanBuilder({
+    this.prefixSpans,
+    this.suffixSpans,
+  });
+
+  /// [InlineSpan]s that will be prepended to the spans list.
+  final List<InlineSpan> prefixSpans;
+
+  /// [InlineSpan]s that will be appended to the spans list.
+  final List<InlineSpan> suffixSpans;
+
+  /// Build text spans to [SpecialText].
+  ///
+  /// This method implements an text stack inside in order to split between
+  /// normal texts and special text that user defined.
+  TextSpan build(
+    String data, {
+    TextStyle textStyle,
+    SpecialTextGestureTapCallback onTap,
+  }) {
     if (data == null || data == '') {
       return null;
     }
@@ -12,7 +31,6 @@ abstract class SpecialTextSpanBuilder {
     if (data.isNotEmpty) {
       SpecialText specialText;
       String textStack = '';
-      //String text
       for (int i = 0; i < data.length; i++) {
         final String char = data[i];
         textStack += char;
@@ -25,12 +43,19 @@ abstract class SpecialTextSpanBuilder {
             textStack = '';
           }
         } else {
-          specialText = createSpecialText(textStack,
-              textStyle: textStyle, onTap: onTap, index: i);
+          specialText = createSpecialText(
+            textStack,
+            textStyle: textStyle,
+            onTap: onTap,
+            index: i,
+          );
           if (specialText != null) {
-            if (textStack.length - specialText.startFlag.length >= 0) {
+            if (textStack.length - specialText.startFlag.toString().length >=
+                0) {
               textStack = textStack.substring(
-                  0, textStack.length - specialText.startFlag.length);
+                0,
+                textStack.length - specialText.startFlag.toString().length,
+              );
               if (textStack.isNotEmpty) {
                 inlineList.add(TextSpan(text: textStack, style: textStyle));
               }
@@ -41,66 +66,104 @@ abstract class SpecialTextSpanBuilder {
       }
 
       if (specialText != null) {
-        inlineList.add(TextSpan(
-            text: specialText.startFlag + specialText.getContent(),
-            style: textStyle));
+        inlineList.add(
+          TextSpan(
+            text: specialText.startFlag.toString() + specialText.getContent(),
+            style: textStyle,
+          ),
+        );
       } else if (textStack.isNotEmpty) {
         inlineList.add(TextSpan(text: textStack, style: textStyle));
       }
     } else {
       inlineList.add(TextSpan(text: data, style: textStyle));
     }
-
+    if (prefixSpans != null) {
+      inlineList.insertAll(0, prefixSpans);
+    }
+    if (suffixSpans != null) {
+      inlineList.addAll(suffixSpans);
+    }
     return TextSpan(children: inlineList, style: textStyle);
   }
 
-  //build SpecialText base on startflag
-  SpecialText createSpecialText(String flag,
-      {TextStyle textStyle, SpecialTextGestureTapCallback onTap, int index});
+  /// Build [SpecialText] based on [startFlag].
+  ///
+  /// By using the default implementation, you can only use [isMatched] for
+  /// conditions in [createSpecialText] method, otherwise the correct special
+  /// text cannot spawned because [isMatched] only matches the end of the text
+  /// stack (in other words, the start of the special text).
+  SpecialText createSpecialText(
+    String data, {
+    TextStyle textStyle,
+    SpecialTextGestureTapCallback onTap,
+    int index,
+  });
 
-  /// start with SpecialText
-  bool isStart(String value, String startFlag) {
-    return value.endsWith(startFlag);
+  /// Whether the characters stack's ends with [startFlag].
+  ///
+  /// Be aware that the default implementation of the [SpecialTextSpanBuilder],
+  /// see documents above.
+  bool isMatched(String value, Pattern startFlag) {
+    return value.endsWithPattern(startFlag);
   }
 }
 
 abstract class SpecialText {
-  SpecialText(this.startFlag, this.endFlag, this.textStyle, {this.onTap})
-      : _content = StringBuffer();
+  SpecialText(
+    this.startFlag,
+    this.endFlag,
+    this.textStyle, {
+    this.onTap,
+  })  : assert(startFlag != null),
+        _content = StringBuffer();
+
   final StringBuffer _content;
 
-  ///start flag of SpecialText
-  final String startFlag;
+  /// Start flag of [SpecialText].
+  final Pattern startFlag;
 
-  ///end flag of SpecialText
-  final String endFlag;
+  /// End flag of [SpecialText].
+  final Pattern endFlag;
 
-  ///TextStyle of SpecialText
+  /// [TextStyle] of [SpecialText].
   final TextStyle textStyle;
 
-  ///tap call back of SpecialText
+  /// Tap callback of [SpecialText].
   final SpecialTextGestureTapCallback onTap;
 
-  ///finish SpecialText
+  /// Finish [SpecialText].
   InlineSpan finishText();
 
-  ///is end of SpecialText
-  bool isEnd(String value) {
-    return value.endsWith(endFlag);
-  }
+  /// Is [SpecialText] end with [endFlag].
+  bool isEnd(String value) => value.endsWithPattern(endFlag);
 
-  ///append text of SpecialText
-  void appendContent(String value) {
-    _content.write(value);
-  }
+  /// Append text of [SpecialText].
+  void appendContent(String value) => _content.write(value);
 
-  ///get content of SpecialText
-  String getContent() {
-    return _content.toString();
-  }
+  /// Get content of [SpecialText].
+  String getContent() => _content.toString();
 
   @override
-  String toString() {
-    return startFlag + getContent() + endFlag;
+  String toString() => '$startFlag${getContent()}$endFlag';
+}
+
+/// While Dart didn't support [String.endsWith] with [Pattern], this extension
+/// implements an method that support with [Pattern].
+extension _StringEndsWithRegEx on String {
+  bool endsWithPattern(Pattern other) {
+    if (other is String) {
+      return endsWith(other);
+    }
+    if (other.allMatches(this).isEmpty) {
+      return false;
+    }
+    final Iterable<Match> matches = other.allMatches(this);
+    final Match lastMatch = matches.last;
+    final String content = lastMatch.group(
+      math.max(lastMatch.groupCount - 1, 0),
+    );
+    final int index = indexOf(content);
+    return content.length + index == length;
   }
 }
