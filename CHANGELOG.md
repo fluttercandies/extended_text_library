@@ -1,6 +1,6 @@
 ## 5.0.0
 
-* Refactored `SpecialText`'s `startFlag` and `endFlag`'s type from `String` to `Pattern`.
+* Refactored `SpecialText`'s `startFlag` and `endFlag`'s type from `String` to `Pattern`, and `isStart` to `isMatched`.
 * Support `prefixSpans` and `suffixSpans` in the default spans builder by default.
 * Fill documentations for special text span builder.
 
