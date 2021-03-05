@@ -1,3 +1,6 @@
+# 5.0.0-non-null-safety
+
+* non-null-safety
 # 4.0.3
 
 * Support keyboard copy on web/desktop for both text and text field
