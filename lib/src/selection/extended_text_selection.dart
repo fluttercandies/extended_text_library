@@ -50,10 +50,10 @@ class ExtendedTextSelectionGestureDetectorBuilder {
   ///
   /// The [delegate] must not be null.
   ExtendedTextSelectionGestureDetectorBuilder({
-    @required this.delegate,
-    @required this.showToolbar,
-  })  : assert(delegate != null),
-        assert(showToolbar != null);
+    required this.delegate,
+    required this.showToolbar,
+    required this.hideToolbar,
+  });
 
   /// The delegate for this [ExtendedTextSelectionGestureDetectorBuilder].
   ///
@@ -63,7 +63,23 @@ class ExtendedTextSelectionGestureDetectorBuilder {
   @protected
   final ExtendedTextSelectionGestureDetectorBuilderDelegate delegate;
 
+  /// Returns true iff lastSecondaryTapDownPosition was on selection.
+  bool get _lastSecondaryTapWasOnSelection {
+    assert(renderEditable.lastSecondaryTapDownPosition != null);
+    if (renderEditable.selection == null) {
+      return false;
+    }
+
+    final TextPosition textPosition = renderEditable.getPositionForPoint(
+      renderEditable.lastSecondaryTapDownPosition!,
+    );
+
+    return renderEditable.selection!.base.offset <= textPosition.offset &&
+        renderEditable.selection!.extent.offset >= textPosition.offset;
+  }
+
   final Function showToolbar;
+  final Function hideToolbar;
 
   /// Whether to show the selection toolbar.
   ///
@@ -94,7 +110,7 @@ class ExtendedTextSelectionGestureDetectorBuilder {
     // through a touch screen (via either a finger or a stylus). A mouse shouldn't
     // trigger the selection overlay.
     // For backwards-compatibility, we treat a null kind the same as touch.
-    final PointerDeviceKind kind = details.kind;
+    final PointerDeviceKind? kind = details.kind;
     _shouldShowSelectionToolbar = kind == null ||
         kind == PointerDeviceKind.touch ||
         kind == PointerDeviceKind.stylus;
@@ -227,6 +243,35 @@ class ExtendedTextSelectionGestureDetectorBuilder {
     }
   }
 
+  /// Handler for [TextSelectionGestureDetector.onSecondaryTap].
+  ///
+  /// By default, selects the word if possible and shows the toolbar.
+  @protected
+  void onSecondaryTap() {
+    if (delegate.selectionEnabled) {
+      if (!_lastSecondaryTapWasOnSelection) {
+        renderEditable.selectWord(cause: SelectionChangedCause.tap);
+      }
+      if (shouldShowSelectionToolbar) {
+        hideToolbar();
+        showToolbar();
+      }
+    }
+  }
+
+  /// Handler for [TextSelectionGestureDetector.onSecondaryTapDown].
+  ///
+  /// See also:
+  ///
+  ///  * [TextSelectionGestureDetector.onSecondaryTapDown], which triggers this
+  ///    callback.
+  ///  * [onSecondaryTap], which is typically called after this.
+  @protected
+  void onSecondaryTapDown(TapDownDetails details) {
+    renderEditable.handleSecondaryTapDown(details);
+    _shouldShowSelectionToolbar = true;
+  }
+
   /// Handler for [TextSelectionGestureDetector.onDoubleTapDown].
   ///
   /// By default, it selects a word through [renderEditable.selectWord] if
@@ -256,6 +301,13 @@ class ExtendedTextSelectionGestureDetectorBuilder {
   ///    this callback.
   @protected
   void onDragSelectionStart(DragStartDetails details) {
+    if (!delegate.selectionEnabled) {
+      return;
+    }
+    final PointerDeviceKind? kind = details.kind;
+    _shouldShowSelectionToolbar = kind == null ||
+        kind == PointerDeviceKind.touch ||
+        kind == PointerDeviceKind.stylus;
     renderEditable.selectPositionAt(
       from: details.globalPosition,
       cause: SelectionChangedCause.drag,
@@ -273,6 +325,9 @@ class ExtendedTextSelectionGestureDetectorBuilder {
   @protected
   void onDragSelectionUpdate(
       DragStartDetails startDetails, DragUpdateDetails updateDetails) {
+    if (!delegate.selectionEnabled) {
+      return;
+    }
     renderEditable.selectPositionAt(
       from: startDetails.globalPosition,
       to: updateDetails.globalPosition,
@@ -298,15 +353,17 @@ class ExtendedTextSelectionGestureDetectorBuilder {
   ///
   /// The [child] or its subtree should contain [EditableText].
   Widget buildGestureDetector({
-    Key key,
-    HitTestBehavior behavior,
-    Widget child,
+    Key? key,
+    HitTestBehavior? behavior,
+    required Widget child,
   }) {
     return TextSelectionGestureDetector(
       key: key,
       onTapDown: onTapDown,
       onForcePressStart: delegate.forcePressEnabled ? onForcePressStart : null,
       onForcePressEnd: delegate.forcePressEnabled ? onForcePressEnd : null,
+      onSecondaryTap: onSecondaryTap,
+      onSecondaryTapDown: onSecondaryTapDown,
       onSingleTapUp: onSingleTapUp,
       onSingleTapCancel: onSingleTapCancel,
       onSingleLongTapStart: onSingleLongTapStart,
@@ -325,25 +382,26 @@ class ExtendedTextSelectionGestureDetectorBuilder {
 class CommonTextSelectionGestureDetectorBuilder
     extends ExtendedTextSelectionGestureDetectorBuilder {
   CommonTextSelectionGestureDetectorBuilder({
-    @required ExtendedTextSelectionGestureDetectorBuilderDelegate delegate,
-    @required Function showToolbar,
-    @required Function hideToolbar,
-    @required Function onTap,
-    @required BuildContext context,
-    @required Function requestKeyboard,
-  })  : _hideToolbar = hideToolbar,
-        _onTap = onTap,
+    required ExtendedTextSelectionGestureDetectorBuilderDelegate delegate,
+    required Function showToolbar,
+    required Function hideToolbar,
+    required Function? onTap,
+    required BuildContext context,
+    required Function? requestKeyboard,
+  })   : _onTap = onTap,
         _context = context,
         _requestKeyboard = requestKeyboard,
-        super(delegate: delegate, showToolbar: showToolbar);
+        super(
+          delegate: delegate,
+          showToolbar: showToolbar,
+          hideToolbar: hideToolbar,
+        );
 
-  final Function _hideToolbar;
-
-  final Function _onTap;
+  final Function? _onTap;
 
   final BuildContext _context;
 
-  final Function _requestKeyboard;
+  final Function? _requestKeyboard;
 
   @override
   void onForcePressStart(ForcePressDetails details) {
@@ -385,12 +443,25 @@ class CommonTextSelectionGestureDetectorBuilder
 
   @override
   void onSingleTapUp(TapUpDetails details) {
-    _hideToolbar();
+    hideToolbar();
     if (delegate.selectionEnabled) {
       switch (Theme.of(_context).platform) {
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
-          renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
+          switch (details.kind) {
+            case PointerDeviceKind.mouse:
+            case PointerDeviceKind.stylus:
+            case PointerDeviceKind.invertedStylus:
+              // Precise devices should place the cursor at a precise position.
+              renderEditable.selectPosition(cause: SelectionChangedCause.tap);
+              break;
+            case PointerDeviceKind.touch:
+            case PointerDeviceKind.unknown:
+              // On macOS/iOS/iPadOS a touch tap places the cursor at the edge
+              // of the word.
+              renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
+              break;
+          }
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:

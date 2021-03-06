@@ -65,9 +65,9 @@ TextSelection convertTextInputSelectionToTextPainterSelection(
   return selection;
 }
 
-TextPosition convertTextPainterPostionToTextInputPostion(
-    InlineSpan text, TextPosition textPosition,
-    {bool end}) {
+TextPosition? convertTextPainterPostionToTextInputPostion(
+    InlineSpan text, TextPosition? textPosition,
+    {bool? end}) {
   final List<InlineSpan> list = <InlineSpan>[];
   textSpanNestToArray(text, list);
   if (list.isNotEmpty && textPosition != null) {
@@ -119,29 +119,29 @@ TextSelection convertTextPainterSelectionToTextInputSelection(
     {bool selectWord = false}) {
   if (selection.isValid) {
     if (selection.isCollapsed) {
-      final TextPosition extent =
+      final TextPosition? extent =
           convertTextPainterPostionToTextInputPostion(text, selection.extent);
       if (selection.extent != extent) {
         selection = selection.copyWith(
-            baseOffset: extent.offset,
+            baseOffset: extent!.offset,
             extentOffset: extent.offset,
             affinity: selection.affinity,
             isDirectional: selection.isDirectional);
         return selection;
       }
     } else {
-      final TextPosition extent = convertTextPainterPostionToTextInputPostion(
+      final TextPosition? extent = convertTextPainterPostionToTextInputPostion(
           text, selection.extent,
           end: selectWord ? true : null);
 
-      final TextPosition base = convertTextPainterPostionToTextInputPostion(
+      final TextPosition? base = convertTextPainterPostionToTextInputPostion(
           text, selection.base,
           end: selectWord ? false : null);
 
       if (selection.extent != extent || selection.base != base) {
         selection = selection.copyWith(
-            baseOffset: base.offset,
-            extentOffset: extent.offset,
+            baseOffset: base!.offset,
+            extentOffset: extent!.offset,
             affinity: selection.affinity,
             isDirectional: selection.isDirectional);
         return selection;
@@ -156,7 +156,7 @@ TextPosition makeSureCaretNotInSpecialText(
     InlineSpan text, TextPosition textPosition) {
   final List<InlineSpan> list = <InlineSpan>[];
   textSpanNestToArray(text, list);
-  if (list.isNotEmpty && textPosition != null) {
+  if (list.isNotEmpty) {
     int caretOffset = textPosition.offset;
     if (caretOffset <= 0) {
       return textPosition;
@@ -205,7 +205,7 @@ TextPosition makeSureCaretNotInSpecialText(
 ///make sure caret is not in text when caretIn is false
 TextEditingValue correctCaretOffset(TextEditingValue value, InlineSpan textSpan,
     TextInputConnection textInputConnection,
-    {TextSelection newSelection}) {
+    {TextSelection? newSelection}) {
   final List<InlineSpan> list = <InlineSpan>[];
   textSpanNestToArray(textSpan, list);
   if (list.isEmpty) {
@@ -240,7 +240,7 @@ TextEditingValue correctCaretOffset(TextEditingValue value, InlineSpan textSpan,
       value = value.copyWith(
           selection: selection.copyWith(
               baseOffset: caretOffset, extentOffset: caretOffset));
-      textInputConnection?.setEditingState(value);
+      textInputConnection.setEditingState(value);
     }
   }
   return value;
@@ -248,11 +248,11 @@ TextEditingValue correctCaretOffset(TextEditingValue value, InlineSpan textSpan,
 
 TextEditingValue handleSpecialTextSpanDelete(
     TextEditingValue value,
-    TextEditingValue oldValue,
+    TextEditingValue? oldValue,
     InlineSpan oldTextSpan,
     TextInputConnection textInputConnection) {
-  final String oldText = oldValue?.text;
-  String newText = value?.text;
+  final String? oldText = oldValue?.text;
+  String newText = value.text;
   final List<InlineSpan> list = <InlineSpan>[];
   textSpanNestToArray(oldTextSpan, list);
   if (list.isNotEmpty) {
@@ -262,7 +262,6 @@ TextEditingValue handleSpecialTextSpanDelete(
     ///take care of image span
     if (imageSpans.isNotEmpty &&
         oldText != null &&
-        newText != null &&
         oldText.length > newText.length) {
       final int difStart = value.selection.extentOffset;
       //int difEnd = oldText.length - 1;
@@ -292,7 +291,7 @@ TextEditingValue handleSpecialTextSpanDelete(
                   extentOffset: caretOffset,
                   affinity: value.selection.affinity,
                   isDirectional: value.selection.isDirectional));
-          textInputConnection?.setEditingState(value);
+          textInputConnection.setEditingState(value);
         }
       }
     }
@@ -317,7 +316,7 @@ bool hasSpecialText(InlineSpan textSpan) {
   return hasT<SpecialInlineSpanBase>(textSpan);
 }
 
-bool hasT<T>(InlineSpan textSpan) {
+bool hasT<T>(InlineSpan? textSpan) {
   if (textSpan == null) {
     return false;
   }
@@ -325,7 +324,7 @@ bool hasT<T>(InlineSpan textSpan) {
     return true;
   }
   if (textSpan is TextSpan && textSpan.children != null) {
-    for (final InlineSpan ts in textSpan.children) {
+    for (final InlineSpan ts in textSpan.children!) {
       final bool has = hasT<T>(ts);
       if (has) {
         return true;
@@ -335,14 +334,13 @@ bool hasT<T>(InlineSpan textSpan) {
   return false;
 }
 
-void textSpanNestToArray(InlineSpan textSpan, List<InlineSpan> list) {
-  assert(list != null);
+void textSpanNestToArray(InlineSpan? textSpan, List<InlineSpan> list) {
   if (textSpan == null) {
     return;
   }
   list.add(textSpan);
   if (textSpan is TextSpan && textSpan.children != null) {
-    for (final InlineSpan ts in textSpan.children) {
+    for (final InlineSpan ts in textSpan.children!) {
       textSpanNestToArray(ts, list);
     }
   }
@@ -357,7 +355,7 @@ String textSpanToActualText(InlineSpan textSpan
 //      buffer.write(span.semanticsLabel);
 //    } else
     {
-      String text = getInlineText(span);
+      String? text = getInlineText(span);
       if (span is SpecialInlineSpanBase) {
         text = (span as SpecialInlineSpanBase).actualText;
       }
@@ -371,7 +369,7 @@ String textSpanToActualText(InlineSpan textSpan
 /// Walks this text span and its descendants in pre-order and calls [visitor]
 /// for each span that has text.
 bool _visitTextSpan(InlineSpan textSpan, bool visitor(InlineSpan span)) {
-  String text = getInlineText(textSpan);
+  String? text = getInlineText(textSpan);
   if (textSpan is SpecialInlineSpanBase) {
     text = (textSpan as SpecialInlineSpanBase).actualText;
   }
@@ -381,7 +379,7 @@ bool _visitTextSpan(InlineSpan textSpan, bool visitor(InlineSpan span)) {
     }
   }
   if (textSpan is TextSpan && textSpan.children != null) {
-    for (final InlineSpan child in textSpan.children) {
+    for (final InlineSpan child in textSpan.children!) {
       if (!_visitTextSpan(child, visitor)) {
         return false;
       }
@@ -393,7 +391,7 @@ bool _visitTextSpan(InlineSpan textSpan, bool visitor(InlineSpan span)) {
 
 int getInlineOffset(InlineSpan inlineSpan) {
   if (inlineSpan is TextSpan && inlineSpan.text != null) {
-    return inlineSpan.text.length;
+    return inlineSpan.text!.length;
   }
   if (inlineSpan is PlaceholderSpan) {
     return 1;
@@ -401,7 +399,7 @@ int getInlineOffset(InlineSpan inlineSpan) {
   return 0;
 }
 
-String getInlineText(InlineSpan inlineSpan) {
+String? getInlineText(InlineSpan inlineSpan) {
   if (inlineSpan is TextSpan && inlineSpan.text != null) {
     return inlineSpan.text;
   }

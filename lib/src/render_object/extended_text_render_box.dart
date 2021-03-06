@@ -24,21 +24,21 @@ abstract class ExtendedTextRenderBox extends RenderBox
   TextPainter get textPainter;
   bool get softWrap;
   TextOverflow get overflow;
-  double textLayoutLastMaxWidth;
-  double textLayoutLastMinWidth;
+  double? textLayoutLastMaxWidth;
+  double? textLayoutLastMinWidth;
   double get caretMargin;
   bool get isMultiline;
   bool get forceLine;
   String get plainText;
   Offset get effectiveOffset;
   //only for [ExtendedText]
-  Widget get overflowWidget;
+  Widget? get overflowWidget;
   int get textChildCount =>
       overflowWidget != null ? childCount - 1 : childCount;
-  bool get hasPlaceholderSpan => _placeholderSpans?.isNotEmpty ?? false;
+  bool get hasPlaceholderSpan => _placeholderSpans.isNotEmpty;
   bool _hasSpecialInlineSpanBase = false;
   bool get hasSpecialInlineSpanBase => _hasSpecialInlineSpanBase;
-  List<PlaceholderSpan> _placeholderSpans;
+  late List<PlaceholderSpan> _placeholderSpans;
 
   void extractPlaceholderSpans(InlineSpan span) {
     _placeholderSpans = <PlaceholderSpan>[];
@@ -82,11 +82,13 @@ abstract class ExtendedTextRenderBox extends RenderBox
   }
 
   void _computeChildrenWidthWithMaxIntrinsics(double height) {
-    RenderBox child = firstChild;
+    RenderBox? child = firstChild;
     final List<PlaceholderDimensions> placeholderDimensions =
-        List<PlaceholderDimensions>(textChildCount);
+        List<PlaceholderDimensions>.filled(
+            textChildCount, PlaceholderDimensions.empty,
+            growable: false);
     int childIndex = 0;
-    while (child != null && childIndex < _placeholderDimensions.length) {
+    while (child != null && childIndex < textChildCount) {
       // Height and baseline is irrelevant as all text will be laid
       // out in a single line.
       placeholderDimensions[childIndex] = PlaceholderDimensions(
@@ -101,11 +103,13 @@ abstract class ExtendedTextRenderBox extends RenderBox
   }
 
   void _computeChildrenWidthWithMinIntrinsics(double height) {
-    RenderBox child = firstChild;
+    RenderBox? child = firstChild;
     final List<PlaceholderDimensions> placeholderDimensions =
-        List<PlaceholderDimensions>(textChildCount);
+        List<PlaceholderDimensions>.filled(
+            textChildCount, PlaceholderDimensions.empty,
+            growable: false);
     int childIndex = 0;
-    while (child != null && childIndex < _placeholderDimensions.length) {
+    while (child != null && childIndex < textChildCount) {
       final double intrinsicWidth = child.getMinIntrinsicWidth(height);
       final double intrinsicHeight =
           child.getMinIntrinsicHeight(intrinsicWidth);
@@ -121,11 +125,13 @@ abstract class ExtendedTextRenderBox extends RenderBox
   }
 
   void _computeChildrenHeightWithMinIntrinsics(double width) {
-    RenderBox child = firstChild;
+    RenderBox? child = firstChild;
     final List<PlaceholderDimensions> placeholderDimensions =
-        List<PlaceholderDimensions>(textChildCount);
+        List<PlaceholderDimensions>.filled(
+            textChildCount, PlaceholderDimensions.empty,
+            growable: false);
     int childIndex = 0;
-    while (child != null && childIndex < _placeholderDimensions.length) {
+    while (child != null && childIndex < textChildCount) {
       final double intrinsicHeight = child.getMinIntrinsicHeight(width);
       final double intrinsicWidth = child.getMinIntrinsicWidth(intrinsicHeight);
       placeholderDimensions[childIndex] = PlaceholderDimensions(
@@ -153,7 +159,7 @@ abstract class ExtendedTextRenderBox extends RenderBox
   // These need to be cached because the text painter's placeholder dimensions
   // will be overwritten during intrinsic width/height calculations and must be
   // restored to the original values before final layout and painting.
-  List<PlaceholderDimensions> _placeholderDimensions;
+  List<PlaceholderDimensions>? _placeholderDimensions;
 
   // Layout the child inline widgets. We then pass the dimensions of the
   // children to _textPainter so that appropriate placeholders can be inserted
@@ -163,10 +169,13 @@ abstract class ExtendedTextRenderBox extends RenderBox
     if (childCount == 0) {
       return;
     }
-    RenderBox child = firstChild;
-    _placeholderDimensions = List<PlaceholderDimensions>(textChildCount);
+    RenderBox? child = firstChild;
+    _placeholderDimensions = List<PlaceholderDimensions>.filled(
+        textChildCount, PlaceholderDimensions.empty,
+        growable: false);
+
     int childIndex = 0;
-    while (child != null && childIndex < _placeholderDimensions.length) {
+    while (child != null && childIndex < textChildCount) {
       // Only constrain the width to the maximum width of the paragraph.
       // Leave height unconstrained, which will overflow if expanded past.
       child.layout(
@@ -174,12 +183,12 @@ abstract class ExtendedTextRenderBox extends RenderBox
             maxWidth: constraints.maxWidth,
           ),
           parentUsesSize: true);
-      double baselineOffset;
+      double? baselineOffset;
       switch (_placeholderSpans[childIndex].alignment) {
         case ui.PlaceholderAlignment.baseline:
           {
             baselineOffset = child
-                .getDistanceToBaseline(_placeholderSpans[childIndex].baseline);
+                .getDistanceToBaseline(_placeholderSpans[childIndex].baseline!);
             break;
           }
         default:
@@ -188,7 +197,7 @@ abstract class ExtendedTextRenderBox extends RenderBox
             break;
           }
       }
-      _placeholderDimensions[childIndex] = PlaceholderDimensions(
+      _placeholderDimensions![childIndex] = PlaceholderDimensions(
         size: child.size,
         alignment: _placeholderSpans[childIndex].alignment,
         baseline: _placeholderSpans[childIndex].baseline,
@@ -213,18 +222,19 @@ abstract class ExtendedTextRenderBox extends RenderBox
   // Iterate through the laid-out children and set the parentData offsets based
   // off of the placeholders inserted for each child.
   void setParentData() {
-    RenderBox child = firstChild;
+    RenderBox? child = firstChild;
     int childIndex = 0;
 
-    ///maybe overflow
+    // maybe overflow
     while (child != null &&
-        childIndex < textPainter.inlinePlaceholderBoxes.length) {
+        childIndex < textPainter.inlinePlaceholderBoxes!.length) {
       final TextParentData textParentData = child.parentData as TextParentData;
 
       textParentData.offset = Offset(
-          textPainter.inlinePlaceholderBoxes[childIndex].left,
-          textPainter.inlinePlaceholderBoxes[childIndex].top);
-      textParentData.scale = textPainter.inlinePlaceholderScales[childIndex];
+        textPainter.inlinePlaceholderBoxes![childIndex].left,
+        textPainter.inlinePlaceholderBoxes![childIndex].top,
+      );
+      textParentData.scale = textPainter.inlinePlaceholderScales![childIndex];
       child = childAfter(child);
       childIndex += 1;
     }
@@ -234,8 +244,6 @@ abstract class ExtendedTextRenderBox extends RenderBox
       {double minWidth = 0.0,
       double maxWidth = double.infinity,
       bool forceLayout = false}) {
-    assert(maxWidth != null && minWidth != null);
-
     if (textLayoutLastMaxWidth == maxWidth &&
         textLayoutLastMinWidth == minWidth &&
         !forceLayout) {
@@ -257,18 +265,18 @@ abstract class ExtendedTextRenderBox extends RenderBox
     textLayoutLastMaxWidth = maxWidth;
   }
 
-  void paintWidgets(PaintingContext context, Offset offset, {Path clip}) {
-    RenderBox child = firstChild;
+  void paintWidgets(PaintingContext context, Offset offset, {Path? clip}) {
+    RenderBox? child = firstChild;
     int childIndex = 0;
 
     ///maybe overflow
     while (child != null &&
-        childIndex < textPainter.inlinePlaceholderBoxes.length) {
+        childIndex < textPainter.inlinePlaceholderBoxes!.length) {
       //assert(childIndex < _textPainter.inlinePlaceholderBoxes.length);
 
       final TextParentData textParentData = child.parentData as TextParentData;
 
-      final double scale = textParentData.scale;
+      final double? scale = textParentData.scale;
 
       final Rect rect = (offset + textParentData.offset) & child.size;
       if (clip != null && !clip.contains(rect.centerLeft)) {
@@ -277,10 +285,10 @@ abstract class ExtendedTextRenderBox extends RenderBox
       context.pushTransform(
         needsCompositing,
         offset + textParentData.offset,
-        Matrix4.diagonal3Values(scale, scale, scale),
+        Matrix4.diagonal3Values(scale!, scale, scale),
         (PaintingContext context, Offset offset) {
           context.paintChild(
-            child,
+            child!,
             offset,
           );
         },
@@ -328,8 +336,8 @@ abstract class ExtendedTextRenderBox extends RenderBox
   // it seems TextPainter works for WidgetSpan on 1.17.0
   // code under 1.17.0
   Offset getCaretOffset(TextPosition textPosition,
-      {ValueChanged<double> caretHeightCallBack,
-      Offset effectiveOffset,
+      {ValueChanged<double>? caretHeightCallBack,
+      Offset? effectiveOffset,
       Rect caretPrototype = Rect.zero}) {
     effectiveOffset ??= Offset.zero;
 
@@ -411,7 +419,6 @@ abstract class ExtendedTextRenderBox extends RenderBox
   @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     assert(!debugNeedsLayout);
-    assert(constraints != null);
     assert(constraints.debugAssertIsValid());
     layoutTextWithConstraints(constraints);
     // todo(garyq): Since our metric for ideographic baseline is currently
@@ -443,12 +450,12 @@ abstract class ExtendedTextRenderBox extends RenderBox
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, {Offset position}) {
-    RenderBox child = firstChild;
+  bool hitTestChildren(BoxHitTestResult result, {Offset? position}) {
+    RenderBox? child = firstChild;
     int childIndex = 0;
     while (child != null &&
-        childIndex < textPainter.inlinePlaceholderBoxes.length) {
-      final bool isHit = hitTestChild(result, child, position: position);
+        childIndex < textPainter.inlinePlaceholderBoxes!.length) {
+      final bool isHit = hitTestChild(result, child, position: position!);
       if (isHit) {
         return true;
       }
@@ -461,14 +468,18 @@ abstract class ExtendedTextRenderBox extends RenderBox
   bool hitTestChild(
     BoxHitTestResult result,
     RenderBox child, {
-    Offset position,
+    required Offset position,
   }) {
     final TextParentData textParentData = child.parentData as TextParentData;
     final Matrix4 transform = Matrix4.translationValues(
         textParentData.offset.dx + effectiveOffset.dx,
         textParentData.offset.dy + effectiveOffset.dy,
         0.0)
-      ..scale(textParentData.scale, textParentData.scale, textParentData.scale);
+      ..scale(
+        textParentData.scale,
+        textParentData.scale,
+        textParentData.scale,
+      );
     final bool isHit = result.addWithPaintTransform(
       transform: transform,
       position: position,
@@ -476,7 +487,7 @@ abstract class ExtendedTextRenderBox extends RenderBox
         assert(() {
           final Offset manualPosition =
               (position - textParentData.offset - effectiveOffset) /
-                  textParentData.scale;
+                  textParentData.scale!;
           return (transformed.dx - manualPosition.dx).abs() <
                   precisionErrorTolerance &&
               (transformed.dy - manualPosition.dy).abs() <
