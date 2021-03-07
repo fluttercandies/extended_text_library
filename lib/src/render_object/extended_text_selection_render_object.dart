@@ -317,8 +317,7 @@ abstract class ExtendedTextSelectionRenderObject extends ExtendedTextRenderBox {
       selection = TextSelection(baseOffset: 0, extentOffset: plainText.length);
       // If the word is a space, on iOS try to select the previous word instead.
       // On Android try to select the previous word instead only if the text is read only.
-    } else if (text?.toPlainText() != null &&
-        isWhitespace(text!.toPlainText().codeUnitAt(position.offset)) &&
+    } else if (isWhitespace(plainText.codeUnitAt(position.offset)) &&
         position.offset > 0) {
       final TextRange? previousWord = _getPreviousWord(word.start);
       switch (defaultTargetPlatform) {
@@ -375,7 +374,7 @@ abstract class ExtendedTextSelectionRenderObject extends ExtendedTextRenderBox {
   // TODO(jonahwilliams): replace when we expose this ICU information.
   bool _onlyWhitespace(TextRange range) {
     for (int i = range.start; i < range.end; i++) {
-      final int codeUnit = text!.codeUnitAt(i)!;
+      final int codeUnit = plainText.codeUnitAt(i);
       if (!isWhitespace(codeUnit)) {
         return false;
       }

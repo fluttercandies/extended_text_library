@@ -204,7 +204,7 @@ TextPosition makeSureCaretNotInSpecialText(
 ///correct caret Offset
 ///make sure caret is not in text when caretIn is false
 TextEditingValue correctCaretOffset(TextEditingValue value, InlineSpan textSpan,
-    TextInputConnection textInputConnection,
+    TextInputConnection? textInputConnection,
     {TextSelection? newSelection}) {
   final List<InlineSpan> list = <InlineSpan>[];
   textSpanNestToArray(textSpan, list);
@@ -240,7 +240,7 @@ TextEditingValue correctCaretOffset(TextEditingValue value, InlineSpan textSpan,
       value = value.copyWith(
           selection: selection.copyWith(
               baseOffset: caretOffset, extentOffset: caretOffset));
-      textInputConnection.setEditingState(value);
+      textInputConnection?.setEditingState(value);
     }
   }
   return value;
