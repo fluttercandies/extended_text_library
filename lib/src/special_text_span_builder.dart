@@ -55,8 +55,12 @@ abstract class SpecialTextSpanBuilder {
   }
 
   //build SpecialText base on startflag
-  SpecialText? createSpecialText(String flag,
-      {TextStyle? textStyle, SpecialTextGestureTapCallback? onTap, int index});
+  SpecialText? createSpecialText(
+    String flag, {
+    TextStyle? textStyle,
+    SpecialTextGestureTapCallback? onTap,
+    required int index,
+  });
 
   /// start with SpecialText
   bool isStart(String value, String startFlag) {

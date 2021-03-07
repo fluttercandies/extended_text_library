@@ -1,6 +1,10 @@
+# 5.0.1
+
+* Fix error when extends SpecialTextSpanBuilder. #30
+
 # 5.0.0
 
-* support null-safety
+* Support null-safety
 
 # 4.0.3
 
