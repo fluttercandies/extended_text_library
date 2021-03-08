@@ -1,3 +1,7 @@
+# 5.0.2
+
+* Fix throw exception when selectWordAtOffset
+  
 # 5.0.1
 
 * Fix error when extends SpecialTextSpanBuilder. #30

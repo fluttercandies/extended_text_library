@@ -310,14 +310,16 @@ abstract class ExtendedTextSelectionRenderObject extends ExtendedTextRenderBox {
     final TextRange word = textPainter.getWordBoundary(position);
     TextSelection? selection;
     // When long-pressing past the end of the text, we want a collapsed cursor.
-    if (position.offset >= word.end)
+    if (position.offset >= word.end) {
       selection = TextSelection.fromPosition(position);
+    }
     // If text is obscured, the entire sentence should be treated as one word.
-    if (obscureText) {
+    else if (obscureText) {
       selection = TextSelection(baseOffset: 0, extentOffset: plainText.length);
-      // If the word is a space, on iOS try to select the previous word instead.
-      // On Android try to select the previous word instead only if the text is read only.
-    } else if (isWhitespace(plainText.codeUnitAt(position.offset)) &&
+    }
+    // If the word is a space, on iOS try to select the previous word instead.
+    // On Android try to select the previous word instead only if the text is read only.
+    else if (isWhitespace(plainText.codeUnitAt(position.offset)) &&
         position.offset > 0) {
       final TextRange? previousWord = _getPreviousWord(word.start);
       switch (defaultTargetPlatform) {
