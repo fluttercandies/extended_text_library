@@ -11,15 +11,13 @@ import 'special_inline_span_base.dart';
 ///support selection for widget Span
 class ExtendedWidgetSpan extends WidgetSpan with SpecialInlineSpanBase {
   ExtendedWidgetSpan({
-    @required Widget child,
-    String actualText= '\uFFFC',
-    int start= 0,
-    this.deleteAll= true,
+    required Widget child,
+    String? actualText = '\uFFFC',
+    int start = 0,
+    this.deleteAll = true,
     ui.PlaceholderAlignment alignment = ui.PlaceholderAlignment.bottom,
-    TextBaseline baseline,
-  })  : assert(start != null),
-        assert(deleteAll != null),
-        actualText = actualText ?? '\uFFFC',
+    TextBaseline? baseline,
+  })  : actualText = actualText ?? '\uFFFC',
         textRange = TextRange(
             start: start, end: start + (actualText ?? '\uFFFC').length),
         widgetSpanSize = WidgetSpanSize()..size = Size.zero,
@@ -36,7 +34,7 @@ class ExtendedWidgetSpan extends WidgetSpan with SpecialInlineSpanBase {
   /// store size to calculate selection
   final WidgetSpanSize widgetSpanSize;
 
-  Size get size => widgetSpanSize.size;
+  Size? get size => widgetSpanSize.size;
 
   @override
   bool operator ==(dynamic other) {
@@ -77,18 +75,20 @@ class ExtendedWidgetSpan extends WidgetSpan with SpecialInlineSpanBase {
   }
 
   @override
-  void build(ui.ParagraphBuilder builder,
-      {double textScaleFactor = 1.0,
-      @required List<PlaceholderDimensions> dimensions}) {
+  void build(
+    ui.ParagraphBuilder builder, {
+    double textScaleFactor = 1.0,
+    List<PlaceholderDimensions>? dimensions,
+  }) {
     assert(debugAssertIsValid());
     assert(dimensions != null);
     final bool hasStyle = style != null;
     if (hasStyle) {
-      builder.pushStyle(style.getTextStyle(textScaleFactor: textScaleFactor));
+      builder.pushStyle(style!.getTextStyle(textScaleFactor: textScaleFactor));
     }
-    assert(builder.placeholderCount < dimensions.length);
+    assert(builder.placeholderCount < dimensions!.length);
     final PlaceholderDimensions currentDimensions =
-        dimensions[builder.placeholderCount];
+        dimensions![builder.placeholderCount];
     widgetSpanSize.size = currentDimensions.size;
     builder.addPlaceholder(
       currentDimensions.size.width,
@@ -104,7 +104,7 @@ class ExtendedWidgetSpan extends WidgetSpan with SpecialInlineSpanBase {
   }
 
   @override
-  InlineSpan getSpanForPositionVisitor(
+  InlineSpan? getSpanForPositionVisitor(
       TextPosition position, Accumulator offset) {
     final TextAffinity affinity = position.affinity;
     final int targetOffset = position.offset;
@@ -125,5 +125,5 @@ class ExtendedWidgetSpan extends WidgetSpan with SpecialInlineSpanBase {
 }
 
 class WidgetSpanSize {
-  Size size;
+  Size? size;
 }

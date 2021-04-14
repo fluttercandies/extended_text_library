@@ -28,31 +28,29 @@ class ExtendedTextSelectionOverlay {
   ///
   /// The [context] must not be null and must have an [Overlay] as an ancestor.
   ExtendedTextSelectionOverlay({
-    @required TextEditingValue value,
-    @required this.context,
+    required TextEditingValue value,
+    required this.context,
     this.debugRequiredFor,
-    @required this.toolbarLayerLink,
-    @required this.startHandleLayerLink,
-    @required this.endHandleLayerLink,
-    @required this.renderObject,
+    required this.toolbarLayerLink,
+    required this.startHandleLayerLink,
+    required this.endHandleLayerLink,
+    required this.renderObject,
     this.selectionControls,
     bool handlesVisible = false,
     this.selectionDelegate,
     this.dragStartBehavior = DragStartBehavior.start,
     this.onSelectionHandleTapped,
-  })  : assert(value != null),
-        assert(context != null),
-        assert(handlesVisible != null),
-        _handlesVisible = handlesVisible,
+    this.clipboardStatus,
+  })  : _handlesVisible = handlesVisible,
         _value = value {
-    final OverlayState overlay = Overlay.of(context, rootOverlay: true);
+    final OverlayState? overlay = Overlay.of(context, rootOverlay: true)!;
     assert(
         overlay != null,
         'No Overlay widget exists above $context.\n'
         'Usually the Navigator created by WidgetsApp provides the overlay. Perhaps your '
         'app content was created above the Navigator with the WidgetsApp builder parameter.');
     _toolbarController =
-        AnimationController(duration: fadeDuration, vsync: overlay);
+        AnimationController(duration: fadeDuration, vsync: overlay!);
   }
 
   /// The context in which the selection handles should appear.
@@ -62,7 +60,7 @@ class ExtendedTextSelectionOverlay {
   final BuildContext context;
 
   /// Debugging information for explaining why the [Overlay] is required.
-  final Widget debugRequiredFor;
+  final Widget? debugRequiredFor;
 
   /// The object supplied to the [CompositedTransformTarget] that wraps the text
   /// field.
@@ -81,11 +79,11 @@ class ExtendedTextSelectionOverlay {
   final ExtendedTextSelectionRenderObject renderObject;
 
   /// Builds text selection handles and toolbar.
-  final TextSelectionControls selectionControls;
+  final TextSelectionControls? selectionControls;
 
   /// The delegate for manipulating the current selection in the owning
   /// text field.
-  final TextSelectionDelegate selectionDelegate;
+  final TextSelectionDelegate? selectionDelegate;
 
   /// Determines the way that drag start behavior is handled.
   ///
@@ -110,12 +108,19 @@ class ExtendedTextSelectionOverlay {
   /// Both regular taps and long presses invoke this callback, but a drag
   /// gesture won't.
   /// {@endtemplate}
-  final VoidCallback onSelectionHandleTapped;
+  final VoidCallback? onSelectionHandleTapped;
+
+  /// Maintains the status of the clipboard for determining if its contents can
+  /// be pasted or not.
+  ///
+  /// Useful because the actual value of the clipboard can only be checked
+  /// asynchronously (see [Clipboard.getData]).
+  final ClipboardStatusNotifier? clipboardStatus;
 
   /// Controls the fade-in and fade-out animations for the toolbar and handles.
   static const Duration fadeDuration = Duration(milliseconds: 150);
 
-  AnimationController _toolbarController;
+  late AnimationController _toolbarController;
   Animation<double> get _toolbarOpacity => _toolbarController.view;
 
   /// Retrieve current value.
@@ -126,10 +131,10 @@ class ExtendedTextSelectionOverlay {
 
   /// A pair of handles. If this is non-null, there are always 2, though the
   /// second is hidden when the selection is collapsed.
-  List<OverlayEntry> _handles;
+  List<OverlayEntry>? _handles;
 
   /// A copy/paste toolbar.
-  OverlayEntry _toolbar;
+  OverlayEntry? _toolbar;
 
   TextSelection get _selection => _value.selection;
 
@@ -150,22 +155,21 @@ class ExtendedTextSelectionOverlay {
   bool get handlesVisible => _handlesVisible;
   bool _handlesVisible = false;
   set handlesVisible(bool visible) {
-    assert(visible != null);
     if (_handlesVisible == visible) {
       return;
     }
     _handlesVisible = visible;
     // If we are in build state, it will be too late to update visibility.
     // We will need to schedule the build in next frame.
-    if (SchedulerBinding.instance.schedulerPhase ==
+    if (SchedulerBinding.instance!.schedulerPhase ==
         SchedulerPhase.persistentCallbacks) {
-      SchedulerBinding.instance.addPostFrameCallback(_markNeedsBuild);
+      SchedulerBinding.instance!.addPostFrameCallback(_markNeedsBuild);
     } else {
       _markNeedsBuild();
     }
   }
 
-  /// Shows the handles by inserting them into the [context]'s overlay.
+  /// Builds the handles by inserting them into the [context]'s overlay.
   void showHandles() {
     assert(_handles == null);
     _handles = <OverlayEntry>[
@@ -176,14 +180,15 @@ class ExtendedTextSelectionOverlay {
           builder: (BuildContext context) =>
               _buildHandle(context, _TextSelectionHandlePosition.end)),
     ];
-    Overlay.of(context, debugRequiredFor: debugRequiredFor).insertAll(_handles);
+    Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor)!
+        .insertAll(_handles!);
   }
 
   /// Destroys the handles by removing them from overlay.
   void hideHandles() {
     if (_handles != null) {
-      _handles[0].remove();
-      _handles[1].remove();
+      _handles![0].remove();
+      _handles![1].remove();
       _handles = null;
     }
   }
@@ -192,7 +197,8 @@ class ExtendedTextSelectionOverlay {
   void showToolbar() {
     assert(_toolbar == null);
     _toolbar = OverlayEntry(builder: _buildToolbar);
-    Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor).insert(_toolbar);
+    Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor)!
+        .insert(_toolbar!);
     _toolbarController.forward(from: 0.0);
   }
 
@@ -210,9 +216,9 @@ class ExtendedTextSelectionOverlay {
       return;
     }
     _value = newValue;
-    if (SchedulerBinding.instance.schedulerPhase ==
+    if (SchedulerBinding.instance!.schedulerPhase ==
         SchedulerPhase.persistentCallbacks) {
-      SchedulerBinding.instance.addPostFrameCallback(_markNeedsBuild);
+      SchedulerBinding.instance!.addPostFrameCallback(_markNeedsBuild);
     } else {
       _markNeedsBuild();
     }
@@ -226,10 +232,10 @@ class ExtendedTextSelectionOverlay {
     _markNeedsBuild();
   }
 
-  void _markNeedsBuild([Duration duration]) {
+  void _markNeedsBuild([Duration? duration]) {
     if (_handles != null) {
-      _handles[0].markNeedsBuild();
-      _handles[1].markNeedsBuild();
+      _handles![0].markNeedsBuild();
+      _handles![1].markNeedsBuild();
     }
     _toolbar?.markNeedsBuild();
   }
@@ -243,8 +249,8 @@ class ExtendedTextSelectionOverlay {
   /// Hides the entire overlay including the toolbar and the handles.
   void hide() {
     if (_handles != null) {
-      _handles[0].remove();
-      _handles[1].remove();
+      _handles![0].remove();
+      _handles![1].remove();
       _handles = null;
     }
     if (_toolbar != null) {
@@ -258,7 +264,7 @@ class ExtendedTextSelectionOverlay {
   void hideToolbar() {
     assert(_toolbar != null);
     _toolbarController.stop();
-    _toolbar.remove();
+    _toolbar!.remove();
     _toolbar = null;
   }
 
@@ -296,22 +302,21 @@ class ExtendedTextSelectionOverlay {
       return Container();
     }
 
-    if (renderObject == null || !renderObject.isAttached) {
+    if (!renderObject.isAttached) {
       return Container();
     }
 
     // Find the horizontal midpoint, just above the selected text.
-    final List<TextSelectionPoint> endpoints =
+    final List<TextSelectionPoint>? endpoints =
         renderObject.getEndpointsForSelection(_selection);
 
-    if (endpoints == null) {
+    if (endpoints == null || endpoints.isEmpty) {
       return Container();
     }
 
     final Rect editingRegion = Rect.fromPoints(
       renderObject.localToGlobal(Offset.zero),
-      renderObject
-          .localToGlobal(renderObject.size.bottomRight(Offset.zero)),
+      renderObject.localToGlobal(renderObject.size.bottomRight(Offset.zero)),
     );
 
     final bool isMultiline =
@@ -330,19 +335,28 @@ class ExtendedTextSelectionOverlay {
       endpoints[0].point.dy - renderObject.preferredLineHeight,
     );
 
-    return FadeTransition(
-      opacity: _toolbarOpacity,
-      child: CompositedTransformFollower(
-        link: toolbarLayerLink,
-        showWhenUnlinked: false,
-        offset: -editingRegion.topLeft,
-        child: selectionControls.buildToolbar(
-          context,
-          editingRegion,
-          renderObject.preferredLineHeight,
-          midpoint,
-          endpoints,
-          selectionDelegate,
+    return Directionality(
+      textDirection: Directionality.of(this.context),
+      child: FadeTransition(
+        opacity: _toolbarOpacity,
+        child: CompositedTransformFollower(
+          link: toolbarLayerLink,
+          showWhenUnlinked: false,
+          offset: -editingRegion.topLeft,
+          child: Builder(
+            builder: (BuildContext context) {
+              return selectionControls!.buildToolbar(
+                context,
+                editingRegion,
+                renderObject.preferredLineHeight,
+                midpoint,
+                endpoints,
+                selectionDelegate!,
+                clipboardStatus!,
+                renderObject.lastSecondaryTapDownPosition,
+              );
+            },
+          ),
         ),
       ),
     );
@@ -350,7 +364,7 @@ class ExtendedTextSelectionOverlay {
 
   void _handleSelectionHandleChanged(
       TextSelection newSelection, _TextSelectionHandlePosition position) {
-    TextPosition textPosition;
+    late TextPosition textPosition;
     switch (position) {
       case _TextSelectionHandlePosition.start:
         textPosition = newSelection.base;
@@ -359,24 +373,24 @@ class ExtendedTextSelectionOverlay {
         textPosition = newSelection.extent;
         break;
     }
-    selectionDelegate.textEditingValue =
+    selectionDelegate!.textEditingValue =
         _value.copyWith(selection: newSelection, composing: TextRange.empty);
-    selectionDelegate.bringIntoView(textPosition);
+    selectionDelegate!.bringIntoView(textPosition);
   }
 }
 
 /// This widget represents a single draggable text selection handle.
 class _TextSelectionHandleOverlay extends StatefulWidget {
   const _TextSelectionHandleOverlay({
-    Key key,
-    @required this.selection,
-    @required this.position,
-    @required this.startHandleLayerLink,
-    @required this.endHandleLayerLink,
-    @required this.renderObject,
-    @required this.onSelectionHandleChanged,
-    @required this.onSelectionHandleTapped,
-    @required this.selectionControls,
+    Key? key,
+    required this.selection,
+    required this.position,
+    required this.startHandleLayerLink,
+    required this.endHandleLayerLink,
+    required this.renderObject,
+    required this.onSelectionHandleChanged,
+    required this.onSelectionHandleTapped,
+    required this.selectionControls,
     this.dragStartBehavior = DragStartBehavior.start,
   }) : super(key: key);
 
@@ -386,8 +400,8 @@ class _TextSelectionHandleOverlay extends StatefulWidget {
   final LayerLink endHandleLayerLink;
   final ExtendedTextSelectionRenderObject renderObject;
   final ValueChanged<TextSelection> onSelectionHandleChanged;
-  final VoidCallback onSelectionHandleTapped;
-  final TextSelectionControls selectionControls;
+  final VoidCallback? onSelectionHandleTapped;
+  final TextSelectionControls? selectionControls;
   final DragStartBehavior dragStartBehavior;
 
   @override
@@ -401,7 +415,6 @@ class _TextSelectionHandleOverlay extends StatefulWidget {
       case _TextSelectionHandlePosition.end:
         return renderObject.selectionEndInViewport;
     }
-    return null;
   }
 }
 
@@ -410,9 +423,9 @@ class _TextSelectionHandleOverlay extends StatefulWidget {
 class _TextSelectionHandleOverlayState
     extends State<_TextSelectionHandleOverlay>
     with SingleTickerProviderStateMixin {
-  Offset _dragPosition;
+  late Offset _dragPosition;
 
-  AnimationController _controller;
+  late AnimationController _controller;
   Animation<double> get _opacity => _controller.view;
 
   @override
@@ -450,7 +463,7 @@ class _TextSelectionHandleOverlayState
   }
 
   void _handleDragStart(DragStartDetails details) {
-    final Size handleSize = widget.selectionControls.getHandleSize(
+    final Size handleSize = widget.selectionControls!.getHandleSize(
       widget.renderObject.preferredLineHeight,
     );
     _dragPosition = details.globalPosition + Offset(0.0, -handleSize.height);
@@ -458,32 +471,32 @@ class _TextSelectionHandleOverlayState
 
   void _handleDragUpdate(DragUpdateDetails details) {
     _dragPosition += details.delta;
-    TextPosition position =
+    TextPosition? position =
         widget.renderObject.getPositionForPoint(_dragPosition);
 
     ///zmt
-    if (widget.renderObject.handleSpecialText) {
+    if (widget.renderObject.hasSpecialInlineSpanBase) {
       position = convertTextPainterPostionToTextInputPostion(
-          widget.renderObject.text, position);
+          widget.renderObject.text!, position);
     }
 
     if (widget.selection.isCollapsed) {
-      widget.onSelectionHandleChanged(TextSelection.fromPosition(position));
+      widget.onSelectionHandleChanged(TextSelection.fromPosition(position!));
       return;
     }
 
-    TextSelection newSelection;
+    TextSelection? newSelection;
     switch (widget.position) {
       case _TextSelectionHandlePosition.start:
         newSelection = TextSelection(
-          baseOffset: position.offset,
+          baseOffset: position!.offset,
           extentOffset: widget.selection.extentOffset,
         );
         break;
       case _TextSelectionHandlePosition.end:
         newSelection = TextSelection(
           baseOffset: widget.selection.baseOffset,
-          extentOffset: position.offset,
+          extentOffset: position!.offset,
         );
         break;
     }
@@ -496,13 +509,13 @@ class _TextSelectionHandleOverlayState
 
   void _handleTap() {
     if (widget.onSelectionHandleTapped != null)
-      widget.onSelectionHandleTapped();
+      widget.onSelectionHandleTapped!();
   }
 
   @override
   Widget build(BuildContext context) {
-    LayerLink layerLink;
-    TextSelectionHandleType type;
+    late LayerLink layerLink;
+    TextSelectionHandleType? type;
 
     switch (widget.position) {
       case _TextSelectionHandlePosition.start:
@@ -525,11 +538,11 @@ class _TextSelectionHandleOverlayState
         break;
     }
 
-    final Offset handleAnchor = widget.selectionControls.getHandleAnchor(
+    final Offset handleAnchor = widget.selectionControls!.getHandleAnchor(
       type,
       widget.renderObject.preferredLineHeight,
     );
-    final Size handleSize = widget.selectionControls.getHandleSize(
+    final Size handleSize = widget.selectionControls!.getHandleSize(
       widget.renderObject.preferredLineHeight,
     );
 
@@ -575,7 +588,7 @@ class _TextSelectionHandleOverlayState
                 right: padding.right,
                 bottom: padding.bottom,
               ),
-              child: widget.selectionControls.buildHandle(
+              child: widget.selectionControls!.buildHandle(
                 context,
                 type,
                 widget.renderObject.preferredLineHeight,
@@ -596,13 +609,11 @@ class _TextSelectionHandleOverlayState
       return TextSelectionHandleType.collapsed;
     }
 
-    assert(textDirection != null);
     switch (textDirection) {
       case TextDirection.ltr:
         return ltrType;
       case TextDirection.rtl:
         return rtlType;
     }
-    return null;
   }
 }
