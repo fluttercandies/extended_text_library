@@ -10,17 +10,22 @@ class SpecialTextSpan extends TextSpan with SpecialInlineSpanBase {
   SpecialTextSpan({
     TextStyle? style,
     required String text,
-    required String? actualText,
+    String? actualText,
     int start = 0,
     this.deleteAll = true,
     GestureRecognizer? recognizer,
-  })  : actualText = actualText ?? text,
+    List<InlineSpan>? children,
+    String? semanticsLabel,
+  })  : assert(!(deleteAll && children != null && children.isNotEmpty)),
+        actualText = actualText ?? text,
         textRange =
             TextRange(start: start, end: start + (actualText ?? text).length),
         super(
           style: style,
           text: text,
           recognizer: recognizer,
+          children: children,
+          semanticsLabel: semanticsLabel,
         );
 
   @override
