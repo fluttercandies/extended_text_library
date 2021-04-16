@@ -154,12 +154,17 @@ abstract class ExtendedTextRenderBox extends RenderBox
   // will be overwritten during intrinsic width/height calculations and must be
   // restored to the original values before final layout and painting.
   List<PlaceholderDimensions> _placeholderDimensions;
-
+  List<PlaceholderDimensions> get placeholderDimensions =>
+      _placeholderDimensions;
   // Layout the child inline widgets. We then pass the dimensions of the
   // children to _textPainter so that appropriate placeholders can be inserted
   // into the LibTxt layout. This does not do anything if no inline widgets were
   // specified.
-  void layoutChildren(BoxConstraints constraints) {
+  void layoutChildren(
+    BoxConstraints constraints, {
+    List<int> hideWidgets,
+    TextPainter textPainter,
+  }) {
     if (childCount == 0) {
       return;
     }
@@ -170,10 +175,13 @@ abstract class ExtendedTextRenderBox extends RenderBox
       // Only constrain the width to the maximum width of the paragraph.
       // Leave height unconstrained, which will overflow if expanded past.
       child.layout(
-          BoxConstraints(
-            maxWidth: constraints.maxWidth,
-          ),
-          parentUsesSize: true);
+        BoxConstraints(
+          maxWidth: hideWidgets != null && hideWidgets.contains(childIndex)
+              ? 0
+              : constraints.maxWidth,
+        ),
+        parentUsesSize: true,
+      );
       double baselineOffset;
       switch (_placeholderSpans[childIndex].alignment) {
         case ui.PlaceholderAlignment.baseline:
@@ -197,7 +205,8 @@ abstract class ExtendedTextRenderBox extends RenderBox
       child = childAfter(child);
       childIndex += 1;
     }
-    textPainter.setPlaceholderDimensions(_placeholderDimensions);
+    (textPainter ?? this.textPainter)
+        .setPlaceholderDimensions(_placeholderDimensions);
   }
 
   //layoutText for extended_text
@@ -257,7 +266,8 @@ abstract class ExtendedTextRenderBox extends RenderBox
     textLayoutLastMaxWidth = maxWidth;
   }
 
-  void paintWidgets(PaintingContext context, Offset offset, {Path clip}) {
+  void paintWidgets(PaintingContext context, Offset offset,
+      {Rect overFlowRect}) {
     RenderBox child = firstChild;
     int childIndex = 0;
 
@@ -271,20 +281,28 @@ abstract class ExtendedTextRenderBox extends RenderBox
       final double scale = textParentData.scale;
 
       final Rect rect = (offset + textParentData.offset) & child.size;
-      if (clip != null && !clip.contains(rect.centerLeft)) {
-        break;
+      bool overlaps = false;
+      if (overFlowRect != null) {
+        if (overFlowRect.overlaps(rect)) {
+          final Rect intersectRect = overFlowRect.intersect(rect);
+          overlaps = intersectRect.size > const Offset(1, 1);
+        }
       }
-      context.pushTransform(
-        needsCompositing,
-        offset + textParentData.offset,
-        Matrix4.diagonal3Values(scale, scale, scale),
-        (PaintingContext context, Offset offset) {
-          context.paintChild(
-            child,
-            offset,
-          );
-        },
-      );
+
+      if (!overlaps) {
+        context.pushTransform(
+          needsCompositing,
+          offset + textParentData.offset,
+          Matrix4.diagonal3Values(scale, scale, scale),
+          (PaintingContext context, Offset offset) {
+            context.paintChild(
+              child,
+              offset,
+            );
+          },
+        );
+      }
+
       child = childAfter(child);
       childIndex += 1;
     }
@@ -327,10 +345,12 @@ abstract class ExtendedTextRenderBox extends RenderBox
 
   // it seems TextPainter works for WidgetSpan on 1.17.0
   // code under 1.17.0
-  Offset getCaretOffset(TextPosition textPosition,
-      {ValueChanged<double> caretHeightCallBack,
-      Offset effectiveOffset,
-      Rect caretPrototype = Rect.zero}) {
+  Offset getCaretOffset(
+    TextPosition textPosition, {
+    ValueChanged<double> caretHeightCallBack,
+    Offset effectiveOffset,
+    Rect caretPrototype = Rect.zero,
+  }) {
     effectiveOffset ??= Offset.zero;
 
     ///zmt

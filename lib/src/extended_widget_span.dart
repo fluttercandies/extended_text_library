@@ -17,13 +17,18 @@ class ExtendedWidgetSpan extends WidgetSpan with SpecialInlineSpanBase {
     this.deleteAll = true,
     ui.PlaceholderAlignment alignment = ui.PlaceholderAlignment.bottom,
     TextBaseline baseline,
-  })  : assert(start != null),
-        assert(deleteAll != null),
-        actualText = actualText ?? '\uFFFC',
+    TextStyle style,
+    this.hide = false,
+  })  : actualText = actualText ?? '\uFFFC',
         textRange = TextRange(
             start: start, end: start + (actualText ?? '\uFFFC').length),
         widgetSpanSize = WidgetSpanSize()..size = Size.zero,
-        super(child: child, alignment: alignment, baseline: baseline);
+        super(
+          child: child,
+          alignment: alignment,
+          baseline: baseline,
+          style: style,
+        );
   @override
   final String actualText;
 
@@ -37,6 +42,9 @@ class ExtendedWidgetSpan extends WidgetSpan with SpecialInlineSpanBase {
   final WidgetSpanSize widgetSpanSize;
 
   Size get size => widgetSpanSize.size;
+
+  /// for overflow
+  final bool hide;
 
   @override
   bool operator ==(dynamic other) {
