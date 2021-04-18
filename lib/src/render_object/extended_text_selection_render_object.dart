@@ -84,6 +84,7 @@ abstract class ExtendedTextSelectionRenderObject extends ExtendedTextRenderBox {
   bool get obscureText;
   Color get selectionColor;
   List<ui.TextBox> get selectionRects;
+  bool get readOnly;
 
   // This affinity should never be null.
   TextAffinity fallbackAffinity = TextAffinity.downstream;
@@ -261,11 +262,37 @@ abstract class ExtendedTextSelectionRenderObject extends ExtendedTextRenderBox {
     // When long-pressing past the end of the text, we want a collapsed cursor.
     if (position.offset >= word.end) {
       selection = TextSelection.fromPosition(position);
-    } else {
-      // If text is obscured, the entire sentence should be treated as one word.
-      if (obscureText) {
-        selection =
-            TextSelection(baseOffset: 0, extentOffset: plainText.length);
+    }
+    // If text is obscured, the entire sentence should be treated as one word.
+    else if (obscureText) {
+      selection = TextSelection(baseOffset: 0, extentOffset: plainText.length);
+    }
+    // If the word is a space, on iOS try to select the previous word instead.
+    // On Android try to select the previous word instead only if the text is read only.
+    else if (text != null &&
+        isWhitespace(text.toPlainText().codeUnitAt(position.offset)) &&
+        position.offset > 0) {
+      final TextRange previousWord = _getPreviousWord(word.start);
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+          selection = TextSelection(
+            baseOffset: previousWord.start,
+            extentOffset: position.offset,
+          );
+          break;
+        case TargetPlatform.android:
+          if (readOnly) {
+            selection = TextSelection(
+              baseOffset: previousWord.start,
+              extentOffset: position.offset,
+            );
+          }
+          break;
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.macOS:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          break;
       }
       selection = TextSelection(baseOffset: word.start, extentOffset: word.end);
     }
@@ -274,6 +301,37 @@ abstract class ExtendedTextSelectionRenderObject extends ExtendedTextRenderBox {
         ? convertTextPainterSelectionToTextInputSelection(text, selection,
             selectWord: true)
         : selection;
+  }
+
+  TextRange _getPreviousWord(int offset) {
+    while (offset >= 0) {
+      final TextRange range =
+          textPainter.getWordBoundary(TextPosition(offset: offset));
+      if (!range.isValid || range.isCollapsed) {
+        return null;
+      }
+      if (!_onlyWhitespace(range)) {
+        return range;
+      }
+      offset = range.start - 1;
+    }
+    return null;
+  }
+
+  // Check if the given text range only contains white space or separator
+  // characters.
+  //
+  // Includes newline characters from ASCII and separators from the
+  // [unicode separator category](https://www.compart.com/en/unicode/category/Zs)
+  // TODO(jonahwilliams): replace when we expose this ICU information.
+  bool _onlyWhitespace(TextRange range) {
+    for (int i = range.start; i < range.end; i++) {
+      final int codeUnit = plainText.codeUnitAt(i);
+      if (!isWhitespace(codeUnit)) {
+        return false;
+      }
+    }
+    return true;
   }
 
   // Sets the fallback affinity to the affinity of the selection.
