@@ -1,4 +1,18 @@
-# 5.0.0-non-null-safety
+# 6.0.0
+
+* Add [TextOverflowWidget.position] to support show overflow at start, middle or end.
+* Add [ExtendedText.betterLineBreakingAndOverflowStyle] to make line breaking and overflow style better.
+# 5.0.2
+
+* Fix throw exception when selectWordAtOffset
+
+# 5.0.1
+
+* Fix error when extends SpecialTextSpanBuilder. #30
+
+# 5.0.0
+
+* Support null-safety
 
 * non-null-safety
 # 4.0.3
@@ -10,7 +24,7 @@
 
 * Change handleSpecialText to hasSpecialInlineSpanBase
 * Add hasPlaceholderSpan
-  
+
 ## 4.0.1
 
 * Fix valid value range #23
