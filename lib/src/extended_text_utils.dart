@@ -1,9 +1,14 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+import '../extended_text_library.dart';
 import 'extended_widget_span.dart';
+import 'extension.dart';
 import 'special_inline_span_base.dart';
 import 'special_text_span.dart';
+
+const String zeroWidthSpace = '\u{200B}';
 
 TextPosition convertTextInputPostionToTextPainterPostion(
     InlineSpan text, TextPosition textPosition) {
@@ -73,7 +78,6 @@ TextPosition? convertTextPainterPostionToTextInputPostion(
     if (caretOffset <= 0) {
       return textPosition;
     }
-
     int textOffset = 0;
     text.visitChildren((InlineSpan ts) {
       if (ts is SpecialInlineSpanBase) {
@@ -96,7 +100,6 @@ TextPosition? convertTextPainterPostionToTextInputPostion(
               caretOffset = specialTs.start;
             }
           }
-
           return false;
         }
       }
@@ -419,20 +422,29 @@ InlineSpan joinChar(
 ) {
   late InlineSpan output;
   String? actualText;
+  bool deleteAll = true;
   if (value is SpecialInlineSpanBase) {
-    actualText = (value as SpecialInlineSpanBase).actualText;
+    final SpecialInlineSpanBase base = value as SpecialInlineSpanBase;
+    actualText = base.actualText;
+    deleteAll = base.deleteAll;
   }
   if (value is TextSpan) {
     List<InlineSpan>? children;
     final int start = offset.value;
     String? text = value.text;
-    if (text != null) {
-      text = Characters(text).join(char);
+    if (actualText == null) {
+      deleteAll = false;
+    }
+    actualText ??= text;
+    if (actualText != null) {
+      actualText = actualText.joinChar();
+    }
+    if (actualText != null) {
+      offset.increment(actualText.length);
     }
 
-    final String? temp = actualText ?? value.text;
-    if (temp != null) {
-      offset.increment(temp.length);
+    if (text != null) {
+      text = text.joinChar();
     }
 
     if (value.children != null) {
@@ -444,12 +456,12 @@ InlineSpan joinChar(
 
     output = SpecialTextSpan(
       text: text ?? '',
-      actualText: actualText ?? value.text,
+      actualText: actualText,
       children: children,
       start: start,
       style: value.style,
       recognizer: value.recognizer,
-      deleteAll: false,
+      deleteAll: deleteAll,
       semanticsLabel: value.semanticsLabel,
     );
   } else if (value is WidgetSpan) {
@@ -462,7 +474,7 @@ InlineSpan joinChar(
       actualText: actualText,
     );
 
-    offset.increment(1);
+    offset.increment(actualText?.length ?? 1);
   } else {
     output = value;
   }

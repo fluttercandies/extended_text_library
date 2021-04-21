@@ -16,7 +16,9 @@ class SpecialTextSpan extends TextSpan with SpecialInlineSpanBase {
     GestureRecognizer? recognizer,
     List<InlineSpan>? children,
     String? semanticsLabel,
-  })  : assert(!(deleteAll && children != null && children.isNotEmpty)),
+    this.perfectLineBreakingAndOverflowStyle = false,
+  })  :
+        //assert(!(deleteAll && children != null && children.isNotEmpty)),
         actualText = actualText ?? text,
         textRange =
             TextRange(start: start, end: start + (actualText ?? text).length),
@@ -36,6 +38,8 @@ class SpecialTextSpan extends TextSpan with SpecialInlineSpanBase {
 
   @override
   final TextRange textRange;
+
+  final bool perfectLineBreakingAndOverflowStyle;
 
   @override
   bool operator ==(dynamic other) {
