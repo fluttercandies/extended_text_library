@@ -12,7 +12,7 @@ class ImageSpan extends ExtendedWidgetSpan {
     @required double imageHeight,
     EdgeInsets margin,
     int start = 0,
-    ui.PlaceholderAlignment alignment = ui.PlaceholderAlignment.bottom,
+    ui.PlaceholderAlignment alignment = ui.PlaceholderAlignment.middle,
     String actualText,
     TextBaseline baseline,
     BoxFit fit = BoxFit.scaleDown,
