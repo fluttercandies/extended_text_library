@@ -422,24 +422,22 @@ InlineSpan joinChar(
 ) {
   late InlineSpan output;
   String? actualText;
-  bool deleteAll = true;
+
+  bool deleteAll = false;
   if (value is SpecialInlineSpanBase) {
     final SpecialInlineSpanBase base = value as SpecialInlineSpanBase;
     actualText = base.actualText;
     deleteAll = base.deleteAll;
+  } else {
+    deleteAll = false;
   }
   if (value is TextSpan) {
     List<InlineSpan>? children;
     final int start = offset.value;
     String? text = value.text;
-    if (actualText == null) {
-      deleteAll = false;
-    }
     actualText ??= text;
     if (actualText != null) {
       actualText = actualText.joinChar();
-    }
-    if (actualText != null) {
       offset.increment(actualText.length);
     }
 
@@ -454,16 +452,31 @@ InlineSpan joinChar(
       }
     }
 
-    output = SpecialTextSpan(
-      text: text ?? '',
-      actualText: actualText,
-      children: children,
-      start: start,
-      style: value.style,
-      recognizer: value.recognizer,
-      deleteAll: deleteAll,
-      semanticsLabel: value.semanticsLabel,
-    );
+    if (value is BackgroundTextSpan) {
+      output = BackgroundTextSpan(
+        background: value.background,
+        clipBorderRadius: value.clipBorderRadius,
+        paintBackground: value.paintBackground,
+        text: text ?? '',
+        actualText: actualText,
+        start: start,
+        style: value.style,
+        recognizer: value.recognizer,
+        deleteAll: deleteAll,
+        semanticsLabel: value.semanticsLabel,
+      );
+    } else {
+      output = SpecialTextSpan(
+        text: text ?? '',
+        actualText: actualText,
+        children: children,
+        start: start,
+        style: value.style,
+        recognizer: value.recognizer,
+        deleteAll: deleteAll,
+        semanticsLabel: value.semanticsLabel,
+      );
+    }
   } else if (value is WidgetSpan) {
     output = ExtendedWidgetSpan(
       child: value.child,

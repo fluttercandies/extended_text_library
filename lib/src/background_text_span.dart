@@ -14,14 +14,17 @@ class BackgroundTextSpan extends SpecialTextSpan {
     String? actualText,
     int start = 0,
     bool deleteAll = false,
+    String? semanticsLabel,
   })  : _textPainterHelper = TextPainterHelper(),
         super(
-            style: style,
-            text: text,
-            recognizer: recognizer,
-            actualText: actualText,
-            start: start,
-            deleteAll: deleteAll);
+          style: style,
+          text: text,
+          recognizer: recognizer,
+          actualText: actualText,
+          start: start,
+          deleteAll: deleteAll,
+          semanticsLabel: semanticsLabel,
+        );
 
   /// The paint drawn as a background for the text.
   ///
