@@ -269,7 +269,7 @@ abstract class ExtendedTextSelectionRenderObject extends ExtendedTextRenderBox {
     }
     // If the word is a space, on iOS try to select the previous word instead.
     // On Android try to select the previous word instead only if the text is read only.
-    else if (text != null &&
+    else if (text?.toPlainText() != null &&
         isWhitespace(text.toPlainText().codeUnitAt(position.offset)) &&
         position.offset > 0) {
       final TextRange previousWord = _getPreviousWord(word.start);
