@@ -218,10 +218,9 @@ TextEditingValue correctCaretOffset(TextEditingValue value, InlineSpan textSpan,
     // correct caret Offset
     // make sure caret is not in text when deleteAll is true
     //
-    textSpan.visitChildren(
-      (InlineSpan span) {
-        if (span is SpecialInlineSpanBase &&
-            (span as SpecialInlineSpanBase).deleteAll) {}
+    textSpan.visitChildren((InlineSpan span) {
+      if (span is SpecialInlineSpanBase &&
+          (span as SpecialInlineSpanBase).deleteAll) {
         final SpecialInlineSpanBase specialTs = span as SpecialInlineSpanBase;
         if (caretOffset >= specialTs.start && caretOffset <= specialTs.end) {
           if (caretOffset >
@@ -233,9 +232,9 @@ TextEditingValue correctCaretOffset(TextEditingValue value, InlineSpan textSpan,
           }
           return false;
         }
-        return true;
-      },
-    );
+      }
+      return true;
+    });
 
     ///tell textInput caretOffset is changed.
     if (caretOffset != selection.baseOffset) {
@@ -290,7 +289,7 @@ TextEditingValue handleSpecialTextSpanDelete(
                 extentOffset: caretOffset,
                 affinity: value.selection.affinity,
                 isDirectional: value.selection.isDirectional));
-        textInputConnection.setEditingState(value);
+        textInputConnection?.setEditingState(value);
       }
     }
   }
