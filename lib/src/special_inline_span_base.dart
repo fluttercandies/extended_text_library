@@ -18,11 +18,10 @@ abstract class SpecialInlineSpanBase {
 
   TextRange get textRange;
 
-  ///extended_text_field
-  ///
-  ///if it's true
-  ///* delete all actual text when it try to delete a SpecialTextSpan(like a image span)
-  ///* caret can't move into special text of SpecialTextSpan(like a image span or @xxxx)
+  /// if it's true
+  /// delete all actual text when it try to delete a SpecialTextSpan(like a image span)
+  /// caret can't move into special text of SpecialTextSpan(like a image span or @xxxx)
+  /// extended_text and extended_text_field
   bool get deleteAll;
 
   bool equal(SpecialInlineSpanBase other) {
