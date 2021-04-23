@@ -17,9 +17,10 @@ abstract class SpecialTextSpanBuilder {
         final String char = data[i];
         textStack += char;
         if (specialText != null) {
-          if (!specialText.isEnd(textStack)) {
-            specialText.appendContent(char);
-          } else {
+          // always append
+          // and remove endflag in getContent method
+          specialText.appendContent(char);
+          if (specialText.isEnd(textStack)) {
             inlineList.add(specialText.finishText());
             specialText = null;
             textStack = '';
@@ -73,34 +74,40 @@ abstract class SpecialText {
       : _content = StringBuffer();
   final StringBuffer _content;
 
-  ///start flag of SpecialText
+  /// start flag of SpecialText
   final String startFlag;
 
-  ///end flag of SpecialText
+  /// end flag of SpecialText
   final String endFlag;
 
-  ///TextStyle of SpecialText
+  /// TextStyle of SpecialText
   final TextStyle textStyle;
 
-  ///tap call back of SpecialText
+  /// tap call back of SpecialText
   final SpecialTextGestureTapCallback? onTap;
 
-  ///finish SpecialText
+  /// finish SpecialText
   InlineSpan finishText();
 
-  ///is end of SpecialText
-  bool isEnd(String value) {
-    return value.endsWith(endFlag);
-  }
+  /// is end of SpecialText
+  bool isEnd(String value) => value.endsWith(endFlag);
 
-  ///append text of SpecialText
+  /// append text of SpecialText
   void appendContent(String value) {
     _content.write(value);
   }
 
-  ///get content of SpecialText
+  /// get content of SpecialText(not include startFlag and endFlag)
+  /// https://github.com/fluttercandies/extended_text/issues/76
   String getContent() {
-    return _content.toString();
+    String content = _content.toString();
+    if (content.endsWith(endFlag)) {
+      content = content.substring(
+        0,
+        content.length - endFlag.length,
+      );
+    }
+    return content;
   }
 
   @override
