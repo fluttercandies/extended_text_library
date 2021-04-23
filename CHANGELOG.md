@@ -2,7 +2,7 @@
 
 * Add [TextOverflowWidget.position] to support show overflow at start, middle or end.
 * Add [ExtendedText.betterLineBreakingAndOverflowStyle] to make line breaking and overflow style better.
-* Breaking change: [SpecialText.getContent] is not include endflag now.(please check if you call getContent and your endflag length is more than 1)
+* Breaking change: [SpecialText.getContent] is not include endFlag now.(please check if you call getContent and your endflag length is more than 1)
 
 
 # 5.0.2
