@@ -1,23 +1,13 @@
-# 6.0.0
+# 6.0.0-non-null-safety
 
 * Add [TextOverflowWidget.position] to support show overflow at start, middle or end.
 * Add [ExtendedText.joinZeroWidthSpace] to make line breaking and overflow style better.
 * Breaking change: [SpecialText.getContent] is not include endFlag now.(please check if you call getContent and your endflag length is more than 1)
 
-
-# 5.0.2
-
-* Fix throw exception when selectWordAtOffset
-
-# 5.0.1
-
-* Fix error when extends SpecialTextSpanBuilder. #30
-
-# 5.0.0
-
-* Support null-safety
+# 5.0.0-non-null-safety
 
 * non-null-safety
+
 # 4.0.3
 
 * Support keyboard copy on web/desktop for both text and text field
