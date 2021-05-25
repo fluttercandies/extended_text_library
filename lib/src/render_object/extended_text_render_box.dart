@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui show PlaceholderAlignment;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -470,19 +471,31 @@ abstract class ExtendedTextRenderBox extends RenderBox
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, {Offset? position}) {
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+    // Hit test text spans.
+    late final bool hitText;
+    final TextPosition textPosition =
+        textPainter.getPositionForOffset(position);
+    final InlineSpan? span = textPainter.text!.getSpanForPosition(textPosition);
+    if (span != null && span is HitTestTarget) {
+      result.add(HitTestEntry(span as HitTestTarget));
+      hitText = true;
+    } else {
+      hitText = false;
+    }
+
     RenderBox? child = firstChild;
     int childIndex = 0;
     while (child != null &&
         childIndex < textPainter.inlinePlaceholderBoxes!.length) {
-      final bool isHit = hitTestChild(result, child, position: position!);
+      final bool isHit = hitTestChild(result, child, position: position);
       if (isHit) {
         return true;
       }
       child = childAfter(child);
       childIndex += 1;
     }
-    return false;
+    return hitText;
   }
 
   bool hitTestChild(
