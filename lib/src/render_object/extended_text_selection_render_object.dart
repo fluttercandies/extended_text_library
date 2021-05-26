@@ -813,9 +813,11 @@ abstract class ExtendedTextSelectionRenderObject extends ExtendedTextRenderBox {
     }
 
     // Update the text selection delegate so that the engine knows what we did.
-    textSelectionDelegate!.textEditingValue = textSelectionDelegate!
-        .textEditingValue
-        .copyWith(selection: newSelection);
+    textSelectionDelegate!.userUpdateTextEditingValue(
+      textSelectionDelegate!.textEditingValue.copyWith(selection: newSelection),
+      SelectionChangedCause.keyboard,
+    );
+
     _handleSelectionChange(
       newSelection,
       SelectionChangedCause.keyboard,
@@ -840,10 +842,13 @@ abstract class ExtendedTextSelectionRenderObject extends ExtendedTextRenderBox {
       if (!selection!.isCollapsed) {
         Clipboard.setData(
             ClipboardData(text: selection!.textInside(plainText)));
-        textSelectionDelegate!.textEditingValue = TextEditingValue(
-          text: selection!.textBefore(plainText) +
-              selection!.textAfter(plainText),
-          selection: TextSelection.collapsed(offset: selection!.start),
+        textSelectionDelegate!.userUpdateTextEditingValue(
+          TextEditingValue(
+            text: selection!.textBefore(plainText) +
+                selection!.textAfter(plainText),
+            selection: TextSelection.collapsed(offset: selection!.start),
+          ),
+          SelectionChangedCause.keyboard,
         );
       }
       return;
@@ -854,12 +859,15 @@ abstract class ExtendedTextSelectionRenderObject extends ExtendedTextRenderBox {
       final TextEditingValue value = textSelectionDelegate!.textEditingValue;
       final ClipboardData? data = await Clipboard.getData(Clipboard.kTextPlain);
       if (data != null) {
-        textSelectionDelegate!.textEditingValue = TextEditingValue(
-          text: value.selection.textBefore(value.text) +
-              data.text! +
-              value.selection.textAfter(value.text),
-          selection: TextSelection.collapsed(
-              offset: value.selection.start + data.text!.length),
+        textSelectionDelegate!.userUpdateTextEditingValue(
+          TextEditingValue(
+            text: value.selection.textBefore(value.text) +
+                data.text! +
+                value.selection.textAfter(value.text),
+            selection: TextSelection.collapsed(
+                offset: value.selection.start + data.text!.length),
+          ),
+          SelectionChangedCause.keyboard,
         );
       }
       return;
@@ -912,9 +920,12 @@ abstract class ExtendedTextSelectionRenderObject extends ExtendedTextRenderBox {
         SelectionChangedCause.keyboard,
       );
     }
-    textSelectionDelegate!.textEditingValue = TextEditingValue(
-      text: textBefore + textAfter,
-      selection: newSelection,
+    textSelectionDelegate!.userUpdateTextEditingValue(
+      TextEditingValue(
+        text: textBefore + textAfter,
+        selection: newSelection,
+      ),
+      SelectionChangedCause.keyboard,
     );
   }
 

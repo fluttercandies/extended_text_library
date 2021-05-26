@@ -373,8 +373,10 @@ class ExtendedTextSelectionOverlay {
         textPosition = newSelection.extent;
         break;
     }
-    selectionDelegate!.textEditingValue =
-        _value.copyWith(selection: newSelection, composing: TextRange.empty);
+    selectionDelegate!.userUpdateTextEditingValue(
+      _value.copyWith(selection: newSelection, composing: TextRange.empty),
+      SelectionChangedCause.drag,
+    );
     selectionDelegate!.bringIntoView(textPosition);
   }
 }

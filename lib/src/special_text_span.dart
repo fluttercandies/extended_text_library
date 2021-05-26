@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'special_inline_span_base.dart';
 
 ///
@@ -16,6 +17,9 @@ class SpecialTextSpan extends TextSpan with SpecialInlineSpanBase {
     GestureRecognizer? recognizer,
     List<InlineSpan>? children,
     String? semanticsLabel,
+    MouseCursor? mouseCursor,
+    PointerEnterEventListener? onEnter,
+    PointerExitEventListener? onExit,
   })  :
         //assert(!(deleteAll && children != null && children.isNotEmpty)),
         actualText = actualText ?? text,
@@ -27,6 +31,9 @@ class SpecialTextSpan extends TextSpan with SpecialInlineSpanBase {
           recognizer: recognizer,
           children: children,
           semanticsLabel: semanticsLabel,
+          mouseCursor: mouseCursor,
+          onEnter: onEnter,
+          onExit: onExit,
         );
 
   @override
