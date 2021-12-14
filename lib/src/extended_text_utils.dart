@@ -3,10 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../extended_text_library.dart';
-import 'extended_widget_span.dart';
-import 'extension.dart';
-import 'special_inline_span_base.dart';
-import 'special_text_span.dart';
 
 const String zeroWidthSpace = '\u{200B}';
 
@@ -104,6 +100,7 @@ TextPosition? convertTextPainterPostionToTextInputPostion(
         }
       }
       textOffset += getInlineOffset(ts);
+
       if (textOffset >= textPosition.offset) {
         return false;
       }
@@ -157,43 +154,41 @@ TextSelection convertTextPainterSelectionToTextInputSelection(
 
 TextPosition makeSureCaretNotInSpecialText(
     InlineSpan text, TextPosition textPosition) {
-  final List<InlineSpan> list = <InlineSpan>[];
-  if (list.isNotEmpty) {
-    int caretOffset = textPosition.offset;
-    if (caretOffset <= 0) {
-      return textPosition;
-    }
+  int caretOffset = textPosition.offset;
+  if (caretOffset <= 0) {
+    return textPosition;
+  }
 
-    int textOffset = 0;
-    text.visitChildren((InlineSpan ts) {
-      if (ts is SpecialInlineSpanBase) {
-        final SpecialInlineSpanBase specialTs = ts as SpecialInlineSpanBase;
+  int textOffset = 0;
+  text.visitChildren((InlineSpan ts) {
+    if (ts is SpecialInlineSpanBase) {
+      final SpecialInlineSpanBase specialTs = ts as SpecialInlineSpanBase;
 
-        ///make sure caret is not in text when deleteAll is true
-        if (specialTs.deleteAll &&
-            caretOffset >= specialTs.start &&
-            caretOffset <= specialTs.end) {
-          if (caretOffset >
-              (specialTs.end - specialTs.start) / 2.0 + specialTs.start) {
-            //move caretOffset to end
-            caretOffset = specialTs.end;
-          } else {
-            caretOffset = specialTs.start;
-          }
-          return false;
+      ///make sure caret is not in text when deleteAll is true
+      if (specialTs.deleteAll &&
+          caretOffset >= specialTs.start &&
+          caretOffset <= specialTs.end) {
+        if (caretOffset >
+            (specialTs.end - specialTs.start) / 2.0 + specialTs.start) {
+          //move caretOffset to end
+          caretOffset = specialTs.end;
+        } else {
+          caretOffset = specialTs.start;
         }
-      }
-      textOffset += getInlineOffset(ts);
-      if (textOffset >= textPosition.offset) {
         return false;
       }
-      return true;
-    });
-
-    if (caretOffset != textPosition.offset) {
-      return TextPosition(offset: caretOffset, affinity: textPosition.affinity);
     }
+    textOffset += getInlineOffset(ts);
+    if (textOffset >= textPosition.offset) {
+      return false;
+    }
+    return true;
+  });
+
+  if (caretOffset != textPosition.offset) {
+    return TextPosition(offset: caretOffset, affinity: textPosition.affinity);
   }
+
   return textPosition;
 }
 
@@ -492,4 +487,97 @@ InlineSpan joinChar(
   }
 
   return output;
+}
+
+// move by keyboard left -1 and right +1
+// make sure keyboard left/right support for SpecialInlineSpan
+TextSelection convertKeyboardMoveSelection(
+  InlineSpan text,
+  TextSelection selection,
+) {
+  if (selection.isValid) {
+    if (selection.isCollapsed) {
+      final TextPosition? extent = convertKeyboardMoveTextPostion(
+        text,
+        selection.extent,
+      );
+      if (selection.extent != extent) {
+        selection = selection.copyWith(
+            baseOffset: extent!.offset,
+            extentOffset: extent.offset,
+            affinity: selection.affinity,
+            isDirectional: selection.isDirectional);
+        return selection;
+      }
+    } else {
+      final TextPosition? extent = convertKeyboardMoveTextPostion(
+        text,
+        selection.extent,
+      );
+
+      final TextPosition? base = convertKeyboardMoveTextPostion(
+        text,
+        selection.base,
+      );
+
+      if (selection.extent != extent || selection.base != base) {
+        selection = selection.copyWith(
+            baseOffset: base!.offset,
+            extentOffset: extent!.offset,
+            affinity: selection.affinity,
+            isDirectional: selection.isDirectional);
+        return selection;
+      }
+    }
+  }
+
+  return selection;
+}
+
+// move by keyboard left -1 and right +1
+// make sure keyboard left/right support for SpecialInlineSpan
+TextPosition? convertKeyboardMoveTextPostion(
+  InlineSpan text,
+  TextPosition? textPosition,
+) {
+  if (textPosition != null) {
+    int caretOffset = textPosition.offset;
+    if (caretOffset <= 0) {
+      return textPosition;
+    }
+    int textOffset = 0;
+    text.visitChildren((InlineSpan ts) {
+      if (ts is SpecialInlineSpanBase) {
+        final SpecialInlineSpanBase specialTs = ts as SpecialInlineSpanBase;
+        final int length = specialTs.actualText.length;
+        textOffset += length;
+
+        ///make sure caret is not in text when deleteAll is true
+        if (specialTs.deleteAll &&
+            caretOffset >= specialTs.start &&
+            caretOffset <= specialTs.end) {
+          if (caretOffset == specialTs.start || caretOffset == specialTs.end) {
+            return false;
+          } else if (caretOffset == specialTs.start + 1) {
+            caretOffset = specialTs.end;
+          } else if (caretOffset == specialTs.end - 1) {
+            caretOffset = specialTs.start;
+          }
+          return false;
+        }
+      } else {
+        textOffset += getInlineOffset(ts);
+      }
+
+      if (textOffset >= textPosition.offset) {
+        return false;
+      }
+      return true;
+    });
+
+    if (caretOffset != textPosition.offset) {
+      return TextPosition(offset: caretOffset, affinity: textPosition.affinity);
+    }
+  }
+  return textPosition;
 }

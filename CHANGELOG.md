@@ -1,3 +1,8 @@
+# 8.0.0
+
+* Support to use keyboard move cursor for SpecialInlineSpan.
+* Fix issue that backspace delete two chars.
+  
 # 7.0.0
 
 * Add [SpecialTextSpan.mouseCursor], [SpecialTextSpan.onEnter] and [SpecialTextSpan.onExit].

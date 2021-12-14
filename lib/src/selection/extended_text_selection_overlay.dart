@@ -7,7 +7,6 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../extended_text_library.dart';
-import '../extended_text_utils.dart';
 
 ///
 ///  create by zmtzawqlp on 2019/7/31

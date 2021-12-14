@@ -81,7 +81,7 @@ abstract class SpecialText {
   final String endFlag;
 
   /// TextStyle of SpecialText
-  final TextStyle textStyle;
+  final TextStyle? textStyle;
 
   /// tap call back of SpecialText
   final SpecialTextGestureTapCallback? onTap;
