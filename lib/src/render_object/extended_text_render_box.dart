@@ -1,7 +1,6 @@
 //import 'package:extended_text_library/src/painting_image_span.dart';
 import 'dart:math' as math;
-import 'dart:ui' as ui show PlaceholderAlignment;
-
+import 'dart:ui' as ui show PlaceholderAlignment, BoxWidthStyle, BoxHeightStyle;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -23,6 +22,8 @@ abstract class ExtendedTextRenderBox extends RenderBox
         RenderBoxContainerDefaultsMixin<RenderBox, TextParentData>,
         RelayoutWhenSystemFontsChangeMixin {
   TextPainter get textPainter;
+  ui.BoxWidthStyle get selectionWidthStyle;
+  ui.BoxHeightStyle get selectionHeightStyle;
   bool get softWrap;
   TextOverflow get overflow;
   double? textLayoutLastMaxWidth;
@@ -367,10 +368,14 @@ abstract class ExtendedTextRenderBox extends RenderBox
     if (hasPlaceholderSpan) {
       ///if first index, check by first span
       int offset = textPosition.offset;
-      List<TextBox> boxs = textPainter.getBoxesForSelection(TextSelection(
-          baseOffset: offset,
-          extentOffset: offset + 1,
-          affinity: textPosition.affinity));
+      List<TextBox> boxs = textPainter.getBoxesForSelection(
+        TextSelection(
+            baseOffset: offset,
+            extentOffset: offset + 1,
+            affinity: textPosition.affinity),
+        boxWidthStyle: selectionWidthStyle,
+        boxHeightStyle: selectionHeightStyle,
+      );
       if (boxs.isNotEmpty) {
         final Rect rect = boxs.toList().last.toRect();
         caretHeightCallBack?.call(rect.height);

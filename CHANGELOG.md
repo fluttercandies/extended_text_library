@@ -1,3 +1,7 @@
+# 8.0.1
+
+* Fix selectionWidthStyle and selectionHeightStyle are not working.
+
 # 8.0.0
 
 * Support to use keyboard move cursor for SpecialInlineSpan.
