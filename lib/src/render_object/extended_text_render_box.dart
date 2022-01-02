@@ -33,8 +33,10 @@ abstract class ExtendedTextRenderBox extends RenderBox
   bool get forceLine;
   String get plainText;
   Offset get effectiveOffset;
-  //only for [ExtendedText]
+  // only for [ExtendedText]
   Widget? get overflowWidget;
+  // only for [ExtendedTextField]
+  Offset get paintOffset;
   int get textChildCount =>
       overflowWidget != null ? childCount - 1 : childCount;
   bool get hasPlaceholderSpan => _placeholderSpans.isNotEmpty;
@@ -480,7 +482,7 @@ abstract class ExtendedTextRenderBox extends RenderBox
     // Hit test text spans.
     late final bool hitText;
     final TextPosition textPosition =
-        textPainter.getPositionForOffset(position);
+        textPainter.getPositionForOffset(position - paintOffset);
     final InlineSpan? span = textPainter.text!.getSpanForPosition(textPosition);
     if (span != null && span is HitTestTarget) {
       result.add(HitTestEntry(span as HitTestTarget));

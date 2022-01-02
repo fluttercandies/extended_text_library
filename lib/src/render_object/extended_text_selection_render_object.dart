@@ -82,7 +82,6 @@ abstract class ExtendedTextSelectionRenderObject extends ExtendedTextRenderBox
   LayerLink? startHandleLayerLink;
   LayerLink? endHandleLayerLink;
   TextSelectionChangedHandler? get onSelectionChanged;
-  Offset get paintOffset;
   bool get obscureText;
   Color? selectionColor;
   List<ui.TextBox>? get selectionRects;
