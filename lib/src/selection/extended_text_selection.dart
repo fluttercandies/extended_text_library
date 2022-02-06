@@ -81,13 +81,15 @@ class ExtendedTextSelectionGestureDetectorBuilder {
   final Function showToolbar;
   final Function hideToolbar;
 
+  bool get showToolbarInWeb => false;
+
   /// Whether to show the selection toolbar.
   ///
   /// It is based on the signal source when a [onTapDown] is called. This getter
   /// will return true if current [onTapDown] event is triggered by a touch or
   /// a stylus.
-  bool get shouldShowSelectionToolbar => _shouldShowSelectionToolbar;
-  bool _shouldShowSelectionToolbar = true;
+
+  bool shouldShowSelectionToolbar = true;
 
   /// The [RenderObject] of the [EditableText] for which the builder will
   /// provide a [TextSelectionGestureDetector].
@@ -111,7 +113,7 @@ class ExtendedTextSelectionGestureDetectorBuilder {
     // trigger the selection overlay.
     // For backwards-compatibility, we treat a null kind the same as touch.
     final PointerDeviceKind? kind = details.kind;
-    _shouldShowSelectionToolbar = kind == null ||
+    shouldShowSelectionToolbar = kind == null ||
         kind == PointerDeviceKind.touch ||
         kind == PointerDeviceKind.stylus;
   }
@@ -130,7 +132,7 @@ class ExtendedTextSelectionGestureDetectorBuilder {
   @protected
   void onForcePressStart(ForcePressDetails details) {
     assert(delegate.forcePressEnabled);
-    _shouldShowSelectionToolbar = true;
+    shouldShowSelectionToolbar = true;
     if (delegate.selectionEnabled) {
       renderEditable.selectWordsInRange(
         from: details.globalPosition,
@@ -269,7 +271,7 @@ class ExtendedTextSelectionGestureDetectorBuilder {
   @protected
   void onSecondaryTapDown(TapDownDetails details) {
     renderEditable.handleSecondaryTapDown(details);
-    _shouldShowSelectionToolbar = true;
+    shouldShowSelectionToolbar = true;
   }
 
   /// Handler for [TextSelectionGestureDetector.onDoubleTapDown].
@@ -305,7 +307,7 @@ class ExtendedTextSelectionGestureDetectorBuilder {
       return;
     }
     final PointerDeviceKind? kind = details.kind;
-    _shouldShowSelectionToolbar = kind == null ||
+    shouldShowSelectionToolbar = kind == null ||
         kind == PointerDeviceKind.touch ||
         kind == PointerDeviceKind.stylus;
     renderEditable.selectPositionAt(
@@ -388,7 +390,7 @@ class CommonTextSelectionGestureDetectorBuilder
     required Function? onTap,
     required BuildContext context,
     required Function? requestKeyboard,
-  })   : _onTap = onTap,
+  })  : _onTap = onTap,
         _context = context,
         _requestKeyboard = requestKeyboard,
         super(

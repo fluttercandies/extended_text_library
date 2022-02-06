@@ -12,6 +12,7 @@ export 'src/render_object/extended_text_selection_render_object.dart';
 export 'src/selection/extended_text_selection.dart';
 export 'src/selection/extended_text_selection_overlay.dart';
 export 'src/selection/painter.dart';
+export 'src/selection/typedef.dart';
 export 'src/special_inline_span_base.dart';
 export 'src/special_text_span.dart';
 export 'src/special_text_span_builder.dart';
