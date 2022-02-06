@@ -1,4 +1,6 @@
 //import 'package:extended_text_library/src/painting_image_span.dart';
+// ignore_for_file: unnecessary_null_comparison, always_put_control_body_on_new_line
+
 import 'dart:math' as math;
 import 'dart:ui' as ui show PlaceholderAlignment, BoxWidthStyle, BoxHeightStyle;
 import 'package:flutter/foundation.dart';
@@ -43,10 +45,23 @@ abstract class ExtendedTextRenderBox extends RenderBox
   bool _hasSpecialInlineSpanBase = false;
   bool get hasSpecialInlineSpanBase => _hasSpecialInlineSpanBase;
   late List<PlaceholderSpan> _placeholderSpans;
+  List<PlaceholderSpan> get placeholderSpans => _placeholderSpans;
 
-  void extractPlaceholderSpans(InlineSpan span) {
+  /// The number of font pixels for each logical pixel.
+  ///
+  /// For example, if the text scale factor is 1.5, text will be 50% larger than
+  /// the specified font size.
+  double get textScaleFactor => textPainter.textScaleFactor;
+  set textScaleFactor(double value) {
+    assert(value != null);
+    if (textPainter.textScaleFactor == value) return;
+    textPainter.textScaleFactor = value;
+    markNeedsTextLayout();
+  }
+
+  void extractPlaceholderSpans(InlineSpan? span) {
     _placeholderSpans = <PlaceholderSpan>[];
-    span.visitChildren((InlineSpan span) {
+    span?.visitChildren((InlineSpan span) {
       if (span is PlaceholderSpan) {
         final PlaceholderSpan placeholderSpan = span;
         _placeholderSpans.add(placeholderSpan);
@@ -174,6 +189,7 @@ abstract class ExtendedTextRenderBox extends RenderBox
     BoxConstraints constraints, {
     List<int>? hideWidgets,
     TextPainter? textPainter,
+    bool dry = false,
   }) {
     if (childCount == 0) {
       return;
@@ -182,35 +198,51 @@ abstract class ExtendedTextRenderBox extends RenderBox
     _placeholderDimensions = List<PlaceholderDimensions>.filled(
         textChildCount, PlaceholderDimensions.empty,
         growable: false);
-
+    // Only constrain the width to the maximum width of the paragraph.
+    // Leave height unconstrained, which will overflow if expanded past.
+    BoxConstraints boxConstraints =
+        BoxConstraints(maxWidth: constraints.maxWidth);
+    // The content will be enlarged by textScaleFactor during painting phase.
+    // We reduce constraints by textScaleFactor, so that the content will fit
+    // into the box once it is enlarged.
+    boxConstraints = boxConstraints / textScaleFactor;
     int childIndex = 0;
     while (child != null && childIndex < textChildCount) {
-      // Only constrain the width to the maximum width of the paragraph.
-      // Leave height unconstrained, which will overflow if expanded past.
-      child.layout(
-        BoxConstraints(
-          maxWidth: hideWidgets != null && hideWidgets.contains(childIndex)
-              ? 0
-              : constraints.maxWidth,
-        ),
-        parentUsesSize: true,
-      );
       double? baselineOffset;
-      switch (_placeholderSpans[childIndex].alignment) {
-        case ui.PlaceholderAlignment.baseline:
-          {
-            baselineOffset = child
-                .getDistanceToBaseline(_placeholderSpans[childIndex].baseline!);
+      final Size childSize;
+
+      if (!dry) {
+        // Only constrain the width to the maximum width of the paragraph.
+        // Leave height unconstrained, which will overflow if expanded past.
+        child.layout(
+          hideWidgets != null && hideWidgets.contains(childIndex)
+              ? const BoxConstraints(maxWidth: 0)
+              : boxConstraints,
+          parentUsesSize: true,
+        );
+        childSize = child.size;
+        switch (_placeholderSpans[childIndex].alignment) {
+          case ui.PlaceholderAlignment.baseline:
+            baselineOffset = child.getDistanceToBaseline(
+              _placeholderSpans[childIndex].baseline!,
+            );
             break;
-          }
-        default:
-          {
+          case ui.PlaceholderAlignment.aboveBaseline:
+          case ui.PlaceholderAlignment.belowBaseline:
+          case ui.PlaceholderAlignment.bottom:
+          case ui.PlaceholderAlignment.middle:
+          case ui.PlaceholderAlignment.top:
             baselineOffset = null;
             break;
-          }
+        }
+      } else {
+        assert(_placeholderSpans[childIndex].alignment !=
+            ui.PlaceholderAlignment.baseline);
+        childSize = child.getDryLayout(boxConstraints);
       }
+
       _placeholderDimensions![childIndex] = PlaceholderDimensions(
-        size: child.size,
+        size: childSize,
         alignment: _placeholderSpans[childIndex].alignment,
         baseline: _placeholderSpans[childIndex].baseline,
         baselineOffset: baselineOffset,
@@ -537,5 +569,29 @@ abstract class ExtendedTextRenderBox extends RenderBox
       },
     );
     return isHit;
+  }
+
+  // Computes the text metrics if `_textPainter`'s layout information was marked
+  // as dirty.
+  //
+  // This method must be called in `RenderEditable`'s public methods that expose
+  // `_textPainter`'s metrics. For instance, `systemFontsDidChange` sets
+  // _textPainter._paragraph to null, so accessing _textPainter's metrics
+  // immediately after `systemFontsDidChange` without first calling this method
+  // may crash.
+  //
+  // This method is also called in various paint methods (`RenderEditable.paint`
+  // as well as its foreground/background painters' `paint`). It's needed
+  // because invisible render objects kept in the tree by `KeepAlive` may not
+  // get a chance to do layout but can still paint.
+  // See https://github.com/flutter/flutter/issues/84896.
+  //
+  // This method only re-computes layout if the underlying `_textPainter`'s
+  // layout cache is invalidated (by calling `TextPainter.markNeedsLayout`), or
+  // the constraints used to layout the `_textPainter` is different. See
+  // `TextPainter.layout`.
+  void computeTextMetricsIfNeeded() {
+    assert(constraints != null);
+    layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
   }
 }

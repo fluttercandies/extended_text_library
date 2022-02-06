@@ -1,3 +1,7 @@
+# 9.0.0
+
+* Migrate to 2.10.0
+
 # 8.0.2
 
 * Fix  hittest is not right on ExtendedTextField
