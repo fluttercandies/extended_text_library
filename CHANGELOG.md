@@ -1,6 +1,11 @@
+# 10.0.0-dev
+
+* Migrate to 2.13.0
+* Support Scribble Handwriting for iPads
+
 # 9.0.0
 
-* Migrate to 2.10.0.
+* Migrate to 2.10.0
 * Add shouldShowSelectionHandles and textSelectionGestureDetectorBuilder call back to define the behavior of handles and toolbar.
 * Shortcut support for web and desktop.
 

@@ -25,6 +25,7 @@ typedef TextSelectionChangedHandler = void Function(
 /// [ExtendedRenderParagraph](https://github.com/fluttercandies/extended_text/blob/master/lib/src/extended_render_paragraph.dart#L13)
 ///
 /// TextSelection for them
+/// flutter/packages/flutter/lib/src/rendering/editable.dart
 abstract class ExtendedTextSelectionRenderObject extends ExtendedTextRenderBox
     implements TextLayoutMetrics {
   ValueListenable<bool> get selectionStartInViewport;
@@ -655,5 +656,16 @@ abstract class ExtendedTextSelectionRenderObject extends ExtendedTextRenderBox
     return hasSpecialInlineSpanBase
         ? convertTextInputSelectionToTextPainterSelection(text!, value!)
         : value;
+  }
+
+  /// Returns a list of rects that bound the given selection.
+  ///
+  /// See [TextPainter.getBoxesForSelection] for more details.
+  List<Rect> getBoxesForSelectionRects(TextSelection selection) {
+    _computeTextMetricsIfNeeded();
+    return textPainter
+        .getBoxesForSelection(selection)
+        .map((TextBox textBox) => textBox.toRect().shift(paintOffset))
+        .toList();
   }
 }

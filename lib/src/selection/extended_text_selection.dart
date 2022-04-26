@@ -452,6 +452,7 @@ class CommonTextSelectionGestureDetectorBuilder
         case TargetPlatform.macOS:
           switch (details.kind) {
             case PointerDeviceKind.mouse:
+            case PointerDeviceKind.trackpad:
             case PointerDeviceKind.stylus:
             case PointerDeviceKind.invertedStylus:
               // Precise devices should place the cursor at a precise position.

@@ -18,6 +18,7 @@ import '../special_inline_span_base.dart';
 /// [ExtendedRenderParagraph](https://github.com/fluttercandies/extended_text/blob/master/lib/src/extended_render_paragraph.dart#L13)
 ///
 /// Widget Span for them
+/// flutter/packages/flutter/lib/src/rendering/paragraph.dart
 abstract class ExtendedTextRenderBox extends RenderBox
     with
         ContainerRenderObjectMixin<RenderBox, TextParentData>,
@@ -109,9 +110,9 @@ abstract class ExtendedTextRenderBox extends RenderBox
     int childIndex = 0;
     while (child != null && childIndex < textChildCount) {
       // Height and baseline is irrelevant as all text will be laid
-      // out in a single line.
+      // out in a single line. Therefore, using 0.0 as a dummy for the height.
       placeholderDimensions[childIndex] = PlaceholderDimensions(
-        size: Size(child.getMaxIntrinsicWidth(height), height),
+        size: Size(child.getMaxIntrinsicWidth(double.infinity), 0.0),
         alignment: _placeholderSpans[childIndex].alignment,
         baseline: _placeholderSpans[childIndex].baseline,
       );
@@ -129,11 +130,10 @@ abstract class ExtendedTextRenderBox extends RenderBox
             growable: false);
     int childIndex = 0;
     while (child != null && childIndex < textChildCount) {
-      final double intrinsicWidth = child.getMinIntrinsicWidth(height);
-      final double intrinsicHeight =
-          child.getMinIntrinsicHeight(intrinsicWidth);
+      // Height and baseline is irrelevant; only looking for the widest word or
+      // placeholder. Therefore, using 0.0 as a dummy for height.
       placeholderDimensions[childIndex] = PlaceholderDimensions(
-        size: Size(intrinsicWidth, intrinsicHeight),
+        size: Size(child.getMinIntrinsicWidth(double.infinity), 0.0),
         alignment: _placeholderSpans[childIndex].alignment,
         baseline: _placeholderSpans[childIndex].baseline,
       );
@@ -150,11 +150,13 @@ abstract class ExtendedTextRenderBox extends RenderBox
             textChildCount, PlaceholderDimensions.empty,
             growable: false);
     int childIndex = 0;
+    // Takes textScaleFactor into account because the content of the placeholder
+    // span will be scaled up when it paints.
+    width = width / textScaleFactor;
     while (child != null && childIndex < textChildCount) {
-      final double intrinsicHeight = child.getMinIntrinsicHeight(width);
-      final double intrinsicWidth = child.getMinIntrinsicWidth(intrinsicHeight);
+      final Size size = child.getDryLayout(BoxConstraints(maxWidth: width));
       placeholderDimensions[childIndex] = PlaceholderDimensions(
-        size: Size(intrinsicWidth, intrinsicHeight),
+        size: size,
         alignment: _placeholderSpans[childIndex].alignment,
         baseline: _placeholderSpans[childIndex].baseline,
       );
@@ -162,6 +164,71 @@ abstract class ExtendedTextRenderBox extends RenderBox
       childIndex += 1;
     }
     textPainter.setPlaceholderDimensions(placeholderDimensions);
+  }
+
+  @override
+  bool hitTestSelf(Offset position) => true;
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+    // Hit test text spans.
+    late final bool hitText;
+    final TextPosition textPosition =
+        textPainter.getPositionForOffset(position - paintOffset);
+    final InlineSpan? span = textPainter.text!.getSpanForPosition(textPosition);
+    if (span != null && span is HitTestTarget) {
+      result.add(HitTestEntry(span as HitTestTarget));
+      hitText = true;
+    } else {
+      hitText = false;
+    }
+
+    RenderBox? child = firstChild;
+    int childIndex = 0;
+    while (child != null &&
+        childIndex < textPainter.inlinePlaceholderBoxes!.length) {
+      final bool isHit = hitTestChild(result, child, position: position);
+      if (isHit) {
+        return true;
+      }
+      child = childAfter(child);
+      childIndex += 1;
+    }
+    return hitText;
+  }
+
+  bool hitTestChild(
+    BoxHitTestResult result,
+    RenderBox child, {
+    required Offset position,
+  }) {
+    final TextParentData textParentData = child.parentData as TextParentData;
+    final Matrix4 transform = Matrix4.translationValues(
+        textParentData.offset.dx + effectiveOffset.dx,
+        textParentData.offset.dy + effectiveOffset.dy,
+        0.0)
+      ..scale(
+        textParentData.scale,
+        textParentData.scale,
+        textParentData.scale,
+      );
+    final bool isHit = result.addWithPaintTransform(
+      transform: transform,
+      position: position,
+      hitTest: (BoxHitTestResult result, Offset transformed) {
+        assert(() {
+          final Offset manualPosition =
+              (position - textParentData.offset - effectiveOffset) /
+                  textParentData.scale!;
+          return (transformed.dx - manualPosition.dx).abs() <
+                  precisionErrorTolerance &&
+              (transformed.dy - manualPosition.dy).abs() <
+                  precisionErrorTolerance;
+        }());
+        return child.hitTest(result, position: transformed);
+      },
+    );
+    return isHit;
   }
 
   double _computeIntrinsicHeight(double width) {
@@ -507,68 +574,6 @@ abstract class ExtendedTextRenderBox extends RenderBox
     textPainter.markNeedsLayout();
     textLayoutLastMaxWidth = null;
     textLayoutLastMinWidth = null;
-  }
-
-  @override
-  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
-    // Hit test text spans.
-    late final bool hitText;
-    final TextPosition textPosition =
-        textPainter.getPositionForOffset(position - paintOffset);
-    final InlineSpan? span = textPainter.text!.getSpanForPosition(textPosition);
-    if (span != null && span is HitTestTarget) {
-      result.add(HitTestEntry(span as HitTestTarget));
-      hitText = true;
-    } else {
-      hitText = false;
-    }
-
-    RenderBox? child = firstChild;
-    int childIndex = 0;
-    while (child != null &&
-        childIndex < textPainter.inlinePlaceholderBoxes!.length) {
-      final bool isHit = hitTestChild(result, child, position: position);
-      if (isHit) {
-        return true;
-      }
-      child = childAfter(child);
-      childIndex += 1;
-    }
-    return hitText;
-  }
-
-  bool hitTestChild(
-    BoxHitTestResult result,
-    RenderBox child, {
-    required Offset position,
-  }) {
-    final TextParentData textParentData = child.parentData as TextParentData;
-    final Matrix4 transform = Matrix4.translationValues(
-        textParentData.offset.dx + effectiveOffset.dx,
-        textParentData.offset.dy + effectiveOffset.dy,
-        0.0)
-      ..scale(
-        textParentData.scale,
-        textParentData.scale,
-        textParentData.scale,
-      );
-    final bool isHit = result.addWithPaintTransform(
-      transform: transform,
-      position: position,
-      hitTest: (BoxHitTestResult result, Offset transformed) {
-        assert(() {
-          final Offset manualPosition =
-              (position - textParentData.offset - effectiveOffset) /
-                  textParentData.scale!;
-          return (transformed.dx - manualPosition.dx).abs() <
-                  precisionErrorTolerance &&
-              (transformed.dy - manualPosition.dy).abs() <
-                  precisionErrorTolerance;
-        }());
-        return child.hitTest(result, position: transformed);
-      },
-    );
-    return isHit;
   }
 
   // Computes the text metrics if `_textPainter`'s layout information was marked
