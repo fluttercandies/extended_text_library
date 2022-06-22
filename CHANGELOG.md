@@ -1,3 +1,7 @@
+# 9.1.1
+
+* Add RegExpSpecialTextSpanBuilder to build SpecialTextSpan with RegExp
+
 # 9.1.0
 
 * Migrate to 3.0.0

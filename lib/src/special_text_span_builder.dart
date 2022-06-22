@@ -115,3 +115,89 @@ abstract class SpecialText {
     return startFlag + getContent() + endFlag;
   }
 }
+
+abstract class RegExpSpecialTextSpanBuilder extends SpecialTextSpanBuilder {
+  List<RegExpSpecialText> get regExps;
+
+  @override
+  TextSpan build(String data,
+      {TextStyle? textStyle, SpecialTextGestureTapCallback? onTap}) {
+    final List<InlineSpan> children = <InlineSpan>[];
+    if (regExps.isNotEmpty) {
+      buildWithRegExp(
+        children: children,
+        start: 0,
+        data: data,
+        copyRegExps: regExps.toList(),
+        textStyle: textStyle,
+        onTap: onTap,
+      );
+    }
+
+    return TextSpan(children: children, style: textStyle);
+  }
+
+  void buildWithRegExp({
+    required String data,
+    required int start,
+    required List<RegExpSpecialText> copyRegExps,
+    required List<InlineSpan> children,
+    TextStyle? textStyle,
+    SpecialTextGestureTapCallback? onTap,
+  }) {
+    if (data.isEmpty) {
+      return;
+    }
+
+    if (copyRegExps.isEmpty) {
+      children.add(TextSpan(text: data, style: textStyle));
+      return;
+    }
+
+    final RegExpSpecialText regExpSpecialText = copyRegExps.first;
+
+    data.splitMapJoin(regExpSpecialText.regExp, onMatch: (Match match) {
+      final String matchString = '${match[0]}';
+      children.add(regExpSpecialText.finishText(
+        start,
+        match,
+        textStyle: textStyle,
+        onTap: onTap,
+      ));
+      start += matchString.length;
+      return '';
+    }, onNonMatch: (String notMatch) {
+      if (notMatch.isNotEmpty) {
+        buildWithRegExp(
+          data: notMatch,
+          start: start,
+          children: children,
+          copyRegExps: copyRegExps.toList()..remove(regExpSpecialText),
+          textStyle: textStyle,
+          onTap: onTap,
+        );
+        start += notMatch.length;
+      }
+      return '';
+    });
+  }
+
+  @override
+  SpecialText? createSpecialText(String flag,
+      {TextStyle? textStyle,
+      SpecialTextGestureTapCallback? onTap,
+      required int index}) {
+    return null;
+  }
+}
+
+abstract class RegExpSpecialText {
+  RegExp get regExp;
+
+  InlineSpan finishText(
+    int start,
+    Match match, {
+    TextStyle? textStyle,
+    SpecialTextGestureTapCallback? onTap,
+  });
+}
