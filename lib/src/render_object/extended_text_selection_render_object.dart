@@ -167,7 +167,7 @@ abstract class ExtendedTextSelectionRenderObject extends ExtendedTextRenderBox
         globalToLocal(lastTapDownPosition! - paintOffset));
     final TextRange word = textPainter.getWordBoundary(position);
     late TextSelection newSelection;
-    if (position.offset - word.start <= 1) {
+    if (position.offset <= word.start) {
       newSelection = TextSelection.collapsed(offset: word.start);
     } else {
       newSelection = TextSelection.collapsed(

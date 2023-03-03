@@ -1,3 +1,7 @@
+# 10.0.0
+
+* fix issue on ios after flutter version 3.7.0. #191 #198
+
 # 9.1.1
 
 * Add RegExpSpecialTextSpanBuilder to build SpecialTextSpan with RegExp
