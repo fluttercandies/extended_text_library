@@ -331,16 +331,7 @@ class ExtendedTextSelectionGestureDetectorBuilder {
   ///  * [TextSelectionGestureDetector.onDragSelectionUpdate], which triggers
   ///    this callback./lib/src/material/text_field.dart
   @protected
-  void onDragSelectionUpdate(TapDragUpdateDetails details) {
-    if (!delegate.selectionEnabled) {
-      return;
-    }
-    renderEditable.selectPositionAt(
-      from: details.localOffsetFromOrigin,
-      to: details.localPosition,
-      cause: SelectionChangedCause.drag,
-    );
-  }
+  void onDragSelectionUpdate(TapDragUpdateDetails details) {}
 
   /// Handler for [TextSelectionGestureDetector.onDragSelectionEnd].
   ///
