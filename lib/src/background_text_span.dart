@@ -159,7 +159,7 @@ class BackgroundTextSpan extends SpecialTextSpan {
   }
 
   @override
-  int get hashCode => hashValues(
+  int get hashCode => Object.hash(
         style,
         text,
         recognizer,
