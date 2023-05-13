@@ -41,4 +41,12 @@ mixin SpecialInlineSpanBase {
 
     return RenderComparison.identical;
   }
+
+  /// showText is the text on screen
+  String getSelectedContent(String showText) {
+    if (deleteAll) {
+      return actualText;
+    }
+    return showText;
+  }
 }

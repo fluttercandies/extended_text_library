@@ -3,7 +3,7 @@ library extended_text_library;
 export 'src/background_text_span.dart';
 export 'src/extended_text_typedef.dart';
 export 'src/extended_text_utils.dart';
-export 'src/extended_text_utils.dart';
+export 'src/extended/util.dart';
 export 'src/extended_widget_span.dart';
 export 'src/extension.dart';
 export 'src/image_span.dart';
