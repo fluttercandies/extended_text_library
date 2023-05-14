@@ -1,6 +1,7 @@
-# Unreleased  
+# 11.0.0
 
-* fix: TextSelectionGestureDetector update for Flutter 3.10.0
+* Migrate to Flutter 3.10.0
+* Refactoring codes and sync codes from 3.10.0
 
 # 10.0.0
 

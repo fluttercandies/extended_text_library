@@ -10,6 +10,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import 'extended_text_render_box.dart';
+
 ///
 ///  create by zmtzawqlp on 2019/8/1
 ///

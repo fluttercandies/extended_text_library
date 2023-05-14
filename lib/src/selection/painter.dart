@@ -1,7 +1,7 @@
 // ignore_for_file: always_put_control_body_on_new_line, unnecessary_null_comparison
 
 import 'dart:ui' as ui;
-import 'package:extended_text_library/extended_text_library.dart';
+import 'package:extended_text_library/src/render_object/extended_text_selection_render_object.dart';
 import 'package:flutter/material.dart';
 
 /// An interface that paints within a [RenderEditable]'s bounds, above or

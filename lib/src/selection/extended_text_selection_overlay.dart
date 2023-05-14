@@ -3,6 +3,7 @@
 import 'dart:math' as math;
 
 import 'package:extended_text_library/extended_text_library.dart';
+import 'package:extended_text_library/src/render_object/extended_text_selection_render_object.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';

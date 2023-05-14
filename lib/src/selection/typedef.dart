@@ -1,4 +1,4 @@
-import 'package:extended_text_library/extended_text_library.dart';
+import 'package:extended_text_library/src/selection/extended_text_selection.dart';
 import 'package:flutter/material.dart';
 
 //   Default
