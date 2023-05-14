@@ -1,7 +1,3 @@
-# Unreleased  
-
-* fix: TextSelectionGestureDetector update for Flutter 3.10.0
-
 # 10.0.0
 
 * fix issue on ios after flutter version 3.7.0. #191 #198

@@ -106,14 +106,8 @@ class ExtendedTextSelectionGestureDetectorBuilder {
   ///
   ///  * [TextSelectionGestureDetector.onTapDown], which triggers this callback.
   @protected
-  void onTapDown(TapDragDownDetails details) {
-    renderEditable.handleTapDown(
-      TapDownDetails(
-        globalPosition: details.globalPosition,
-        localPosition: details.localPosition,
-        kind: details.kind,
-      ),
-    );
+  void onTapDown(TapDownDetails details) {
+    renderEditable.handleTapDown(details);
     // The selection overlay should only be shown when the user is interacting
     // through a touch screen (via either a finger or a stylus). A mouse shouldn't
     // trigger the selection overlay.
@@ -179,7 +173,7 @@ class ExtendedTextSelectionGestureDetectorBuilder {
   ///  * [TextSelectionGestureDetector.onSingleTapUp], which triggers
   ///    this callback.
   @protected
-  void onSingleTapUp(TapDragUpDetails details) {
+  void onSingleTapUp(TapUpDetails details) {
     if (delegate.selectionEnabled) {
       renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
     }
@@ -290,7 +284,7 @@ class ExtendedTextSelectionGestureDetectorBuilder {
   ///  * [TextSelectionGestureDetector.onDoubleTapDown], which triggers this
   ///    callback.
   @protected
-  void onDoubleTapDown(TapDragDownDetails details) {
+  void onDoubleTapDown(TapDownDetails details) {
     if (delegate.selectionEnabled) {
       renderEditable.selectWord(cause: SelectionChangedCause.tap);
       if (shouldShowSelectionToolbar) {
@@ -308,7 +302,7 @@ class ExtendedTextSelectionGestureDetectorBuilder {
   ///  * [TextSelectionGestureDetector.onDragSelectionStart], which triggers
   ///    this callback.
   @protected
-  void onDragSelectionStart(TapDragStartDetails details) {
+  void onDragSelectionStart(DragStartDetails details) {
     if (!delegate.selectionEnabled) {
       return;
     }
@@ -331,13 +325,14 @@ class ExtendedTextSelectionGestureDetectorBuilder {
   ///  * [TextSelectionGestureDetector.onDragSelectionUpdate], which triggers
   ///    this callback./lib/src/material/text_field.dart
   @protected
-  void onDragSelectionUpdate(TapDragUpdateDetails details) {
+  void onDragSelectionUpdate(
+      DragStartDetails startDetails, DragUpdateDetails updateDetails) {
     if (!delegate.selectionEnabled) {
       return;
     }
     renderEditable.selectPositionAt(
-      from: details.localOffsetFromOrigin,
-      to: details.localPosition,
+      from: startDetails.globalPosition,
+      to: updateDetails.globalPosition,
       cause: SelectionChangedCause.drag,
     );
   }
@@ -351,7 +346,7 @@ class ExtendedTextSelectionGestureDetectorBuilder {
   ///  * [TextSelectionGestureDetector.onDragSelectionEnd], which triggers this
   ///    callback.
   @protected
-  void onDragSelectionEnd(TapDragEndDetails details) {
+  void onDragSelectionEnd(DragEndDetails details) {
     /* Subclass should override this method if needed. */
   }
 
@@ -449,7 +444,7 @@ class CommonTextSelectionGestureDetectorBuilder
   }
 
   @override
-  void onSingleTapUp(TapDragUpDetails details) {
+  void onSingleTapUp(TapUpDetails details) {
     hideToolbar();
     if (delegate.selectionEnabled) {
       switch (Theme.of(_context).platform) {
