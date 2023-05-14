@@ -645,9 +645,8 @@ abstract class ExtendedTextSelectionRenderObject extends ExtendedTextRenderBox
     setSelection(selection, SelectionChangedCause.keyboard);
   }
 
-  TextSelection? getActualSelection(
-      {TextRange? newRange, TextSelection? newSelection}) {
-    TextSelection? value = newSelection ?? selection;
+  TextSelection? getActualSelection({TextRange? newRange}) {
+    TextSelection? value = selection;
     if (newRange != null) {
       value =
           TextSelection(baseOffset: newRange.start, extentOffset: newRange.end);
