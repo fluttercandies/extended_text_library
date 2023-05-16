@@ -521,7 +521,7 @@ class ExtendedTextLibraryUtils {
 // }
 
   /// join char into text
- static InlineSpan joinChar(
+  static InlineSpan joinChar(
     InlineSpan value,
     Accumulator offset,
     String char,
