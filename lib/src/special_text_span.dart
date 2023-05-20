@@ -60,7 +60,7 @@ class SpecialTextSpan extends TextSpan with SpecialInlineSpanBase {
   }
 
   @override
-  int get hashCode => hashValues(super.hashCode, baseHashCode);
+  int get hashCode => Object.hash(super.hashCode, baseHashCode);
 
   @override
   RenderComparison compareTo(InlineSpan other) {

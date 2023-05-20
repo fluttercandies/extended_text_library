@@ -1,3 +1,8 @@
+# 11.0.0
+
+* Migrate to Flutter 3.10.0
+* Refactoring codes and sync codes from 3.10.0
+
 # 10.0.0
 
 * fix issue on ios after flutter version 3.7.0. #191 #198

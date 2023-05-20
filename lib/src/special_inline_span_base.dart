@@ -28,7 +28,7 @@ abstract class SpecialInlineSpanBase {
         other.actualText == actualText;
   }
 
-  int get baseHashCode => hashValues(actualText, start, deleteAll);
+  int get baseHashCode => Object.hash(actualText, start, deleteAll);
 
   RenderComparison baseCompareTo(SpecialInlineSpanBase other) {
     if (other.actualText != actualText) {
@@ -40,5 +40,13 @@ abstract class SpecialInlineSpanBase {
     }
 
     return RenderComparison.identical;
+  }
+
+  /// showText is the text on screen
+  String getSelectedContent(String showText) {
+    if (deleteAll) {
+      return actualText;
+    }
+    return showText;
   }
 }

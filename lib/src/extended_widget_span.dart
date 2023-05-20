@@ -66,7 +66,7 @@ class ExtendedWidgetSpan extends WidgetSpan with SpecialInlineSpanBase {
 
   @override
   int get hashCode =>
-      hashValues(super.hashCode, baseHashCode, widgetSpanSize.size);
+      Object.hash(super.hashCode, baseHashCode, widgetSpanSize.size);
 
   @override
   RenderComparison compareTo(InlineSpan other) {
