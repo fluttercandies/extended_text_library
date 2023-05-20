@@ -1,56 +1,56 @@
-# 11.0.0
+## 11.0.0
 
 * Migrate to Flutter 3.10.0
 * Refactoring codes and sync codes from 3.10.0
 
-# 10.0.0
+## 10.0.0
 
 * fix issue on ios after flutter version 3.7.0. #191 #198
 
-# 9.1.1
+## 9.1.1
 
 * Add RegExpSpecialTextSpanBuilder to build SpecialTextSpan with RegExp
 
-# 9.1.0
+## 9.1.0
 
 * Migrate to 3.0.0
 * Support Scribble Handwriting for iPads
 
-# 9.0.0
+## 9.0.0
 
 * Migrate to 2.10.0
 * Add shouldShowSelectionHandles and textSelectionGestureDetectorBuilder call back to define the behavior of handles and toolbar.
 * Shortcut support for web and desktop.
 
-# 8.0.2
+## 8.0.2
 
 * Fix  hittest is not right on ExtendedTextField
 
-# 8.0.1
+## 8.0.1
 
 * Fix selectionWidthStyle and selectionHeightStyle are not working.
 
-# 8.0.0
+## 8.0.0
 
 * Support to use keyboard move cursor for SpecialInlineSpan.
 * Fix issue that backspace delete two chars.
   
-# 7.0.0
+## 7.0.0
 
 * Add [SpecialTextSpan.mouseCursor], [SpecialTextSpan.onEnter] and [SpecialTextSpan.onExit].
 
-# 6.0.0
+## 6.0.0
 
 * Add [TextOverflowWidget.position] to support show overflow at start, middle or end.
 * Add [ExtendedText.joinZeroWidthSpace] to make line breaking and overflow style better.
 * Breaking change: [SpecialText.getContent] is not include endFlag now.(please check if you call getContent and your endflag length is more than 1)
 
 
-# 5.0.2
+## 5.0.2
 
 * Fix throw exception when selectWordAtOffset
 
-# 5.0.1
+## 5.0.1
 
 * Fix error when extends SpecialTextSpanBuilder. #30
 
@@ -58,7 +58,7 @@
 
 * Support null-safety
 
-# 4.0.3
+## 4.0.3
 
 * Support keyboard copy on web/desktop for both text and text field
 * Fix wrong position of caret
