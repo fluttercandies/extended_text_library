@@ -6,7 +6,7 @@ abstract class SpecialTextSpanBuilder {
   TextSpan build(String data,
       {TextStyle? textStyle, SpecialTextGestureTapCallback? onTap}) {
     if (data == '') {
-      return const TextSpan(text: '');
+      return TextSpan(text: '', style: textStyle);
     }
     final List<InlineSpan> inlineList = <InlineSpan>[];
     if (data.isNotEmpty) {
@@ -122,6 +122,9 @@ abstract class RegExpSpecialTextSpanBuilder extends SpecialTextSpanBuilder {
   @override
   TextSpan build(String data,
       {TextStyle? textStyle, SpecialTextGestureTapCallback? onTap}) {
+    if (data == '') {
+      return TextSpan(text: '', style: textStyle);
+    }
     final List<InlineSpan> children = <InlineSpan>[];
     if (regExps.isNotEmpty) {
       buildWithRegExp(

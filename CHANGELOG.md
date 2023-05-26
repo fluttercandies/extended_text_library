@@ -1,3 +1,7 @@
+## 11.0.1
+
+* Fix issue that empty text miss TextStyle. (Fix #41,#42,#43)
+
 ## 11.0.0
 
 * Migrate to Flutter 3.10.0
