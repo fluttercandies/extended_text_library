@@ -313,13 +313,32 @@ class ExtendedTextLibraryUtils {
 
   /// correct caret Offset
   /// make sure caret is not in text when caretIn is false
-  static TextEditingValue correctCaretOffset(TextEditingValue value,
-      InlineSpan textSpan, TextInputConnection? textInputConnection,
-      {TextSelection? newSelection}) {
-    final TextSelection selection = newSelection ?? value.selection;
+  static TextEditingValue correctCaretOffset(
+    TextEditingValue value,
+    InlineSpan textSpan,
+    TextInputConnection? textInputConnection, {
+    TextEditingValue? oldValue,
+  }) {
+    final TextSelection selection = value.selection;
 
     if (selection.isValid && selection.isCollapsed) {
       int caretOffset = selection.extentOffset;
+
+      // move to previous or next
+      // https://github.com/fluttercandies/extended_text_field/issues/210
+      bool? movePrevious;
+      if (oldValue != null) {
+        final TextSelection oldSelection = oldValue.selection;
+        if (oldSelection.isValid && oldSelection.isCollapsed) {
+          final int moveOffset = selection.baseOffset - oldSelection.baseOffset;
+
+          if (moveOffset < 0) {
+            movePrevious = true;
+          } else if (moveOffset > 0) {
+            movePrevious = false;
+          }
+        }
+      }
 
       // correct caret Offset
       // make sure caret is not in text when deleteAll is true
@@ -329,13 +348,22 @@ class ExtendedTextLibraryUtils {
             (span as SpecialInlineSpanBase).deleteAll) {
           final SpecialInlineSpanBase specialTs = span as SpecialInlineSpanBase;
           if (caretOffset >= specialTs.start && caretOffset <= specialTs.end) {
-            if (caretOffset >
-                (specialTs.end - specialTs.start) / 2.0 + specialTs.start) {
-              //move caretOffset to end
-              caretOffset = specialTs.end;
+            if (movePrevious != null) {
+              if (movePrevious) {
+                caretOffset = specialTs.start;
+              } else {
+                caretOffset = specialTs.end;
+              }
             } else {
-              caretOffset = specialTs.start;
+              if (caretOffset >
+                  (specialTs.end - specialTs.start) / 2.0 + specialTs.start) {
+                //move caretOffset to end
+                caretOffset = specialTs.end;
+              } else {
+                caretOffset = specialTs.start;
+              }
             }
+
             return false;
           }
         }

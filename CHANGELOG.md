@@ -1,3 +1,7 @@
+## 11.0.2
+
+* Fix issue that wrong cursor position on macos. (https://github.com/fluttercandies/extended_text_field/issues/210)
+
 ## 11.0.1
 
 * Fix issue that empty text miss TextStyle. (Fix #41,#42,#43)
