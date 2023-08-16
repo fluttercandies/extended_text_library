@@ -88,23 +88,18 @@ class ExtendedTextLibraryUtils {
     required Offset position,
   }) {
     final TextParentData textParentData = child.parentData as TextParentData;
+    final Offset? offset = textParentData.offset;
+    if (offset == null) {
+      return false;
+    }
     final Matrix4 transform = Matrix4.translationValues(
-        textParentData.offset.dx + effectiveOffset.dx,
-        textParentData.offset.dy + effectiveOffset.dy,
-        0.0)
-      ..scale(
-        textParentData.scale,
-        textParentData.scale,
-        textParentData.scale,
-      );
+        offset.dx + effectiveOffset.dx, offset.dy + effectiveOffset.dy, 0.0);
     final bool isHit = result.addWithPaintTransform(
       transform: transform,
       position: position,
       hitTest: (BoxHitTestResult result, Offset transformed) {
         assert(() {
-          final Offset manualPosition =
-              (position - textParentData.offset - effectiveOffset) /
-                  textParentData.scale!;
+          final Offset manualPosition = position - offset - effectiveOffset;
           return (transformed.dx - manualPosition.dx).abs() <
                   precisionErrorTolerance &&
               (transformed.dy - manualPosition.dy).abs() <

@@ -1,3 +1,7 @@
+## 11.1.0
+
+* Migrate to Flutter 3.13.0
+
 ## 11.0.2
 
 * Fix issue that wrong cursor position on macos. (https://github.com/fluttercandies/extended_text_field/issues/210)

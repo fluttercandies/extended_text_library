@@ -4,7 +4,7 @@ import 'package:flutter/rendering.dart';
 ///  create by zmtzawqlp on 2019/7/10
 ///
 
-abstract class SpecialInlineSpanBase {
+mixin SpecialInlineSpanBase {
   /// actual text
   String get actualText;
 
