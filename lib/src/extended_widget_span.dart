@@ -84,27 +84,35 @@ class ExtendedWidgetSpan extends WidgetSpan with SpecialInlineSpanBase {
     return comparison;
   }
 
+  /// Adds a placeholder box to the paragraph builder if a size has been
+  /// calculated for the widget.
+  ///
+  /// Sizes are provided through `dimensions`, which should contain a 1:1
+  /// in-order mapping of widget to laid-out dimensions. If no such dimension
+  /// is provided, the widget will be skipped.
+  ///
+  /// The `textScaler` will be applied to the laid-out size of the widget.
   @override
   void build(
     ui.ParagraphBuilder builder, {
-    double textScaleFactor = 1.0,
+    TextScaler textScaler = TextScaler.noScaling,
     List<PlaceholderDimensions>? dimensions,
   }) {
     assert(debugAssertIsValid());
     assert(dimensions != null);
     final bool hasStyle = style != null;
     if (hasStyle) {
-      builder.pushStyle(style!.getTextStyle(textScaleFactor: textScaleFactor));
+      builder.pushStyle(style!.getTextStyle(textScaler: textScaler));
     }
     assert(builder.placeholderCount < dimensions!.length);
     final PlaceholderDimensions currentDimensions =
         dimensions![builder.placeholderCount];
+    // zmtzawqlp
     widgetSpanSize.size = currentDimensions.size;
     builder.addPlaceholder(
       currentDimensions.size.width,
       currentDimensions.size.height,
       alignment,
-      scale: textScaleFactor,
       baseline: currentDimensions.baseline,
       baselineOffset: currentDimensions.baselineOffset,
     );

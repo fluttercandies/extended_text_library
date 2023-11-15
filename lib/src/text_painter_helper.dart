@@ -12,12 +12,12 @@ class TextPainterHelper {
                 ? _painter!.text != textSpan
                 : (_painter!.text as TextSpan).text != textSpan.text) ||
             _painter!.textAlign != painter.textAlign ||
-            _painter!.textScaleFactor != painter.textScaleFactor ||
+            _painter!.textScaler != painter.textScaler ||
             _painter!.locale != painter.locale)) {
       _painter = TextPainter(
           text: textSpan,
           textAlign: painter.textAlign,
-          textScaleFactor: painter.textScaleFactor,
+          textScaler: painter.textScaler,
           textDirection: painter.textDirection,
           locale: painter.locale);
     }
