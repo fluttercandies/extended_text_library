@@ -70,7 +70,7 @@ abstract class SpecialTextSpanBuilder {
 
   /// The SpecialTextSpanBuilder.handleKeyEventCallback event gives the user a chance to process keyboard input
   KeyEventResult handleKeyEventCallback(FocusNode node, KeyEvent event) {
-    return KeyEventResult.skipRemainingHandlers;
+    return KeyEventResult.ignored;
   }
 }
 
