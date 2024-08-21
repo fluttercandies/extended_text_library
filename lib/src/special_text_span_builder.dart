@@ -67,6 +67,11 @@ abstract class SpecialTextSpanBuilder {
   bool isStart(String value, String startFlag) {
     return value.endsWith(startFlag);
   }
+
+  /// The SpecialTextSpanBuilder.handleKeyEventCallback event gives the user a chance to process keyboard input
+  KeyEventResult handleKeyEventCallback(FocusNode node, KeyEvent event) {
+    return KeyEventResult.skipRemainingHandlers;
+  }
 }
 
 abstract class SpecialText {
