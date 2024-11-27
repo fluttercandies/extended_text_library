@@ -22,13 +22,21 @@ mixin SpecialInlineSpanBase {
   /// extended_text and extended_text_field
   bool get deleteAll;
 
+  bool? get keepVisible;
+
   bool equal(SpecialInlineSpanBase other) {
     return other.start == start &&
         other.deleteAll == deleteAll &&
-        other.actualText == actualText;
+        other.actualText == actualText &&
+        other.keepVisible == keepVisible;
   }
 
-  int get baseHashCode => Object.hash(actualText, start, deleteAll);
+  int get baseHashCode => Object.hash(
+        actualText,
+        start,
+        deleteAll,
+        keepVisible,
+      );
 
   RenderComparison baseCompareTo(SpecialInlineSpanBase other) {
     if (other.actualText != actualText) {

@@ -15,6 +15,7 @@ class BackgroundTextSpan extends SpecialTextSpan {
     int start = 0,
     bool deleteAll = false,
     String? semanticsLabel,
+    bool? keepVisible,
   })  : _textPainterHelper = TextPainterHelper(),
         super(
           style: style,
@@ -24,6 +25,7 @@ class BackgroundTextSpan extends SpecialTextSpan {
           start: start,
           deleteAll: deleteAll,
           semanticsLabel: semanticsLabel,
+          keepVisible: keepVisible,
         );
 
   /// The paint drawn as a background for the text.
@@ -142,7 +144,7 @@ class BackgroundTextSpan extends SpecialTextSpan {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -155,7 +157,8 @@ class BackgroundTextSpan extends SpecialTextSpan {
         other.recognizer == recognizer &&
         other.background == background &&
         other.clipBorderRadius == clipBorderRadius &&
-        other.paintBackground == paintBackground;
+        other.paintBackground == paintBackground &&
+        equal(other);
   }
 
   @override

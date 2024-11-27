@@ -19,6 +19,7 @@ class ExtendedWidgetSpan extends WidgetSpan with SpecialInlineSpanBase {
     TextBaseline? baseline,
     TextStyle? style,
     this.hide = false,
+    this.keepVisible,
   })  : actualText = actualText ?? '\uFFFC',
         textRange = TextRange(
             start: start, end: start + (actualText ?? '\uFFFC').length),
@@ -38,6 +39,9 @@ class ExtendedWidgetSpan extends WidgetSpan with SpecialInlineSpanBase {
   @override
   final TextRange textRange;
 
+  @override
+  final bool? keepVisible;
+
   /// store size to calculate selection
   final WidgetSpanSize widgetSpanSize;
 
@@ -47,7 +51,7 @@ class ExtendedWidgetSpan extends WidgetSpan with SpecialInlineSpanBase {
   final bool hide;
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -58,15 +62,19 @@ class ExtendedWidgetSpan extends WidgetSpan with SpecialInlineSpanBase {
       return false;
     }
 
-    if (widgetSpanSize.size != other.widgetSpanSize.size) {
-      return false;
-    }
-    return other is SpecialInlineSpanBase && equal(other);
+    return other is ExtendedWidgetSpan &&
+        hide == other.hide &&
+        widgetSpanSize.size == other.widgetSpanSize.size &&
+        equal(other);
   }
 
   @override
-  int get hashCode =>
-      Object.hash(super.hashCode, baseHashCode, widgetSpanSize.size);
+  int get hashCode => Object.hash(
+        super.hashCode,
+        baseHashCode,
+        widgetSpanSize.size,
+        hide,
+      );
 
   @override
   RenderComparison compareTo(InlineSpan other) {

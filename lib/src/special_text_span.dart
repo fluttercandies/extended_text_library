@@ -20,6 +20,7 @@ class SpecialTextSpan extends TextSpan with SpecialInlineSpanBase {
     MouseCursor? mouseCursor,
     PointerEnterEventListener? onEnter,
     PointerExitEventListener? onExit,
+    this.keepVisible,
   })  :
         //assert(!(deleteAll && children != null && children.isNotEmpty)),
         actualText = actualText ?? text,
@@ -46,7 +47,9 @@ class SpecialTextSpan extends TextSpan with SpecialInlineSpanBase {
   final TextRange textRange;
 
   @override
-  bool operator ==(dynamic other) {
+  final bool? keepVisible;
+  @override
+  bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
     }

@@ -1,3 +1,7 @@
+## 12.0.1
+
+* Add keepVisible for SpecialInlineSpanBase to support [ExtendedText.TextOverflowPosition.auto]
+
 ## 12.0.0
 
 * Migrate to Flutter 3.16.0
